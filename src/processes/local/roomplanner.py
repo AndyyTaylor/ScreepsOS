@@ -38,8 +38,8 @@ class RoomPlanner(Process):
         for x in range(50):
             for y in range(50):
                 if self.is_wall(x, y) or x == 0 or y == 0 or x == 49 or y == 49:
-                    for w in range(min(width, x + 1)):
-                        for h in range(min(height, y + 1)):
+                    for w in range(min(width + 1, x + 1)):
+                        for h in range(min(height + 1, y + 1)):
                             valid[x - w][y - h] = False
 
         valid_pos = []

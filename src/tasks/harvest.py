@@ -9,7 +9,7 @@ class Harvest(Task):
     def __init__(self, data={}):
         super().__init__('harvest', data)
 
-    def run(self, creep):
+    def _run(self, creep):
         source = Game.getObjectById(self._data.source_id)
 
         if creep.pos.isNearTo(source):

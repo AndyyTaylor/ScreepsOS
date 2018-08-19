@@ -9,4 +9,10 @@ class Task():
         self._data = data
 
     def run(self, creep):
-        print("Task running with", creep['name'])
+        self._run(creep)
+
+        if self.is_completed(creep):
+            creep.clear_task()
+
+    def is_completed(self, creep):
+        return False

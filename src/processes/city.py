@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from base import base
 
 from framework.process import Process
 
@@ -18,6 +19,17 @@ class City(Process):
 
         if self.scheduler.count_by_name('roomplanner', self._pid) < 1:
             self.launch_child_process('roomplanner', {'room_name': self._data.main_room})
+
+        if self.scheduler.count_by_name('feedsite', self._pid) < len(base['feedpaths']):
+            paths = [i for i in range(len(base['feedpaths']))]
+            taken_paths = []
+            for proc in self.scheduler.proc_by_name('feedsite', self._pid):
+                taken_paths.append(proc['data'].index)
+
+            for path in paths:
+                if not taken_paths.includes(path):
+                    self.launch_child_process('feedsite', {'room_name': self._data.main_room,
+                                                           'index': path})
 
         if self.scheduler.count_by_name('upgradesite', self._pid) < 1:
             self.launch_child_process('upgradesite', {'room_name': self._data.main_room})

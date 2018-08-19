@@ -4,10 +4,10 @@ from defs import *  # noqa
 from framework.task import Task
 
 
-class Gather(Task):
+class Feed(Task):
 
     def __init__(self, data={}):
-        super().__init__('gather', data)
+        super().__init__('feed', data)
 
     def _run(self, creep):
         target = Game.getObjectById(self._data.target_id)
@@ -15,7 +15,7 @@ class Gather(Task):
             target = self.select_target(creep, creep.room)
 
             if not target:
-                creep.say("No gather")
+                creep.say("No feed")
                 return
 
             self._data.target_id = target.id
@@ -23,18 +23,18 @@ class Gather(Task):
         if not creep.pos.isNearTo(target):
             creep.moveTo(target)
         else:
-            creep.pickup(target)
+            creep.transfer(target, RESOURCE_ENERGY)
 
     def select_target(self, creep, room):
-        energy = _.filter(room.find(FIND_DROPPED_RESOURCES),
-                          lambda r: r.resourceType == RESOURCE_ENERGY)
+        locations = _.filter(room.feed_locations,
+                             lambda s: s.energy < s.energyCapacity)
 
-        if not energy:
+        if not locations:
             return
 
-        target = creep.pos.findClosestByRange(energy)
+        target = creep.pos.findClosestByRange(locations)
 
         return target
 
     def is_completed(self, creep):
-        return creep.is_full()
+        return creep.is_empty()

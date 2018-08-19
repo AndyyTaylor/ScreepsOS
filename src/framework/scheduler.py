@@ -10,7 +10,8 @@ process_classes = {
     'city': City,
     'minesite': MineSite,
     'roomplanner': RoomPlanner,
-    'upgradesite': UpgradeSite
+    'upgradesite': UpgradeSite,
+    'feedsite': FeedSite
 }
 
 

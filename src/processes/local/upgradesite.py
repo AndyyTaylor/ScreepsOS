@@ -46,7 +46,7 @@ class UpgradeSite(CreepProcess):
         creep.run_current_task()
 
     def needs_creeps(self):
-        return len(self._data.creep_names) < 1  # Scale this
+        return len(self._data.creep_names) < 2  # Scale this
 
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True

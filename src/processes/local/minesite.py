@@ -80,4 +80,4 @@ class MineSite(CreepProcess):
                 break
 
         if not already_placed:
-            self.room.createFlag(x, y, 'MineSite(' + str(x) + ',' + str(y) + ')', COLOR_GREEN)
+            self.room.createFlag(x, y, 'MineSite(' + str(x) + ',' + str(y) + ')', COLOR_YELLOW)
