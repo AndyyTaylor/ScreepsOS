@@ -3,6 +3,8 @@ from defs import *  # noqa
 
 from framework.scheduler import Scheduler
 
+__pragma__('noalias', 'keys')
+
 
 class Kernel():
 
@@ -16,8 +18,7 @@ class Kernel():
             self.scheduler.kill_all_processes()
 
     def start(self):
-        if self.scheduler.count_by_name('city') < 1:
-            self.scheduler.launch_process('city')
+        self.launch_cities()  # Launch Empire
 
         self.scheduler.queue_processes()
 
@@ -25,12 +26,40 @@ class Kernel():
         process = self.scheduler.get_next_process()
 
         while process is not None:
-            process.run()
             print("Running", process.name)
+            process.run()
             process = self.scheduler.get_next_process()
 
     def shutdown(self):
-        pass
+        # Kill completed processes
+
+        self.unassign_creeps()
+
+    def unassign_creeps(self):
+        pids = self.scheduler.list_pids()
+
+        for name in Object.keys(Game.creeps):
+            creep = Game.creeps[name]
+            if not pids.includes(creep.assigned):
+                creep.unassign()
+
+    def launch_cities(self):
+        cities = []
+
+        for room_name in Object.keys(Game.rooms):
+            room = Game.rooms[room_name]
+
+            if room.is_city():
+                cities.append(room_name)
+
+        if self.scheduler.count_by_name('city') < len(cities):
+            taken_cities = []
+            for proc in self.scheduler.proc_by_name('city'):
+                taken_cities.append(proc['data'].main_room)
+
+            for city in cities:
+                if not taken_cities.includes(city):
+                    self.scheduler.launch_process('city', {'main_room': city})
 
     def check_version(self):
         if Memory.os.VERSION != js_global.VERSION:

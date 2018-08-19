@@ -57,17 +57,28 @@ class Scheduler():
             all_processes = Object.values(self.processes)
             self._grouped_by_name = dict(_.groupBy(all_processes, 'name'))
 
-    def count_by_name(self, name):
+    def count_by_name(self, name, parent=None):
         self.group_processes_by_name()
 
-        return len(self._grouped_by_name.get(name, []))
+        procs = self._grouped_by_name.get(name, [])
 
-    def proc_by_name(self, name):
+        if parent is not None:
+            procs = _.filter(procs, lambda p: p.data.parent == parent)
+
+        return len(procs)
+
+    def proc_by_name(self, name, parent=None):
         self.group_processes_by_name()
 
-        processes = self._grouped_by_name.get(name, [])
+        procs = self._grouped_by_name.get(name, [])
 
-        return processes
+        if parent is not None:
+            procs = _.filter(procs, lambda p: p.data.parent == parent)
+
+        return procs
+
+    def list_pids(self):
+        return Object.keys(self.processes)
 
     def save_processes(self):
         pass

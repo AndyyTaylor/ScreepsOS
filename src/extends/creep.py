@@ -1,0 +1,45 @@
+
+from defs import *  # noqa
+
+from tasks import *  # noqa
+
+
+Object.defineProperties(Creep.prototype, {
+    'assigned': {
+        'get': lambda: this.memory.assigned
+    },
+})
+
+
+def _assign(pid):
+    this.memory.assigned = pid
+
+
+def _unassign():
+    this.memory.assigned = None
+
+
+def _set_task(name, data={}):
+    this.memory.task_name = name
+    this.memory.task_data = data
+
+
+def _get_task_instance(name, data={}):
+    classes_by_name = {
+        'harvest': Harvest
+    }
+
+    TaskClass = classes_by_name[name]
+
+    return TaskClass(data)
+
+
+def _run_current_task():
+    task = _get_task_instance(this.memory.task_name, this.memory.task_data)
+    task.run(this)
+
+
+Creep.prototype.assign = _assign
+Creep.prototype.unassign = _unassign
+Creep.prototype.set_task = _set_task
+Creep.prototype.run_current_task = _run_current_task
