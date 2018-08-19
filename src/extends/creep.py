@@ -24,9 +24,15 @@ def _set_task(name, data={}):
     this.memory.task_data = data
 
 
+def _is_idle():
+    return _.isUndefined(this.memory.task_name) or not this.memory.task_name
+
+
 def _get_task_instance(name, data={}):
     classes_by_name = {
-        'harvest': Harvest
+        'harvest': Harvest,
+        'gather': Gather,
+        'upgrade': Upgrade
     }
 
     TaskClass = classes_by_name[name]
@@ -39,7 +45,18 @@ def _run_current_task():
     task.run(this)
 
 
+def _is_empty():
+    return _.sum(this.carry) == 0
+
+
+def _is_full():
+    return _.sum(this.carry) == this.carryCapacity
+
+
 Creep.prototype.assign = _assign
 Creep.prototype.unassign = _unassign
 Creep.prototype.set_task = _set_task
 Creep.prototype.run_current_task = _run_current_task
+Creep.prototype.is_empty = _is_empty
+Creep.prototype.is_full = _is_full
+Creep.prototype.is_idle = _is_idle

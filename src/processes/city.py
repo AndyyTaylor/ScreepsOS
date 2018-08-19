@@ -19,6 +19,9 @@ class City(Process):
         if self.scheduler.count_by_name('roomplanner', self._pid) < 1:
             self.launch_child_process('roomplanner', {'room_name': self._data.main_room})
 
+        if self.scheduler.count_by_name('upgradesite', self._pid) < 1:
+            self.launch_child_process('upgradesite', {'room_name': self._data.main_room})
+
         if self.scheduler.count_by_name('minesite', self._pid) < len(sources):
             taken_ids = []
             source_ids = [source.id for source in sources]
