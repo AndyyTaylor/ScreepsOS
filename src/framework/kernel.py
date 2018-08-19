@@ -40,7 +40,10 @@ class Kernel():
 
         for name in Object.keys(Game.creeps):
             creep = Game.creeps[name]
-            if not pids.includes(creep.assigned):
+            if not creep.assigned:
+                continue
+
+            if not pids.includes(str(creep.assigned)):
                 creep.unassign()
 
     def launch_cities(self):

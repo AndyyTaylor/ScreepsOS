@@ -8,7 +8,8 @@ __pragma__('noalias', 'values')
 
 process_classes = {
     'city': City,
-    'minesite': MineSite
+    'minesite': MineSite,
+    'roomplanner': RoomPlanner
 }
 
 

@@ -25,6 +25,7 @@ class CreepProcess(Process):
         for name in Object.keys(Game.creeps):
             creep = Game.creeps[name]
 
+            creep.say(creep.assigned)
             if not creep.assigned:
                 self.assign_creep(creep)
 
