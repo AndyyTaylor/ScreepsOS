@@ -34,6 +34,7 @@ class Kernel():
         # Kill completed processes
 
         self.unassign_creeps()
+        self.clear_memory()
 
     def unassign_creeps(self):
         pids = self.scheduler.list_pids()
@@ -70,6 +71,11 @@ class Kernel():
             return True
 
         return False
+
+    def clear_memory(self):
+        for name in Object.keys(Memory.creeps):
+            if not Game.creeps[name]:
+                del Memory.creeps[name]
 
     def validate_memory(self):
         if _.isUndefined(Memory.os):

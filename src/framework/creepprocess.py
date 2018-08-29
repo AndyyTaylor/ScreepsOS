@@ -30,7 +30,9 @@ class CreepProcess(Process):
                 expired_creeps.append(name)
                 continue
 
-            creep.say(self.name)
+            if js_global.CREEP_SAY:
+                creep.say(self.name)
+
             self.run_creep(creep)
 
         for name in expired_creeps:
