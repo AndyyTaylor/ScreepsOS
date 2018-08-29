@@ -31,7 +31,7 @@ class Kernel():
             process = self.scheduler.get_next_process()
 
     def shutdown(self):
-        # Kill completed processes
+        self.scheduler.shutdown()
 
         self.unassign_creeps()
         self.clear_memory()

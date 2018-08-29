@@ -12,10 +12,11 @@ class UpgradeSite(CreepProcess):
     def __init__(self, pid, data={}):
         super().__init__('upggradesite', pid, 5, data)
 
-    def _run(self):
-        self.room = Game.rooms[self._data.room_name]
-        self.controller = self.room.controller
+        if pid != -1:
+            self.room = Game.rooms[self._data.room_name]
+            self.controller = self.room.controller
 
+    def _run(self):
         if _.isUndefined(self._data.has_init):
             self.init()
 
@@ -32,7 +33,10 @@ class UpgradeSite(CreepProcess):
         creep.run_current_task()
 
     def needs_creeps(self):
-        return len(self._data.creep_names) < 1  # Scale this
+        if len(self.room.construction_sites):
+            return len(self._data.creep_names) < 1  # Scale this
+        else:
+            return len(self._data.creep_names) < 3
 
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True

@@ -34,6 +34,8 @@ class RoomPlanner(Process):
         # TODO: Should return whether lay was successful
         self.room.createConstructionSite(x, y, type)
 
+        return True
+
     def load_base_pos(self):
         if _.isUndefined(self._data.base_x) or _.isUndefined(self._data.base_y):
             for flag in self.room.flags:

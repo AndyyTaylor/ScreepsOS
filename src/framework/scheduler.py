@@ -42,10 +42,7 @@ class Scheduler():
             self.current_priority += 1
             self.current_index = 0
 
-        proc = self.processes[str(pid)]
-        ProcessClass = process_classes[proc['name']]
-
-        return ProcessClass(proc['pid'], proc['data'])
+        return self.create_process(pid)
 
     def queue_processes(self):
         self.current_priority = 0  # shift_processes instead?
@@ -68,6 +65,24 @@ class Scheduler():
         self.queue[priority].append(pid)
 
         self._grouped_by_name = undefined
+
+    def shutdown(self):
+        for pid in Object.keys(self.processes):
+            if self.create_process(pid).is_completed():
+                self.delete_process(pid)
+
+    def delete_process(self, pid):
+        proc = self.processes[str(pid)]
+
+        del self.processes[str(pid)]
+        self.queue[str(proc['priority'])].remove(pid)
+
+    def create_process(self, pid):
+        proc = self.processes[str(pid)]
+
+        ProcessClass = process_classes[proc['name']]
+
+        return ProcessClass(proc['pid'], proc['data'])
 
     def group_processes_by_name(self):
         if _.isUndefined(self._grouped_by_name):

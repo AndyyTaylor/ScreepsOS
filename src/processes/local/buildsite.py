@@ -27,8 +27,14 @@ class BuildSite(CreepProcess):
 
         creep.run_current_task()
 
+    def is_completed(self):
+        if not Game.getObjectById(self._data.site_id):
+            return True
+
+        return False
+
     def needs_creeps(self):
-        return len(self._data.creep_names) < 1  # Scale this
+        return len(self._data.creep_names) < 3  # Scale this
 
     def place_flag(self):
         flags = self.room.flags
