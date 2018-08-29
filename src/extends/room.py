@@ -5,11 +5,12 @@ from defs import *  # noqa
 Object.defineProperties(Room.prototype, {
     'flags': {
         'get': lambda: this.find(FIND_FLAGS)
-    },
-    'feed_locations': {
+    }, 'feed_locations': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN or
                                 s.structureType == STRUCTURE_EXTENSION)
+    }, 'construction_sites': {
+        'get': lambda: this.find(FIND_CONSTRUCTION_SITES)
     }
 })
 

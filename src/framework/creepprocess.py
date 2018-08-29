@@ -21,6 +21,21 @@ class CreepProcess(Process):
 
         super().run()
 
+    def run_creeps(self):
+        expired_creeps = []
+        for name in self._data.creep_names:
+            creep = Game.creeps[name]
+
+            if not creep:
+                expired_creeps.append(name)
+                continue
+
+            creep.say(self.name)
+            self.run_creep(creep)
+
+        for name in expired_creeps:
+            self._data.creep_names.remove(name)
+
     def assign_creeps(self):
         for name in Object.keys(Game.creeps):
             creep = Game.creeps[name]
@@ -43,3 +58,6 @@ class CreepProcess(Process):
 
     def value_creep(self, creep):
         return 0
+
+    def run_creep(self, creep):
+        return

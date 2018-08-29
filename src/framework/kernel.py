@@ -26,7 +26,7 @@ class Kernel():
         process = self.scheduler.get_next_process()
 
         while process is not None:
-            print("Running", process.name)
+            # print("Running", process.name)
             process.run()
             process = self.scheduler.get_next_process()
 
@@ -80,5 +80,11 @@ class Kernel():
 
         if _.isUndefined(Memory.os.kernel):
             Memory.os.kernel = {}
+
+        if _.isUndefined(Memory.stats):
+            Memory.stats = {}
+
+        if _.isUndefined(Memory.stats.cpu):
+            Memory.stats.cpu = {}
 
         self.memory = Memory.os.kernel

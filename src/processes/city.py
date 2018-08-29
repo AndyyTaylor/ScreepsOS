@@ -45,3 +45,15 @@ class City(Process):
                 if not taken_ids.includes(source_id):
                     self.launch_child_process('minesite', {'source_id': source_id,
                                                            'room_name': self._data.main_room})
+
+        if self.scheduler.count_by_name('buildsite', self._pid) < len(room.construction_sites):
+            taken_ids = []
+            site_ids = [site.id for site in room.construction_sites]
+
+            for proc in self.scheduler.proc_by_name('buildsite', self._pid):
+                taken_ids.append(proc['data'].site_id)
+
+            for site_id in site_ids:
+                if not taken_ids.includes(source_id):
+                    self.launch_child_process('buildsite', {'site_id': site_id,
+                                                            'room_name': self._data.main_room})

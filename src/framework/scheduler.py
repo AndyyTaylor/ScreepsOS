@@ -11,7 +11,8 @@ process_classes = {
     'minesite': MineSite,
     'roomplanner': RoomPlanner,
     'upgradesite': UpgradeSite,
-    'feedsite': FeedSite
+    'feedsite': FeedSite,
+    'buildsite': BuildSite
 }
 
 

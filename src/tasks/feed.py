@@ -11,11 +11,11 @@ class Feed(Task):
 
     def _run(self, creep):
         target = Game.getObjectById(self._data.target_id)
-        if not target:
+        if not target or target.energy == target.energyCapacity:
             target = self.select_target(creep, creep.room)
 
             if not target:
-                creep.say("No feed")
+                self._data.completed = True
                 return
 
             self._data.target_id = target.id
@@ -37,4 +37,4 @@ class Feed(Task):
         return target
 
     def is_completed(self, creep):
-        return creep.is_empty()
+        return creep.is_empty() or self._data.completed

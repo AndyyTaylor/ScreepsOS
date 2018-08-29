@@ -24,22 +24,8 @@ class FeedSite(CreepProcess):
 
         self.run_creeps()
 
-    def run_creeps(self):
-        expired_creeps = []
-        for name in self._data.creep_names:
-            creep = Game.creeps[name]
-
-            if not creep:
-                expired_creeps.append(name)
-                continue
-
-            self.run_creep(creep)
-
-        for name in expired_creeps:
-            self._data.creep_names.remove(name)
-
     def run_creep(self, creep):
-        creep.say("Feeder")
+        # creep.say("Feeder")
         if creep.is_idle():
             if creep.is_empty():
                 creep.set_task('gather')

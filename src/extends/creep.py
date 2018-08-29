@@ -41,7 +41,8 @@ def _get_task_instance(name, data={}):
         'gather': Gather,
         'upgrade': Upgrade,
         'travel': Travel,
-        'feed': Feed
+        'feed': Feed,
+        'build': Build
     }
 
     TaskClass = classes_by_name[name]

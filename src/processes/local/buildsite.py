@@ -7,48 +7,46 @@ __pragma__('noalias', 'keys')
 __pragma__('noalias', 'values')
 
 
-class UpgradeSite(CreepProcess):
+class BuildSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('upggradesite', pid, 5, data)
+        super().__init__('buildsite', pid, 5, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
         self.controller = self.room.controller
 
-        if _.isUndefined(self._data.has_init):
-            self.init()
-
         self.place_flag()
-
         self.run_creeps()
 
     def run_creep(self, creep):
         if creep.is_empty():
             creep.set_task('gather')
         elif creep.is_full() or creep.is_idle():
-            creep.set_task('upgrade')
+            creep.set_task('build', {'site_id': self._data.site_id})
 
         creep.run_current_task()
 
     def needs_creeps(self):
         return len(self._data.creep_names) < 1  # Scale this
 
-    def init(self):  # This should request certain buildings. container / link etc
-        self._data.has_init = True
-
-        # Will identify the upcont for use
-
     def place_flag(self):
         flags = self.room.flags
 
-        x, y = self.controller.pos.x, self.controller.pos.y
+        site = Game.getObjectById(self._data.site_id)
+        if not site:
+            return
+
+        x, y = site.pos.x, site.pos.y
 
         already_placed = False
         for flag in flags:
-            if flag['name'] == 'UpgradeSite(' + str(self._data.room_name) + ')':
-                already_placed = True
-                break
+            if flag['name'] == 'BuildSite(' + str(self._data.room_name) + ')':
+                if flag['pos']['x'] == x and flag['pos']['y'] == y:
+                    already_placed = True
+                    break
+                else:
+                    flag.remove()
 
         if not already_placed:
-            self.room.createFlag(x, y, 'UpgradeSite(' + str(self._data.room_name) + ')', COLOR_BLUE)
+            self.room.createFlag(x, y, 'BuildSite(' + str(self._data.room_name) + ')', COLOR_ORANGE)

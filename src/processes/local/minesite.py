@@ -23,22 +23,10 @@ class MineSite(CreepProcess):
 
         self.run_creeps()
 
-    def run_creeps(self):
-        expired_creeps = []
-        for name in self._data.creep_names:
-            creep = Game.creeps[name]
-
-            if not creep:
-                expired_creeps.append(name)
-                continue
-
-            self.run_creep(creep)
-
-        for name in expired_creeps:
-            self._data.creep_names.remove(name)
-
     def run_creep(self, creep):
-        creep.set_task('harvest', {'source_id': self._data.source_id})
+        if creep.is_idle():
+            creep.set_task('harvest', {'source_id': self._data.source_id})
+
         creep.run_current_task()
 
     def needs_creeps(self):
