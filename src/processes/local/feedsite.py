@@ -11,7 +11,7 @@ __pragma__('noalias', 'values')
 class FeedSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('feedsite', pid, 5, data)
+        super().__init__('feedsite', pid, 2, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]

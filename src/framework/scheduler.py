@@ -26,17 +26,30 @@ class Scheduler():
         self.completed = []
 
     def get_next_process(self):
-        if self.current_priority >= len(Object.keys(self.processes)):
+        while not Object.keys(self.queue).includes(str(self.current_priority)) \
+                and self.current_priority < 10:
+            self.current_priority += 1
+            self.current_index = 0
+
+        if self.current_priority >= 10:
             return None
 
-        proc = self.processes[Object.keys(self.processes)[self.current_priority]]
-        self.current_priority += 1
+        pids = list(self.queue[self.current_priority])
+        pid = pids[self.current_index]
+
+        self.current_index += 1
+        if self.current_index >= len(pids):
+            self.current_priority += 1
+            self.current_index = 0
+
+        proc = self.processes[str(pid)]
         ProcessClass = process_classes[proc['name']]
 
         return ProcessClass(proc['pid'], proc['data'])
 
     def queue_processes(self):
         self.current_priority = 0  # shift_processes instead?
+        self.current_index = 0
 
     def launch_process(self, name, data={}):
         pid = self.gen_pid()
@@ -52,7 +65,7 @@ class Scheduler():
 
         if priority not in self.queue:
             self.queue[priority] = []
-        self.queue[priority] += pid
+        self.queue[priority].append(pid)
 
         self._grouped_by_name = undefined
 

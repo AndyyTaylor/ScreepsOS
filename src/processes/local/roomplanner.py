@@ -11,7 +11,7 @@ __pragma__('noalias', 'values')
 class RoomPlanner(Process):
 
     def __init__(self, pid, data={}):
-        super().__init__('roomplanner', pid, 5, data)
+        super().__init__('roomplanner', pid, 4, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]

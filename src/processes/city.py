@@ -10,7 +10,7 @@ __pragma__('noalias', 'keys')
 class City(Process):
 
     def __init__(self, pid, data={}):
-        super().__init__("city", pid, 5, data)
+        super().__init__("city", pid, 1, data)
 
     def _run(self):
         room = Game.rooms[self._data.main_room]
