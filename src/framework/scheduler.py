@@ -81,8 +81,8 @@ class Scheduler():
     def delete_process(self, pid):
         proc = self.processes[str(pid)]
 
-        index = self.queue[str(proc['priority'])].indexOf(pid)
-        print("deleting", pid, 'at', index)
+        index = self.queue[proc['priority']].indexOf(pid)
+
         del self.processes[str(pid)]
         self.queue[str(proc['priority'])].splice(index, 1)
 

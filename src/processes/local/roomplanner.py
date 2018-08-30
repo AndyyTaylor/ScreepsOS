@@ -128,7 +128,7 @@ class RoomPlanner(Process):
         best_pos = None
         best_score = None
         for pos in valid_pos:
-            score = (- abs(pos['x'] - 25) - abs(pos['y'] - 25))
+            score = (- abs(pos['x'] - 20) - abs(pos['y'] - 20))  # Want base centered, not flag
             if best_pos is None or score > best_score:
                 best_pos = pos
                 best_score = score
