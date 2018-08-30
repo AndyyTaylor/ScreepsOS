@@ -13,6 +13,7 @@ class Process():
 
         self.priority = priority
         self.scheduler = js_global.kernel.scheduler
+        self.ticketer = js_global.kernel.ticketer
 
     def run(self):
         # Check if process is sleeping

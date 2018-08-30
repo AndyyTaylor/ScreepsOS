@@ -38,6 +38,18 @@ class UpgradeSite(CreepProcess):
         else:
             return len(self._data.creep_names) < 3
 
+    def is_valid_creep(self, creep):
+        return creep.getActiveBodyparts(WORK) > 0
+
+    def gen_body(self, energy):
+        body = [WORK, CARRY, MOVE]
+        mod = [WORK, CARRY, MOVE]
+
+        while self.get_body_cost(body.concat(mod)) <= energy:
+            body = body.concat(mod)
+
+        return body
+
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True
 

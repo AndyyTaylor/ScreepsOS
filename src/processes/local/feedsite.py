@@ -16,7 +16,7 @@ class FeedSite(CreepProcess):
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
         self.controller = self.room.controller
-
+        print(len(self._data.spawn_tickets))
         if _.isUndefined(self._data.has_init):
             self.init()
 
@@ -40,6 +40,15 @@ class FeedSite(CreepProcess):
 
     def needs_creeps(self):
         return len(self._data.creep_names) < 1
+
+    def gen_body(self, energy):
+        body = [CARRY, MOVE]
+        mod = [CARRY, MOVE]
+
+        while self.get_body_cost(body.concat(mod)) <= energy:
+            body = body.concat(mod)
+
+        return body
 
     def init(self):
         base_flag = Game.flags[self._data.room_name]

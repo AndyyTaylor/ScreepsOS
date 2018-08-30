@@ -32,6 +32,22 @@ class MineSite(CreepProcess):
     def needs_creeps(self):
         return len(self._data.creep_names) < self._data.adj_tiles
 
+    def is_valid_creep(self, creep):
+        return creep.getActiveBodyparts(WORK) > 0
+
+    def gen_body(self, energyAvailable):
+        # Should have no carry before link, and get carry when link exists
+
+        body = [WORK, MOVE]
+        mod = [WORK, MOVE]
+        total_work = 1
+
+        while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 6:
+            total_work += 1
+            body = body.concat(mod)
+
+        return body
+
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True
 

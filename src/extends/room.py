@@ -11,6 +11,9 @@ Object.defineProperties(Room.prototype, {
                                 s.structureType == STRUCTURE_EXTENSION)
     }, 'construction_sites': {
         'get': lambda: this.find(FIND_CONSTRUCTION_SITES)
+    }, 'spawns': {
+        'get': lambda: _.filter(this.find(FIND_STRUCTURES),
+                                lambda s: s.structureType == STRUCTURE_SPAWN)
     }
 })
 
@@ -28,6 +31,14 @@ def _is_full():
     return this.energyAvailable == this.energyCapacityAvailable
 
 
+def _get_spawn_energy():
+    if len(this.find(FIND_MY_CREEPS)) < 6:
+        return 300
+
+    return this.energyCapacityAvailable
+
+
 Room.prototype.get_sources = _get_sources
 Room.prototype.is_city = _is_city
 Room.prototype.is_full = _is_full
+Room.prototype.get_spawn_energy = _get_spawn_energy

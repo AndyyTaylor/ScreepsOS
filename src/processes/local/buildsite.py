@@ -38,6 +38,18 @@ class BuildSite(CreepProcess):
     def needs_creeps(self):
         return len(self._data.creep_names) < 3  # Scale this
 
+    def is_valid_creep(self, creep):
+        return creep.getActiveBodyparts(WORK) > 0
+
+    def gen_body(self, energy):
+        body = [WORK, CARRY, MOVE]
+        mod = [WORK, CARRY, MOVE]
+
+        while self.get_body_cost(body.concat(mod)) <= energy:
+            body = body.concat(mod)
+
+        return body
+
     def place_flag(self):
         flags = self.room.flags
 

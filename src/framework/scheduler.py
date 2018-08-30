@@ -12,7 +12,8 @@ process_classes = {
     'roomplanner': RoomPlanner,
     'upgradesite': UpgradeSite,
     'feedsite': FeedSite,
-    'buildsite': BuildSite
+    'buildsite': BuildSite,
+    'spawning': Spawning
 }
 
 
@@ -70,6 +71,11 @@ class Scheduler():
         for pid in Object.keys(self.processes):
             if self.create_process(pid).is_completed():
                 self.delete_process(pid)
+
+    def get_priority_of(self, pid):
+        proc = self.processes[pid]
+
+        return proc['priority']
 
     def delete_process(self, pid):
         proc = self.processes[str(pid)]

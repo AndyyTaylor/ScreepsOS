@@ -17,8 +17,10 @@ class City(Process):
 
         sources = room.get_sources()
 
-        if self.scheduler.count_by_name('roomplanner', self._pid) < 1:
-            self.launch_child_process('roomplanner', {'room_name': self._data.main_room})
+        one_of = ['roomplanner', 'spawning']
+        for name in one_of:
+            if self.scheduler.count_by_name(name, self._pid) < 1:
+                self.launch_child_process(name, {'room_name': self._data.main_room})
 
         if self.scheduler.count_by_name('feedsite', self._pid) < len(base['feedpaths']):
             paths = [i for i in range(len(base['feedpaths']))]

@@ -15,7 +15,7 @@ class Gather(Task):
             target = self.select_target(creep, creep.room)
 
             if not target:
-                creep.say("No gather")
+                # creep.say("No gather")
                 return
 
             self._data.target_id = target.id

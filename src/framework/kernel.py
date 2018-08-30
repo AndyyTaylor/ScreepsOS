@@ -2,6 +2,7 @@
 from defs import *  # noqa
 
 from framework.scheduler import Scheduler, process_classes
+from framework.ticketer import Ticketer
 
 __pragma__('noalias', 'keys')
 
@@ -16,13 +17,20 @@ class Kernel():
         new_upload = self.check_version()
         if new_upload:
             self.scheduler.kill_all_processes()
+            self.unassign_creeps()
 
     def start(self):
+        if _.isUndefined(self.ticketer):
+            self.ticketer = Ticketer()  # Has to be declared after kernel finishes init
+
         self.last_cpu = 0
 
         self.launch_cities()  # Launch Empire
 
         self.scheduler.queue_processes()
+
+        # if len(self.ticketer.get_tickets_by_type("spawn")) < 1:
+        #     self.ticketer.add_ticket("spawn", 'kernel')
 
         Memory.stats.cpu.start = self.get_cpu_diff()
 
@@ -57,6 +65,10 @@ class Kernel():
                 rcl_progressTotal += CONTROLLER_LEVELS[7]  # Check that this is cumulative
 
         Memory.stats.rcl = rcl_progress / rcl_progressTotal
+
+        spawn_tickets = self.ticketer.get_tickets_by_type("spawn")
+        print(len(spawn_tickets), ' spawn tickets')
+
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket
 
@@ -104,7 +116,8 @@ class Kernel():
 
     def clear_memory(self):
         for name in Object.keys(Memory.creeps):
-            if not Game.creeps[name]:
+            if not Game.creeps[name] and (not Memory.creeps['created'] or
+                                          Memory.creeps['created'] < Game.time - 100):
                 del Memory.creeps[name]
 
     def validate_memory(self):
@@ -128,5 +141,8 @@ class Kernel():
 
         if _.isUndefined(Memory.stats.processes.count):
             Memory.stats.processes.count = {}
+
+        if _.isUndefined(Memory.stats.tickets):
+            Memory.stats.tickets = {}
 
         self.memory = Memory.os.kernel
