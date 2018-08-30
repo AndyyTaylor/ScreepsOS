@@ -61,15 +61,19 @@ class Kernel():
             room = Game.rooms[name]
             if room.is_city():
                 rcl_progress += room.controller.progress
-                rcl_progressTotal += CONTROLLER_LEVELS[7]  # Check that this is cumulative
+                for i in range(room.controller.level - 1):
+                    rcl_progress += CONTROLLER_LEVELS[i + 1]
+
+                for i in range(7):
+                    rcl_progressTotal += CONTROLLER_LEVELS[i + 1]
 
         Memory.stats.rcl = rcl_progress / rcl_progressTotal
 
-        spawn_tickets = self.ticketer.get_tickets_by_type("spawn")
-        if len(spawn_tickets) > 0:
-            print(len(spawn_tickets), '-', len(_.filter(spawn_tickets,
-                                                        lambda s: not s['completed'])),
-                  'spawn tickets')
+        # spawn_tickets = self.ticketer.get_tickets_by_type("spawn")
+        # if len(spawn_tickets) > 0:
+        #     print(len(spawn_tickets), '-', len(_.filter(spawn_tickets,
+        #                                                 lambda s: not s['completed'])),
+        #           'spawn tickets')
 
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket

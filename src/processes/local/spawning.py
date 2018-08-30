@@ -15,8 +15,7 @@ class Spawning(Process):
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
-        if self.get_spawn_ticket():
-            print(self.get_spawn_ticket()['data']['body'])
+
         for spawn in self.room.spawns:
             if not spawn.spawning:
                 ticket = self.get_spawn_ticket()

@@ -4,3 +4,4 @@ from processes.local.upgradesite import UpgradeSite
 from processes.local.feedsite import FeedSite
 from processes.local.buildsite import BuildSite
 from processes.local.spawning import Spawning
+from processes.local.repairsite import RepairSite

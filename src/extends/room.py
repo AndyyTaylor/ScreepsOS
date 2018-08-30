@@ -14,6 +14,11 @@ Object.defineProperties(Room.prototype, {
     }, 'spawns': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN)
+    }, 'repair_sites': {
+        'get': lambda: _.filter(this.find(FIND_STRUCTURES),
+                                lambda s: s.structureType != STRUCTURE_WALL and
+                                         s.structureType != STRUCTURE_RAMPART and
+                                          s.hits < s.hitsMax * js_global.MIN_REPAIR)  # noqa
     }
 })
 

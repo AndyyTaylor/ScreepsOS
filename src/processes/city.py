@@ -48,6 +48,10 @@ class City(Process):
                     self.launch_child_process('buildsite', {'site_id': site_id,
                                                             'room_name': self._data.main_room})
 
+        if self.scheduler.count_by_name('repairsite', self._pid) < 1 and len(room.repair_sites) > 0:
+            self.launch_child_process('repairsite', {'site_id': room.repair_sites[0].id,
+                                                     'room_name': self._data.main_room})
+
         if self.scheduler.count_by_name('minesite', self._pid) < len(sources):
             taken_ids = []
             source_ids = [source.id for source in sources]

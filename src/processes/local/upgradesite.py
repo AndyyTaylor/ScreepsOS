@@ -53,7 +53,22 @@ class UpgradeSite(CreepProcess):
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True
 
-        # Will identify the upcont for use
+        withdraw_id = None
+
+        x, y = self.room.controller.pos.x, self.room.controller.pos.y
+        nearby_structs = self.room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
+        for struct in nearby_structs:
+            if struct.structure.structureType == STRUCTURE_CONTAINER:
+                withdraw_id = struct.structure.id
+
+        if withdraw_id is None:
+            nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
+            for terrain in nearby_terrain:
+                if terrain.terrain != 'wall':
+                    tid = self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_CONTAINER,
+                                                                        'x': terrain.x,
+                                                                        'y': terrain.y})
+                    self._data.build_tickets.append(tid)
 
     def place_flag(self):
         flags = self.room.flags

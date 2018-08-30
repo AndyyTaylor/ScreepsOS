@@ -15,6 +15,9 @@ class Process():
         self.scheduler = js_global.kernel.scheduler
         self.ticketer = js_global.kernel.ticketer
 
+        if _.isUndefined(self._data.build_tickets):
+            self._data.build_tickets = []
+
     def run(self):
         # Check if process is sleeping
 

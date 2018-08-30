@@ -13,7 +13,8 @@ process_classes = {
     'upgradesite': UpgradeSite,
     'feedsite': FeedSite,
     'buildsite': BuildSite,
-    'spawning': Spawning
+    'spawning': Spawning,
+    'repairsite': RepairSite
 }
 
 

@@ -28,11 +28,17 @@ class RoomPlanner(Process):
         self.lay_structures(STRUCTURE_TERMINAL)
         self.lay_structures(STRUCTURE_LAB)
 
+        ticket = self.ticketer.get_highest_priority('build')
+        if ticket:
+            self.build(ticket['data']['type'], int(ticket['data']['x']),
+                       int(ticket['data']['y']), False)
+
         self.vis_enabled = False
 
         if len(self.room.construction_sites) < 1:
-            if not self.lay_structures(STRUCTURE_EXTENSION):
-                self.lay_structures(STRUCTURE_CONTAINER)
+            for type in js_global.BUILD_ORDER:
+                if self.lay_structures(type):
+                    break
 
     def lay_structures(self, type):
         positions = base['buildings'][type]['pos']
@@ -40,9 +46,10 @@ class RoomPlanner(Process):
             if self.build(type, pos['x'] - 1, pos['y'] - 1):
                 return True
 
-    def build(self, type, x, y):
-        x += self._data.base_x
-        y += self._data.base_y
+    def build(self, type, x, y, add_base=True):
+        if add_base:
+            x += self._data.base_x
+            y += self._data.base_y
 
         # TODO: Should return whether lay was successful
         if self.vis_enabled:
