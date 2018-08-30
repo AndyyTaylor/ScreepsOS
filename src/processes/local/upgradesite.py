@@ -39,7 +39,7 @@ class UpgradeSite(CreepProcess):
             return len(self._data.creep_names) < 3
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0
+        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0
 
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]

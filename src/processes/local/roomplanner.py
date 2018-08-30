@@ -18,6 +18,18 @@ class RoomPlanner(Process):
         self.vis = self.room.visual
 
         self.load_base_pos()
+
+        self.vis_enabled = True
+
+        self.lay_structures(STRUCTURE_EXTENSION)
+        self.lay_structures(STRUCTURE_SPAWN)
+        self.lay_structures(STRUCTURE_TOWER)
+        self.lay_structures(STRUCTURE_ROAD)
+        self.lay_structures(STRUCTURE_TERMINAL)
+        self.lay_structures(STRUCTURE_LAB)
+
+        self.vis_enabled = False
+
         if len(self.room.construction_sites) < 1:
             if not self.lay_structures(STRUCTURE_EXTENSION):
                 self.lay_structures(STRUCTURE_CONTAINER)
@@ -33,7 +45,49 @@ class RoomPlanner(Process):
         y += self._data.base_y
 
         # TODO: Should return whether lay was successful
-        return self.room.createConstructionSite(x, y, type) == OK
+        if self.vis_enabled:
+            self.draw_visual(x, y, type)
+
+            return False
+        else:
+            return self.room.createConstructionSite(x, y, type) == OK
+
+    def draw_visual(self, x, y, type):
+        if type == STRUCTURE_EXTENSION:
+            self.draw_extension(x, y)
+        elif type == STRUCTURE_SPAWN:
+            self.draw_spawn(x, y)
+        elif type == STRUCTURE_TOWER:
+            self.draw_tower(x, y)
+        elif type == STRUCTURE_ROAD:
+            self.draw_road(x, y)
+        elif type == STRUCTURE_TERMINAL:
+            self.draw_terminal(x, y)
+        elif type == STRUCTURE_LAB:
+            self.draw_lab(x, y)
+        else:
+            self.draw_generic(x, y)
+
+    def draw_extension(self, x, y):
+        self.vis.circle(x, y, {'fill': 'yellow', 'radius': 0.3})
+
+    def draw_spawn(self, x, y):
+        self.vis.circle(x, y, {'fill': 'yellow', 'radius': 0.4})
+
+    def draw_tower(self, x, y):
+        self.vis.rect(x - 0.4, y - 0.4, 0.8, 0.8, {'fill': 'black'})
+
+    def draw_road(self, x, y):
+        self.vis.circle(x, y, {'fill': 'gray', 'radius': 0.4})
+
+    def draw_terminal(self, x, y):
+        self.vis.rect(x - 0.4, y - 0.4, 0.8, 0.8, {'fill': 'lightgray'})
+
+    def draw_lab(self, x, y):
+        self.vis.circle(x, y, {'fill': 'black', 'radius': 0.4})
+
+    def draw_generic(self, x, y):
+        self.vis.circle(x, y)
 
     def load_base_pos(self):
         if _.isUndefined(self._data.base_x) or _.isUndefined(self._data.base_y):

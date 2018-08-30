@@ -36,18 +36,6 @@ class City(Process):
         if self.scheduler.count_by_name('upgradesite', self._pid) < 1:
             self.launch_child_process('upgradesite', {'room_name': self._data.main_room})
 
-        if self.scheduler.count_by_name('minesite', self._pid) < len(sources):
-            taken_ids = []
-            source_ids = [source.id for source in sources]
-
-            for proc in self.scheduler.proc_by_name('minesite', self._pid):
-                taken_ids.append(proc['data'].source_id)
-
-            for source_id in source_ids:
-                if not taken_ids.includes(source_id):
-                    self.launch_child_process('minesite', {'source_id': source_id,
-                                                           'room_name': self._data.main_room})
-
         if self.scheduler.count_by_name('buildsite', self._pid) < len(room.construction_sites):
             taken_ids = []
             site_ids = [site.id for site in room.construction_sites]
@@ -59,3 +47,15 @@ class City(Process):
                 if not taken_ids.includes(source_id):
                     self.launch_child_process('buildsite', {'site_id': site_id,
                                                             'room_name': self._data.main_room})
+
+        if self.scheduler.count_by_name('minesite', self._pid) < len(sources):
+            taken_ids = []
+            source_ids = [source.id for source in sources]
+
+            for proc in self.scheduler.proc_by_name('minesite', self._pid):
+                taken_ids.append(proc['data'].source_id)
+
+            for source_id in source_ids:
+                if not taken_ids.includes(source_id):
+                    self.launch_child_process('minesite', {'source_id': source_id,
+                                                           'room_name': self._data.main_room})

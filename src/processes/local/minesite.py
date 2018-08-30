@@ -30,6 +30,18 @@ class MineSite(CreepProcess):
         creep.run_current_task()
 
     def needs_creeps(self):
+        total = 0
+        for name in self._data.creep_names:
+            creep = Game.creeps[name]
+            if creep:
+                total += creep.getActiveBodyparts(WORK)
+
+        if total >= 6:
+            return False
+
+        if _.isUndefined(self._data.adj_tiles):
+            return len(self._data.creep_names) < 1
+
         return len(self._data.creep_names) < self._data.adj_tiles
 
     def is_valid_creep(self, creep):

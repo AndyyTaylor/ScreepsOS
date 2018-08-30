@@ -27,7 +27,7 @@ class Gather(Task):
 
     def select_target(self, creep, room):
         energy = _.filter(room.find(FIND_DROPPED_RESOURCES),
-                          lambda r: r.resourceType == RESOURCE_ENERGY)
+                          lambda r: r.resourceType == RESOURCE_ENERGY and r.amount > 50)
 
         if not energy:
             return

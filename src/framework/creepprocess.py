@@ -50,7 +50,7 @@ class CreepProcess(Process):
             ticket = self.ticketer.get_ticket(self._data.spawn_tickets[0])
 
             if ticket['completed']:
-                print(self._pid, 'early assigning', ticket['result']['name'])
+                # print(self._pid, 'early assigning', ticket['result']['name'])
                 Memory.creeps[ticket['result']['name']].assigned = self._pid
                 Memory.creeps[ticket['result']['name']].early = True
                 self._data.creep_names.append(ticket['result']['name'])
@@ -63,12 +63,12 @@ class CreepProcess(Process):
         for name in Object.keys(Game.creeps):
             creep = Game.creeps[name]
 
-            if creep.memory.early:
-                creep.say("Early")
+            # if creep.memory.early:
+            #     creep.say("Early")
 
             if not creep.assigned and creep.memory.created < Game.time - 10 and \
                     self.is_valid_creep(creep):
-                print("Normally assigned")
+
                 self.assign_creep(creep)
 
             if not self.needs_creeps():

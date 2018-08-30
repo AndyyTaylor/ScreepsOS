@@ -38,7 +38,6 @@ class Kernel():
         process = self.scheduler.get_next_process()
 
         while process is not None:
-            # print("Running", process.name)
             process.run()
             process = self.scheduler.get_next_process()
 
@@ -67,7 +66,10 @@ class Kernel():
         Memory.stats.rcl = rcl_progress / rcl_progressTotal
 
         spawn_tickets = self.ticketer.get_tickets_by_type("spawn")
-        print(len(spawn_tickets), ' spawn tickets')
+        if len(spawn_tickets) > 0:
+            print(len(spawn_tickets), '-', len(_.filter(spawn_tickets,
+                                                        lambda s: not s['completed'])),
+                  'spawn tickets')
 
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket
