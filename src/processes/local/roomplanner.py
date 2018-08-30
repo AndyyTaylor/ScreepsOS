@@ -19,7 +19,8 @@ class RoomPlanner(Process):
 
         self.load_base_pos()
         if len(self.room.construction_sites) < 1:
-            self.lay_structures(STRUCTURE_EXTENSION)
+            if not self.lay_structures(STRUCTURE_EXTENSION):
+                self.lay_structures(STRUCTURE_CONTAINER)
 
     def lay_structures(self, type):
         positions = base['buildings'][type]['pos']
@@ -32,9 +33,7 @@ class RoomPlanner(Process):
         y += self._data.base_y
 
         # TODO: Should return whether lay was successful
-        self.room.createConstructionSite(x, y, type)
-
-        return True
+        return self.room.createConstructionSite(x, y, type) == OK
 
     def load_base_pos(self):
         if _.isUndefined(self._data.base_x) or _.isUndefined(self._data.base_y):

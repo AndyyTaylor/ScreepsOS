@@ -28,7 +28,9 @@ class BuildSite(CreepProcess):
         creep.run_current_task()
 
     def is_completed(self):
-        if not Game.getObjectById(self._data.site_id):
+        site = Game.getObjectById(self._data.site_id)
+
+        if not site or _.isUndefined(site.progress):
             return True
 
         return False
