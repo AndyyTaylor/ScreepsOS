@@ -36,7 +36,7 @@ class UpgradeSite(CreepProcess):
         if len(self.room.construction_sites):
             return len(self._data.creep_names) < 1  # Scale this
         else:
-            return len(self._data.creep_names) < 3
+            return len(self._data.creep_names) < 3 + self.room.get_additional_workers()
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0

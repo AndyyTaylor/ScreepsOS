@@ -12,10 +12,11 @@ class BuildSite(CreepProcess):
     def __init__(self, pid, data={}):
         super().__init__('buildsite', pid, 4, data)
 
-    def _run(self):
-        self.room = Game.rooms[self._data.room_name]
-        self.controller = self.room.controller
+        if pid != -1:
+            self.room = Game.rooms[self._data.room_name]
+            self.controller = self.room.controller
 
+    def _run(self):
         self.place_flag()
         self.run_creeps()
 
@@ -30,13 +31,15 @@ class BuildSite(CreepProcess):
     def is_completed(self):
         site = Game.getObjectById(self._data.site_id)
 
-        if not site or _.isUndefined(site.progress):
+        if not site or _.isUndefined(site.progress) or not \
+                Object.keys(Game.constructionSites).includes(self._data.site_id):
+
             return True
 
         return False
 
     def needs_creeps(self):
-        return len(self._data.creep_names) < 3  # Scale this
+        return len(self._data.creep_names) < 3 + self.room.get_additional_workers()  # Scale this
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0

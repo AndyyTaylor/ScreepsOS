@@ -32,5 +32,7 @@ class Process():
         if self._killed:
             return True
 
+        return False
+
     def kill(self):
         self._killed = True
