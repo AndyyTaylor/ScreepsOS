@@ -37,6 +37,9 @@ class RoomPlanner(Process):
 
         if len(self.room.construction_sites) < 1:
             for type in js_global.BUILD_ORDER:
+                if type == STRUCTURE_ROAD and self.room.rcl < js_global.ROAD_RCL:
+                    continue
+
                 if self.lay_structures(type):
                     break
 
@@ -60,6 +63,11 @@ class RoomPlanner(Process):
             return self.room.createConstructionSite(x, y, type) == OK
 
     def draw_visual(self, x, y, type):
+        structures = self.room.lookForAt(LOOK_STRUCTURES, x, y)
+        for structure in structures:
+            if structure.structureType == type:
+                return
+
         if type == STRUCTURE_EXTENSION:
             self.draw_extension(x, y)
         elif type == STRUCTURE_SPAWN:

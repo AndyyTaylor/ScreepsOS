@@ -32,7 +32,9 @@ def _clear_task():
 
 
 def _is_idle():
-    return _.isUndefined(this.memory.task_name) or not this.memory.task_name
+    is_idle = _.isUndefined(this.memory.task_name) or not this.memory.task_name
+
+    return is_idle
 
 
 def _get_task_instance(name, data={}):
@@ -43,7 +45,9 @@ def _get_task_instance(name, data={}):
         'travel': Travel,
         'feed': Feed,
         'build': Build,
-        'repair': Repair
+        'repair': Repair,
+        'withdraw': Withdraw,
+        'deposit': Deposit
     }
 
     TaskClass = classes_by_name[name]

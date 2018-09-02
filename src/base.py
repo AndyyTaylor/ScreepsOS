@@ -5,7 +5,13 @@ base = {
     "feedpaths": [
         {
             "hold_x": 4,
-            "hold_y": 4
+            "hold_y": 4,
+            "landmarks": [
+                {"x": 3, "y": 4},
+                {"x": 0, "y": 3},
+                {"x": 3, "y": 0},
+                {"x": 3, "y": 4}
+            ]
         },
         {
             "hold_x": 6,

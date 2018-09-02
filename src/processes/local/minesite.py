@@ -24,6 +24,10 @@ class MineSite(CreepProcess):
         self.run_creeps()
 
     def run_creep(self, creep):
+        if self._data.creep_names.indexOf(creep.name) == 0:
+            # Move to drop_pos
+            if creep.is_idle():
+                pass
         if creep.is_idle():
             creep.set_task('harvest', {'source_id': self._data.source_id})
 
@@ -45,7 +49,7 @@ class MineSite(CreepProcess):
         return len(self._data.creep_names) < self._data.adj_tiles
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0
+        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3
 
     def gen_body(self, energyAvailable):
         # Should have no carry before link, and get carry when link exists
@@ -67,22 +71,37 @@ class MineSite(CreepProcess):
         terrain = self.room.lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1,
                                           pos.y + 1, pos.x + 1, True)
 
+        deposit_id = None
         drop_pos = None
         adj_tiles = 0
         for tile in terrain:
             if tile.terrain != 'wall':
                 adj_tiles += 1
                 drop_pos = {'x': tile.x, 'y': tile.y}
-        self._data.adj_tiles = adj_tiles
 
-        structures = self.room.lookForAtArea(LOOK_STRUCTURES, pos.y - 1, pos.x - 1,
-                                             pos.y + 1, pos.x + 1, True)
-        for struct in structures:
-            pass  # Comlete once I actually have structures
+        self._data.adj_tiles = adj_tiles
+        self._data.drop_type = 'floor'
+
+        x, y = self.room.controller.pos.x, self.room.controller.pos.y
+        nearby_structs = self.room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
+        for struct in nearby_structs:
+            if struct.structure.structureType == STRUCTURE_CONTAINER:
+                deposit_id = struct.structure.id
+
+        if deposit_id is None:
+            nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
+            for terrain in nearby_terrain:
+                if terrain.terrain != 'wall':
+                    tid = self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_CONTAINER,
+                                                                        'x': terrain.x,
+                                                                        'y': terrain.y})
+                    self._data.build_tickets.append(tid)
+        else:
+            drop_pos = Game.getObjectById(deposit_id).pos
+            self._data.drop_type = 'container'
 
         self._data.drop_x = drop_pos.x
         self._data.drop_y = drop_pos.y
-        self._data.drop_type = 'floor'
 
     def place_flag(self):
         flags = self.room.flags

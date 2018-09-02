@@ -16,16 +16,26 @@ class Spawning(Process):
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
 
+        # ticket = self.get_spawn_ticket()
+        # if ticket is not None:
+        #     body = ticket['data']['body']
+        #     body.sort()
+        #     print('soon spawning', body)
+        # else:
+        #     print('no spawn tickets')
+
         for spawn in self.room.spawns:
             if not spawn.spawning:
                 ticket = self.get_spawn_ticket()
 
                 if ticket is not None:
                     name = str(random.randint(0, 10000))
-                    result = spawn.spawnCreep(ticket['data']['body'], name)
+                    body = ticket['data']['body']
+                    body.sort(reverse=True)
+                    result = spawn.spawnCreep(body, name)
 
                     if result == OK:
-                        print('spawning', ticket['data']['body'])
+                        print('spawning', body)
                         ticket['completed'] = True
                         ticket['result']['name'] = name
                         Memory.creeps[name] = {'created': Game.time}

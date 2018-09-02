@@ -16,6 +16,9 @@ class Kernel():
 
         new_upload = self.check_version()
         if new_upload:
+            print("-------------------------")
+            print("NEW UPLOAD DETECTED -", js_global.VERSION)
+            print("-------------------------")
             self.scheduler.kill_all_processes()
             self.unassign_creeps()
 
@@ -28,6 +31,7 @@ class Kernel():
         self.launch_cities()  # Launch Empire
 
         self.scheduler.queue_processes()
+        self.ticketer.load_tickets()
 
         # if len(self.ticketer.get_tickets_by_type("spawn")) < 1:
         #     self.ticketer.add_ticket("spawn", 'kernel')
@@ -45,6 +49,7 @@ class Kernel():
 
     def shutdown(self):
         self.scheduler.shutdown()
+        self.ticketer.save_tickets()
 
         self.unassign_creeps()
         self.clear_memory()
@@ -83,8 +88,20 @@ class Kernel():
 
         for name in Object.keys(Game.creeps):
             creep = Game.creeps[name]
+
             if not creep.assigned:
+                if creep.memory.death_timer:
+                    creep.memory.death_timer -= 1
+                    creep.say(creep.memory.death_timer)
+                else:
+                    creep.memory.death_timer = js_global.MAX_DEATH_TIMER
+
+                if creep.memory.death_timer <= 0:
+                    creep.suicide()
+
                 continue
+            else:
+                del creep.memory.death_timer
 
             if not pids.includes(str(creep.assigned)):
                 creep.unassign()

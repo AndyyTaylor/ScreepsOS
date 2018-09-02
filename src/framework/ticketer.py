@@ -40,6 +40,7 @@ class Ticketer():
         highest_ticket = None
         for tid in Object.keys(self.tickets):
             ticket = self.tickets[tid]
+
             if ticket['type'] == type and ticket['priority'] < highest_priority \
                     and not ticket['completed']:
                 highest_ticket = ticket
@@ -61,10 +62,10 @@ class Ticketer():
         del self.tickets[tid]
 
     def save_tickets(self):
-        return  # Save tickets to memory
+        Memory.os.ticketer.tickets = self.tickets
 
     def load_tickets(self):
-        return  # Load tickets from memory
+        self.tickets = Object.assign({}, Memory.os.ticketer.tickets)
 
     def gen_tid(self):
         self.memory.tid += 1

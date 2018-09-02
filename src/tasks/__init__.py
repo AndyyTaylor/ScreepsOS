@@ -5,3 +5,5 @@ from tasks.travel import Travel
 from tasks.feed import Feed
 from tasks.build import Build
 from tasks.repair import Repair
+from tasks.withdraw import Withdraw
+from tasks.deposit import Deposit

@@ -39,7 +39,7 @@ class BuildSite(CreepProcess):
         return False
 
     def needs_creeps(self):
-        return len(self._data.creep_names) < 3 + self.room.get_additional_workers()  # Scale this
+        return len(self._data.creep_names) < 1 + self.room.get_additional_workers()  # Scale this
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0

@@ -36,7 +36,7 @@ class UpgradeSite(CreepProcess):
         if len(self.room.construction_sites):
             return len(self._data.creep_names) < 1  # Scale this
         else:
-            return len(self._data.creep_names) < 3 + self.room.get_additional_workers()
+            return len(self._data.creep_names) < 1 + self.room.get_additional_workers()
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0
@@ -61,7 +61,7 @@ class UpgradeSite(CreepProcess):
             if struct.structure.structureType == STRUCTURE_CONTAINER:
                 withdraw_id = struct.structure.id
 
-        if withdraw_id is None:
+        if withdraw_id is None and len(self._data.build_tickets) < 1:
             nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
             for terrain in nearby_terrain:
                 if terrain.terrain != 'wall':

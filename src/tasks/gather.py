@@ -15,7 +15,7 @@ class Gather(Task):
             target = self.select_target(creep, creep.room)
 
             if not target:
-                # creep.say("No gather")
+                self._data.completed = True
                 return
 
             self._data.target_id = target.id
@@ -37,4 +37,4 @@ class Gather(Task):
         return target
 
     def is_completed(self, creep):
-        return creep.is_full()
+        return creep.is_full() or self._data.completed

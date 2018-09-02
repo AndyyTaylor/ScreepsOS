@@ -17,7 +17,7 @@ class City(Process):
 
         sources = room.get_sources()
 
-        one_of = ['roomplanner', 'spawning']
+        one_of = ['roomplanner', 'spawning', 'defence']
         for name in one_of:
             if self.scheduler.count_by_name(name, self._pid) < 1:
                 self.launch_child_process(name, {'room_name': self._data.main_room})
@@ -35,7 +35,7 @@ class City(Process):
 
         if self.scheduler.count_by_name('upgradesite', self._pid) < 1:
             self.launch_child_process('upgradesite', {'room_name': self._data.main_room})
-        print(self.scheduler.count_by_name('buildsite', self._pid))
+
         if self.scheduler.count_by_name('buildsite', self._pid) < len(room.construction_sites):
             taken_ids = []
             site_ids = [site.id for site in room.construction_sites]
