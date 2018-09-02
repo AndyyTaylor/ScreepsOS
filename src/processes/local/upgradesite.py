@@ -48,7 +48,7 @@ class UpgradeSite(CreepProcess):
         while self.get_body_cost(body.concat(mod)) <= energy:
             body = body.concat(mod)
 
-        return body
+        return body, None
 
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True
@@ -69,6 +69,8 @@ class UpgradeSite(CreepProcess):
                                                                         'x': terrain.x,
                                                                         'y': terrain.y})
                     self._data.build_tickets.append(tid)
+
+                    return
 
     def place_flag(self):
         flags = self.room.flags

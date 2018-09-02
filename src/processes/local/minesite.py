@@ -24,10 +24,12 @@ class MineSite(CreepProcess):
         self.run_creeps()
 
     def run_creep(self, creep):
-        if self._data.creep_names.indexOf(creep.name) == 0:
-            # Move to drop_pos
-            if creep.is_idle():
-                pass
+        if self._data.creep_names.indexOf(creep.js_name) == 0:
+            empty = len(self.room.lookForAt(LOOK_CREEPS, self._data.drop_x, self._data.drop_y)) == 0
+            if creep.is_idle() and (creep.pos.x != self._data.drop_x or
+                                    creep.pos.y != self._data.drop_y) and empty:
+                creep.set_task('travel', {'dest_x': self._data.drop_x, 'dest_y': self._data.drop_y,
+                                          'dest_room_name': self._data.room_name})
         if creep.is_idle():
             creep.set_task('harvest', {'source_id': self._data.source_id})
 
@@ -62,7 +64,7 @@ class MineSite(CreepProcess):
             total_work += 1
             body = body.concat(mod)
 
-        return body
+        return body, None
 
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True
@@ -82,13 +84,13 @@ class MineSite(CreepProcess):
         self._data.adj_tiles = adj_tiles
         self._data.drop_type = 'floor'
 
-        x, y = self.room.controller.pos.x, self.room.controller.pos.y
+        x, y = pos.x, pos.y
         nearby_structs = self.room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
         for struct in nearby_structs:
             if struct.structure.structureType == STRUCTURE_CONTAINER:
                 deposit_id = struct.structure.id
 
-        if deposit_id is None:
+        if deposit_id is None and len(self._data.build_tickets) < 1:
             nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
             for terrain in nearby_terrain:
                 if terrain.terrain != 'wall':
@@ -96,6 +98,8 @@ class MineSite(CreepProcess):
                                                                         'x': terrain.x,
                                                                         'y': terrain.y})
                     self._data.build_tickets.append(tid)
+
+                    return
         else:
             drop_pos = Game.getObjectById(deposit_id).pos
             self._data.drop_type = 'container'

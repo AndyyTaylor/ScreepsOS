@@ -58,7 +58,8 @@ class FeedSite(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) < 1
+        return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) < 1 and \
+            _.isUndefined(creep.memory.haul_ind)
 
     def gen_body(self, energy):
         body = [CARRY, MOVE]
@@ -76,7 +77,7 @@ class FeedSite(CreepProcess):
             body = body.concat(mod)
             carry_count += 1
 
-        return body
+        return body, None
 
     def init(self):
         base_flag = Game.flags[self._data.room_name]
@@ -108,7 +109,7 @@ class FeedSite(CreepProcess):
                 result = PathFinder.search(start, goal,
                                            {'roomCallback': lambda r:
                                             self.room.basic_matrix(ignore_creeps=True)})
-                print(start, goal)
+
                 for position in result.path:
                     positions.append(position)
 

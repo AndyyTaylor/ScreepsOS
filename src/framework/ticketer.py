@@ -58,6 +58,9 @@ class Ticketer():
 
         return tickets
 
+    def clear_all_tickets(self):
+        self.tickets = {}
+
     def delete_ticket(self, tid):
         del self.tickets[tid]
 
@@ -74,6 +77,9 @@ class Ticketer():
     def validate_memory(self):
         if _.isUndefined(Memory.os.ticketer):
             Memory.os.ticketer = {}
+
+        if _.isUndefined(Memory.os.ticketer.tickets):
+            Memory.os.ticketer.tickets = {}
 
         if _.isUndefined(Memory.os.ticketer.tid):
             Memory.os.ticketer.tid = 0

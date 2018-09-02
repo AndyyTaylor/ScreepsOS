@@ -35,10 +35,13 @@ class Spawning(Process):
                     result = spawn.spawnCreep(body, name)
 
                     if result == OK:
-                        print('spawning', body)
+                        # print('spawning', body)
                         ticket['completed'] = True
                         ticket['result']['name'] = name
                         Memory.creeps[name] = {'created': Game.time}
+                        if ticket['data']['memory']:
+                            Memory.creeps[name] = Object.assign(Memory.creeps[name],
+                                                                ticket['data']['memory'])
 
     def get_spawn_ticket(self):
         ticket = self.ticketer.get_highest_priority('spawn')

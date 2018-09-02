@@ -31,6 +31,9 @@ class RepairSite(CreepProcess):
         site = Game.getObjectById(self._data.site_id)
 
         if not site or site.hits == site.hitsMax:
+            flag = Game.flags['RepairSite(' + str(self._data.room_name) + ')']
+            if flag:
+                flag.remove()
             return True
 
         return False
@@ -48,7 +51,7 @@ class RepairSite(CreepProcess):
         while self.get_body_cost(body.concat(mod)) <= energy:
             body = body.concat(mod)
 
-        return body
+        return body, None
 
     def place_flag(self):
         flags = self.room.flags

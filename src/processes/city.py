@@ -17,7 +17,7 @@ class City(Process):
 
         sources = room.get_sources()
 
-        one_of = ['roomplanner', 'spawning', 'defence']
+        one_of = ['roomplanner', 'spawning', 'defence', 'logistics']
         for name in one_of:
             if self.scheduler.count_by_name(name, self._pid) < 1:
                 self.launch_child_process(name, {'room_name': self._data.main_room})

@@ -28,6 +28,10 @@ Object.defineProperties(Room.prototype, {
                                 lambda s: s.structureType == STRUCTURE_TOWER)
     }, 'rcl': {
         'get': lambda: 0 if _.isUndefined(this.controller) else this.controller.level
+    }, 'tombstones': {
+        'get': lambda: this.find(FIND_TOMBSTONES)
+    }, 'sources': {
+        'get': lambda: this.find(FIND_SOURCES)
     }
 })
 
@@ -82,9 +86,9 @@ def _get_additional_workers():
         this.memory.dropped_energy = this.total_dropped_energy()
         this.memory.dropped_energy_tick = Game.time
 
-        if this.total_dropped_energy() > 2000:
+        if this.total_dropped_energy() > 1000:
             this.memory.additional_workers += 1
-        elif this.total_dropped_energy() < 500:
+        elif this.total_dropped_energy() < 200:
             this.memory.additional_workers -= 1
 
         this.memory.additional_workers = max(0, this.memory.additional_workers)
@@ -98,6 +102,7 @@ def _basic_matrix(ignore_creeps=False):
     structures = this.find(FIND_STRUCTURES)
     for struct in structures:
         if struct.structureType != STRUCTURE_CONTAINER and \
+                struct.structureType != STRUCTURE_ROAD and \
                 (struct.structureType != STRUCTURE_RAMPART or not struct.my):
             costs.set(struct.pos.x, struct.pos.y, 0xff)
 

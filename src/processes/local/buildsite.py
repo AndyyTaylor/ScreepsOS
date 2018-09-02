@@ -51,7 +51,7 @@ class BuildSite(CreepProcess):
         while self.get_body_cost(body.concat(mod)) <= energy:
             body = body.concat(mod)
 
-        return body
+        return body, None
 
     def place_flag(self):
         flags = self.room.flags

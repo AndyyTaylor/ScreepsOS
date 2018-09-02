@@ -76,8 +76,12 @@ class CreepProcess(Process):
 
         if len(self._data.spawn_tickets) < 1:
             room = Game.rooms[self._data.room_name]
+            body, memory = self.gen_body(room.get_spawn_energy())
+            if memory is None:
+                memory = {}
+
             tid = self.ticketer.add_ticket('spawn', self._pid,
-                                           {'body': self.gen_body(room.get_spawn_energy())})
+                                           {'body': body, 'memory': memory})
             self._data.spawn_tickets.append(tid)
 
         # Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], random.randint(0, 10000))

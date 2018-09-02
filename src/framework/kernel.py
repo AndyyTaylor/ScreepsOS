@@ -14,8 +14,8 @@ class Kernel():
 
         self.scheduler = Scheduler()
 
-        new_upload = self.check_version()
-        if new_upload:
+        self.new_upload = self.check_version()
+        if self.new_upload:
             print("-------------------------")
             print("NEW UPLOAD DETECTED -", js_global.VERSION)
             print("-------------------------")
@@ -35,6 +35,11 @@ class Kernel():
 
         # if len(self.ticketer.get_tickets_by_type("spawn")) < 1:
         #     self.ticketer.add_ticket("spawn", 'kernel')
+
+        if self.new_upload:
+            self.ticketer.clear_all_tickets()
+
+            self.new_upload = False
 
         Memory.stats.cpu.start = self.get_cpu_diff()
 
@@ -74,11 +79,10 @@ class Kernel():
 
         Memory.stats.rcl = rcl_progress / rcl_progressTotal
 
-        # spawn_tickets = self.ticketer.get_tickets_by_type("spawn")
-        # if len(spawn_tickets) > 0:
-        #     print(len(spawn_tickets), '-', len(_.filter(spawn_tickets,
-        #                                                 lambda s: not s['completed'])),
-        #           'spawn tickets')
+        # build_tickets = self.ticketer.get_tickets_by_type("build")
+        # print(len(build_tickets), '-', len(_.filter(build_tickets,
+        #                                             lambda s: not s['completed'])),
+        #       'build tickets')
 
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket

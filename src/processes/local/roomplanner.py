@@ -27,12 +27,16 @@ class RoomPlanner(Process):
         self.lay_structures(STRUCTURE_ROAD)
         self.lay_structures(STRUCTURE_TERMINAL)
         self.lay_structures(STRUCTURE_LAB)
+        self.lay_structures(STRUCTURE_CONTAINER)
 
-        ticket = self.ticketer.get_highest_priority('build')
-        if ticket:
-            self.build(ticket['data']['type'], int(ticket['data']['x']),
-                       int(ticket['data']['y']), False)
+        if Object.keys(js_global.WALL_WIDTH).includes(self.room.rcl):
+            self.visualise_walls(js_global.WALL_WIDTH[self.room.rcl])
 
+        # tickets = self.ticketer.get_tickets_by_type('build')
+        # for ticket in tickets:
+        #     self.build(ticket['data']['type'], int(ticket['data']['x']),
+        #                int(ticket['data']['y']), False)
+        #     print(int(ticket['data']['x']), int(ticket['data']['y']))
         self.vis_enabled = False
 
         if len(self.room.construction_sites) < 1:
@@ -47,6 +51,12 @@ class RoomPlanner(Process):
         positions = base['buildings'][type]['pos']
         for pos in positions:
             if self.build(type, pos['x'] - 1, pos['y'] - 1):
+                return True
+
+        tickets = _.filter(self.ticketer.get_tickets_by_type("build"),
+                           lambda t: t['data']['type'] == type)
+        for ticket in tickets:
+            if self.build(type, ticket['data']['x'], ticket['data']['y'], False):
                 return True
 
     def build(self, type, x, y, add_base=True):
@@ -114,6 +124,20 @@ class RoomPlanner(Process):
 
             # If no flag exists
             self.place_base()
+
+    def visualise_walls(self, width):
+        start_x = self._data.base_x - 1
+        start_y = self._data.base_y - 1
+
+        width -= 1
+
+        for xx in range(start_x, start_x + base['width'] + 2):
+            for yy in range(start_y, start_y + base['height'] + 2):
+                if min(abs(start_x - xx), abs(start_x + base['width'] + 1 - xx)) > width and \
+                        min(abs(start_y - yy), abs(start_y + base['height'] + 1 - yy)) > width:
+                    continue
+
+                self.vis.rect(xx - 0.5, yy - 0.5, 1, 1, {'fill': 'green', 'opacity': 0.3})
 
     def place_base(self):
         valid = [[True for y in range(50)] for x in range(50)]
