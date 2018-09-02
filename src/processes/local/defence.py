@@ -17,7 +17,11 @@ class Defence(Process):
         self.vis = self.room.visual
 
         hostile_creeps = self.room.find(FIND_HOSTILE_CREEPS)
+        repairs = _.filter(self.room.find(FIND_STRUCTURES),
+                           lambda s: s.hits < s.hitsMax * js_global.TOWER_REPAIR)
 
-        if len(hostile_creeps) > 0:
-            for tower in self.room.towers:
+        for tower in self.room.towers:
+            if len(hostile_creeps) > 0:
                 tower.attack(hostile_creeps[0])
+            elif len(repairs) > 0:
+                tower.repair(repairs[0])

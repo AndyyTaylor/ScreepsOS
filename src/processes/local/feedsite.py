@@ -38,20 +38,25 @@ class FeedSite(CreepProcess):
         cont = Game.getObjectById(self._data.withdraw_id)
         if creep.is_idle():
             if creep.is_empty():
-                if not creep.room.is_full() and not _.isUndefined(cont) and _.sum(cont.store) > 0:
+                storage = creep.room.storage
+                if not creep.room.is_full() and not _.isUndefined(cont) and \
+                        cont.store[RESOURCE_ENERGY] > 0:
                     creep.set_task('withdraw', {'target_id': self._data.withdraw_id})
-                else:
+                elif not _.isUndefined(storage) and storage.store[RESOURCE_ENERGY] > 0:
+                    creep.set_task('withdraw', {'target_id': storage.id})
+                elif _.isUndefined(creep.room.storage):
                     creep.set_task('gather')
-            elif not creep.room.is_full():
+            elif not creep.room.is_full() and not creep.is_empty():
                 creep.set_task('feed')
-            elif not _.isUndefined(cont) and _.sum(cont.store) < cont.storeCapacity:
+            elif not _.isUndefined(cont) and _.sum(cont.store) < cont.storeCapacity and not \
+                    creep.is_empty():
                 creep.set_task('deposit', {'target_id': self._data.withdraw_id})
-            else:
+
+            if creep.is_idle():
                 creep.set_task('travel', {'dest_x': self._data.hold_x,
                                           'dest_y': self._data.hold_y,
                                           'dest_room_name': self._data.room_name})
 
-        # creep.say(creep.memory.task_name)
         creep.run_current_task()
 
     def needs_creeps(self):

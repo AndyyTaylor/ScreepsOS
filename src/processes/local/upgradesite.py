@@ -26,7 +26,11 @@ class UpgradeSite(CreepProcess):
 
     def run_creep(self, creep):
         if creep.is_empty():
-            creep.set_task('gather')
+            if not _.isUndefined(self.room.storage) and \
+                    self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
+                creep.set_task('withdraw', {'target_id': self.room.storage.id})
+            else:
+                creep.set_task('gather')
         elif creep.is_full() or creep.is_idle():
             creep.set_task('upgrade')
 
@@ -52,25 +56,6 @@ class UpgradeSite(CreepProcess):
 
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True
-
-        withdraw_id = None
-
-        x, y = self.room.controller.pos.x, self.room.controller.pos.y
-        nearby_structs = self.room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
-        for struct in nearby_structs:
-            if struct.structure.structureType == STRUCTURE_CONTAINER:
-                withdraw_id = struct.structure.id
-
-        if withdraw_id is None and len(self._data.build_tickets) < 1:
-            nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
-            for terrain in nearby_terrain:
-                if terrain.terrain != 'wall':
-                    tid = self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_CONTAINER,
-                                                                        'x': terrain.x,
-                                                                        'y': terrain.y})
-                    self._data.build_tickets.append(tid)
-
-                    return
 
     def place_flag(self):
         flags = self.room.flags

@@ -26,8 +26,7 @@ class MineSite(CreepProcess):
     def run_creep(self, creep):
         if self._data.creep_names.indexOf(creep.js_name) == 0:
             empty = len(self.room.lookForAt(LOOK_CREEPS, self._data.drop_x, self._data.drop_y)) == 0
-            if creep.is_idle() and (creep.pos.x != self._data.drop_x or
-                                    creep.pos.y != self._data.drop_y) and empty:
+            if (creep.pos.x != self._data.drop_x or creep.pos.y != self._data.drop_y) and empty:
                 creep.set_task('travel', {'dest_x': self._data.drop_x, 'dest_y': self._data.drop_y,
                                           'dest_room_name': self._data.room_name})
         if creep.is_idle():
