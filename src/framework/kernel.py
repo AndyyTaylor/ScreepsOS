@@ -10,11 +10,13 @@ __pragma__('noalias', 'keys')
 class Kernel():
 
     def __init__(self):
+        self.new_upload = self.check_version()
+        Memory.os.kernel.finished = False
+
         self.validate_memory()
 
         self.scheduler = Scheduler()
 
-        self.new_upload = self.check_version()
         if self.new_upload:
             print("-------------------------")
             print("NEW UPLOAD DETECTED -", js_global.VERSION)
@@ -87,6 +89,8 @@ class Kernel():
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket
 
+        Memory.os.kernel.finished = True
+
     def unassign_creeps(self):
         pids = self.scheduler.list_pids()
 
@@ -129,7 +133,7 @@ class Kernel():
                     self.scheduler.launch_process('city', {'main_room': city})
 
     def check_version(self):
-        if Memory.os.VERSION != js_global.VERSION:
+        if Memory.os.VERSION != js_global.VERSION or not Memory.os.kernel.finished:
             Memory.os.VERSION = js_global.VERSION
             return True
 

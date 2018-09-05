@@ -23,7 +23,7 @@ class RepairSite(CreepProcess):
         if creep.is_empty():
             if not _.isUndefined(self.room.storage) and \
                     self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
-                creep.set_task('withdraw', {'targed_id': self.room.storage.id})
+                creep.set_task('withdraw', {'target_id': self.room.storage.id})
             else:
                 creep.set_task('gather')
         elif creep.is_full() or creep.is_idle():

@@ -46,7 +46,14 @@ def _is_city():
 
 
 def _is_full():
-    return this.energyAvailable == this.energyCapacityAvailable
+    spawns_full = this.energyAvailable == this.energyCapacityAvailable
+    towers_full = True
+    for tower in this.towers:
+        if tower.energy < tower.energyCapacity:
+            towers_full = False
+            break
+
+    return spawns_full and towers_full
 
 
 def _get_spawn_energy():
