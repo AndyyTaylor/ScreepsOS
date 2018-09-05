@@ -16,7 +16,8 @@ process_classes = {
     'spawning': Spawning,
     'repairsite': RepairSite,
     'defence': Defence,
-    'logistics': Logistics
+    'logistics': Logistics,
+    'management': Management
 }
 
 

@@ -25,8 +25,12 @@ class UpgradeSite(CreepProcess):
         self.run_creeps()
 
     def run_creep(self, creep):
+        print(self._data.link_id)
         if creep.is_empty():
-            if not _.isUndefined(self.room.storage) and \
+            link = Game.getObjectById(self._data.link_id)
+            if not _.isUndefined(self._data.link_id) and link.energy > 0:
+                creep.set_task('withdraw', {'target_id': self._data.link_id})
+            elif not _.isUndefined(self.room.storage) and \
                     self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
                 creep.set_task('withdraw', {'target_id': self.room.storage.id})
             else:
@@ -55,7 +59,32 @@ class UpgradeSite(CreepProcess):
         return body, None
 
     def init(self):  # This should request certain buildings. container / link etc
+        if self.room.rcl >= 5:
+            self.load_link()
+
         self._data.has_init = True
+
+    def load_link(self):
+        link_id = None
+        pos = self.room.controller.pos
+        x, y = pos.x, pos.y
+        nearby_structs = self.room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
+        for struct in nearby_structs:
+            if struct.structure.structureType == STRUCTURE_LINK:
+                link_id = struct.structure.id
+
+        if link_id is None:
+            nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
+            for terrain in nearby_terrain:
+                if terrain.terrain != 'wall':
+                    tid = self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_LINK,
+                                                                        'x': terrain.x,
+                                                                        'y': terrain.y})
+                    self._data.build_tickets.append(tid)
+
+                    return
+        else:
+            self._data.link_id = link_id
 
     def place_flag(self):
         flags = self.room.flags
