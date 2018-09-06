@@ -113,7 +113,7 @@ class FeedSite(CreepProcess):
 
                 result = PathFinder.search(start, goal,
                                            {'roomCallback': lambda r:
-                                            self.room.basic_matrix(ignore_creeps=True)})
+                                            self.room.basic_matrix(True)})
 
                 for position in result.path:
                     positions.append(position)
