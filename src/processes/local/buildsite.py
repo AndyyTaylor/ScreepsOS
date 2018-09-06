@@ -51,9 +51,11 @@ class BuildSite(CreepProcess):
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]
         mod = [WORK, CARRY, MOVE]
+        count = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy:
+        while self.get_body_cost(body.concat(mod)) <= energy and count < 10:
             body = body.concat(mod)
+            count += 1
 
         return body, None
 
