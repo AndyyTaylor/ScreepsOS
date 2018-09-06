@@ -21,6 +21,7 @@ class City(Process):
 
         if room.rcl >= 5:
             one_of.append('management')
+            one_of.append('remote')
 
         for name in one_of:
             if self.scheduler.count_by_name(name, self._pid) < 1:

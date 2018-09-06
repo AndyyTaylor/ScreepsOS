@@ -17,7 +17,9 @@ process_classes = {
     'repairsite': RepairSite,
     'defence': Defence,
     'logistics': Logistics,
-    'management': Management
+    'management': Management,
+    'remote': Remote,
+    'remotemine': RemoteMine
 }
 
 
