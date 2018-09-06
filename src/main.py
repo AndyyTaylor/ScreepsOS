@@ -1,6 +1,7 @@
 
 import config  # noqa
 from defs import *  # noqa
+from extends import *  # noqa
 
 from framework.kernel import Kernel
 
