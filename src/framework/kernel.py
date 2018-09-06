@@ -49,6 +49,7 @@ class Kernel():
         process = self.scheduler.get_next_process()
 
         while process is not None:
+            # print('running', process.name)
             process.run()
             process = self.scheduler.get_next_process()
 
@@ -65,8 +66,61 @@ class Kernel():
             num = self.scheduler.count_by_name(name)
             Memory.stats.processes.count[name] = num
 
-        Memory.stats.gcl = Game.gcl.progress / Game.gcl.progressTotal
+        self.log_gcl()
+        self.log_rcl()
+        self.log_defence()
+        self.log_rooms()
 
+        Memory.stats.cpu.shutdown = self.get_cpu_diff()
+        Memory.stats.cpu.bucket = Game.cpu.bucket
+
+        Memory.os.kernel.finished = True
+
+    def log_rooms(self):
+        Memory.stats.rooms = {}
+
+        for name in Object.keys(Game.rooms):
+            room = Game.rooms[name]
+            stats = {}
+
+            stats.rcl = {
+                'level': room.controller.level,
+                'progress': room.controller.progress,
+                'progressTotal': room.controller.progressTotal
+            }
+
+            stored_energy = 0
+            if not _.isUndefined(room.storage):
+                stored_energy += room.storage.store[RESOURCE_ENERGY]
+
+            for struct in _.filter(room.find(FIND_STRUCTURES),
+                                   lambda s: s.structureType == STRUCTURE_CONTAINER or
+                                             s.structureType == STRUCTURE_LINK):  # noqa
+                if struct.structureType == STRUCTURE_CONTAINER:
+                    stored_energy += struct.store[RESOURCE_ENERGY]
+                else:
+                    stored_energy += struct.energy
+
+            stats.stored = {
+                'energy': stored_energy
+            }
+
+            Memory.stats.rooms[name] = stats
+
+    def log_defence(self):
+        Memory.stats.defence = {
+            'overall': 0
+        }
+
+    def log_gcl(self):
+        Memory.stats.gcl = {
+            'level': Game.gcl.level,
+            'progress': Game.gcl.progress,
+            'progressTotal': Game.gcl.progressTotal,
+            'percentage': Game.gcl.progress / Game.gcl.progressTotal
+        }
+
+    def log_rcl(self):
         rcl_progress = 0
         rcl_progressTotal = 0
         for name in Object.keys(Game.rooms):
@@ -79,17 +133,11 @@ class Kernel():
                 for i in range(7):
                     rcl_progressTotal += CONTROLLER_LEVELS[i + 1]
 
-        Memory.stats.rcl = rcl_progress / rcl_progressTotal
-
-        # build_tickets = self.ticketer.get_tickets_by_type("build")
-        # print(len(build_tickets), '-', len(_.filter(build_tickets,
-        #                                             lambda s: not s['completed'])),
-        #       'build tickets')
-
-        Memory.stats.cpu.shutdown = self.get_cpu_diff()
-        Memory.stats.cpu.bucket = Game.cpu.bucket
-
-        Memory.os.kernel.finished = True
+        Memory.stats.rcl = {
+            'percentage': rcl_progress / rcl_progressTotal,
+            'progress': rcl_progress,
+            'progressTotal': rcl_progressTotal
+        }
 
     def unassign_creeps(self):
         pids = self.scheduler.list_pids()

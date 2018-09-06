@@ -25,10 +25,9 @@ class UpgradeSite(CreepProcess):
         self.run_creeps()
 
     def run_creep(self, creep):
-        print(self._data.link_id)
         if creep.is_empty():
             link = Game.getObjectById(self._data.link_id)
-            if not _.isUndefined(self._data.link_id) and link.energy > 0:
+            if not _.isNull(link) and link.energy > 0:
                 creep.set_task('withdraw', {'target_id': self._data.link_id})
             elif not _.isUndefined(self.room.storage) and \
                     self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:

@@ -11,7 +11,7 @@ __pragma__('noalias', 'values')
 class Management(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('management', pid, 2, data)
+        super().__init__('management', pid, 3, data)
 
         if self._pid != -1:
             self.room = Game.rooms[self._data.room_name]
@@ -32,15 +32,26 @@ class Management(CreepProcess):
             if creep.pos.inRangeTo(sit_pos, 0):
                 center_link = Game.getObjectById(self._data.cent_link_id)
                 up_link = Game.getObjectById(self._data.up_link_id)
+
+                if _.isNull(center_link) or _.isNull(up_link):
+                    return
+
                 if self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
-                    if creep.is_empty():
-                        creep.withdraw(room.storage, RESOURCE_ENERGY)
+                    if center_link.energy > 0:
+                        if up_link.energy < up_link.energyCapacity:
+                            center_link.transferEnergy(up_link)
+                        elif creep.is_full():
+                            creep.transfer(self.room.storage, RESOURCE_ENERGY)
+                        else:
+                            creep.withdraw(center_link, RESOURCE_ENERGY)
+                    elif creep.is_empty():
+                        creep.withdraw(self.room.storage, RESOURCE_ENERGY)
                     elif center_link.energy < center_link.energyCapacity and \
-                            up_link.energy < up_link.energyCapacity:
+                            up_link.energy < up_link.energyCapacity and center_link.cooldown == 0:
                         creep.transfer(center_link, RESOURCE_ENERGY)
-                        center_link.transferEnergy(up_link)
             else:
-                creep.set_task("travel", {"dest_x": self._data.sit_x, "dest_y": self._data.sit_y})
+                creep.set_task("travel", {"dest_x": self._data.sit_x, "dest_y": self._data.sit_y,
+                                          "dest_room_name": self._data.room_name})
 
         creep.run_current_task()
 
@@ -70,8 +81,17 @@ class Management(CreepProcess):
             return
 
         link_x = base_flag.pos.x + base['central_link']['x']
-        link_y = base_flag.pos.x + base['central_link']['y']
+        link_y = base_flag.pos.y + base['central_link']['y']
         self._data.cent_link_id = self.load_link(link_x, link_y)
+
+        pos = self.room.controller.pos
+        structs = self.room.lookForAtArea(LOOK_STRUCTURES, pos.y - 1, pos.x - 1,
+                                          pos.y + 1, pos.x + 1, True)
+        for struct in structs:
+            if struct.structure.structureType == STRUCTURE_LINK:
+                self._data.up_link_id = struct.structure.id
+
+                break
 
         self._data.sit_x = base_flag.pos.x + base['manager']['x']
         self._data.sit_y = base_flag.pos.y + base['manager']['y']

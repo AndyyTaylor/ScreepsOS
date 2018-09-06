@@ -11,7 +11,8 @@ class Withdraw(Task):
 
     def _run(self, creep):
         target = Game.getObjectById(self._data.target_id)
-        if not target or _.sum(target.store) == 0:
+        if not target or (not _.isUndefined(target.story) and _.sum(target.store) == 0) or \
+                         (not _.isUndefined(target.energy) and target.energy == 0):
             return
 
         if not creep.pos.isNearTo(target):

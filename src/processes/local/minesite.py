@@ -98,8 +98,8 @@ class MineSite(CreepProcess):
                                                                         'y': terrain.y})
                     self._data.build_tickets.append(tid)
 
-                    return
-        else:
+                    break
+        elif deposit_id is not None:
             drop_pos = Game.getObjectById(deposit_id).pos
             self._data.drop_type = 'container'
 

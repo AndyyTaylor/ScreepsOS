@@ -6,6 +6,7 @@ base = {
     "central_link": {"x": 7, "y": 5},
     "feedpaths": [
         {
+            "rcl": 1,
             "hold_x": 4,
             "hold_y": 4,
             "landmarks": [
@@ -16,6 +17,7 @@ base = {
             ]
         },
         {
+            "rcl": 1,
             "hold_x": 6,
             "hold_y": 4,
             "landmarks": [
@@ -26,6 +28,7 @@ base = {
             ]
         },
         {
+            "rcl": 7,
             "hold_x": 4,
             "hold_y": 6,
             "landmarks": [

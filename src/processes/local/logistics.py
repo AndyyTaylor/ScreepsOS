@@ -33,7 +33,10 @@ class Logistics(CreepProcess):
         if creep.is_full():
             creep.set_task('deposit', {'target_id': self.room.storage.id})
         elif creep.is_empty() or creep.is_idle():
-            creep.set_task('withdraw', {'target_id': haul.cont_id})
+            if not _.isNull(haul.cont_id):
+                creep.set_task('withdraw', {'target_id': haul.cont_id})
+            else:
+                creep.set_task('gather')
 
         creep.run_current_task()
 

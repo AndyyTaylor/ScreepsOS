@@ -26,8 +26,9 @@ class City(Process):
             if self.scheduler.count_by_name(name, self._pid) < 1:
                 self.launch_child_process(name, {'room_name': self._data.main_room})
 
-        if self.scheduler.count_by_name('feedsite', self._pid) < len(base['feedpaths']):
-            paths = [i for i in range(len(base['feedpaths']))]
+        needed_paths = _.filter(base['feedpaths'], lambda p: p['rcl'] <= room.rcl)
+        if self.scheduler.count_by_name('feedsite', self._pid) < len(needed_paths):
+            paths = [i for i in range(len(needed_paths))]
             taken_paths = []
             for proc in self.scheduler.proc_by_name('feedsite', self._pid):
                 taken_paths.append(proc['data'].index)
