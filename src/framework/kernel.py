@@ -35,9 +35,6 @@ class Kernel():
         self.scheduler.queue_processes()
         self.ticketer.load_tickets()
 
-        # if len(self.ticketer.get_tickets_by_type("spawn")) < 1:
-        #     self.ticketer.add_ticket("spawn", 'kernel')
-
         if self.new_upload:
             self.ticketer.clear_all_tickets()
 
@@ -70,7 +67,9 @@ class Kernel():
         self.log_rcl()
         self.log_defence()
         self.log_rooms()
+        self.log_resources()
 
+        Memory.stats.credits = Game.market.credits
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket
 
@@ -109,7 +108,8 @@ class Kernel():
 
     def log_defence(self):
         Memory.stats.defence = {
-            'overall': 0
+            'overall': 0,
+            'safeMode': 0
         }
 
     def log_gcl(self):
@@ -138,6 +138,18 @@ class Kernel():
             'progress': rcl_progress,
             'progressTotal': rcl_progressTotal
         }
+
+    def log_resources(self):
+        resources = {}
+        for name in Object.keys(Memory.stats.rooms):
+            stored = Memory.stats.rooms[name].stored
+            for resource in Object.keys(stored):
+                if resource in resources:
+                    resources[resource] += stored[resource]
+                else:
+                    resources[resource] = stored[resource]
+
+        Memory.stats.resources = resources
 
     def unassign_creeps(self):
         pids = self.scheduler.list_pids()
