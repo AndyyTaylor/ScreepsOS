@@ -29,7 +29,10 @@ class Reserve(CreepProcess):
                 ticks_left = 0
             Memory.rooms[self._data.target_room].reservation = ticks_left
 
-        print('reserving', self._data.target_room)
+            if _.isUndefined(Memory.rooms[self._data.target_room].num_sources):
+                source_ids = [source.id for source in self.target_room.find(FIND_SOURCES)]
+                Memory.rooms[self._data.target_room].num_sources = len(source_ids)
+                Memory.rooms[self._data.target_room].sources = source_ids
 
         self.run_creeps()
 

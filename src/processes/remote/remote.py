@@ -28,6 +28,21 @@ class Remote(Process):
                     self.launch_child_process('reserve', {'room_name': self._data.room_name,
                                                           'target_room': mine_room})
 
+        rmines = self.scheduler.proc_by_name('remotemine', self._pid)
+        for room in should_mine:
+            if _.isUndefined(Memory.rooms[room].num_sources):
+                continue
+
+            room_mines = _.filter(rmines, lambda m: m['data'].mine_room)
+            if Memory.rooms[room].num_sources < len(room_mines):
+                taken = [m['data'].source_id for m in room_mines]
+
+                for sid in Memory.rooms[room].sources:
+                    if not taken.includes(sid):
+                        self.launch_child_process('remotemine', {'room_name': self._data.room_name,
+                                                                 'mine_room': mine_room,
+                                                                 'source_id': sid})
+
         # if self.scheduler.count_by_name('remotemine', self._pid) < len(should_mine):
             # is_mining = []
             #
@@ -36,5 +51,5 @@ class Remote(Process):
             #
             # for mine_room in should_mine:
             #     if not is_mining.includes(mine_room):
-            #         self.launch_child_process('remotemine', {'room_name': self._data.room_name,
-            #                                                  'mine_room': mine_room})
+                    # self.launch_child_process('remotemine', {'room_name': self._data.room_name,
+                    #                                          'mine_room': mine_room})
