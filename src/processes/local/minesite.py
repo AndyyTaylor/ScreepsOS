@@ -51,7 +51,7 @@ class MineSite(CreepProcess):
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3 and \
-            _.isUndefined(creep.memory.source_id)
+            _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energyAvailable):
         # Should have no carry before link, and get carry when link exists

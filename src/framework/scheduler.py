@@ -20,7 +20,8 @@ process_classes = {
     'management': Management,
     'remote': Remote,
     'remotemine': RemoteMine,
-    'reserve': Reserve
+    'reserve': Reserve,
+    'remotehaul': RemoteHaul
 }
 
 

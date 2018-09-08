@@ -33,14 +33,29 @@ class Remote(Process):
             if _.isUndefined(Memory.rooms[room].num_sources):
                 continue
 
-            room_mines = _.filter(rmines, lambda m: m['data'].mine_room)
-            if Memory.rooms[room].num_sources < len(room_mines):
+            room_mines = _.filter(rmines, lambda m: m['data'].mine_room == room)
+            if len(room_mines) < Memory.rooms[room].num_sources:
                 taken = [m['data'].source_id for m in room_mines]
 
                 for sid in Memory.rooms[room].sources:
                     if not taken.includes(sid):
                         self.launch_child_process('remotemine', {'room_name': self._data.room_name,
-                                                                 'mine_room': mine_room,
+                                                                 'mine_room': room,
+                                                                 'source_id': sid})
+
+        rhauls = self.scheduler.proc_by_name('remotehaul', self._pid)
+        for room in should_mine:
+            if _.isUndefined(Memory.rooms[room].num_sources):
+                continue
+
+            room_hauls = _.filter(rhauls, lambda m: m['data'].haul_room == room)
+            if len(room_hauls) < Memory.rooms[room].num_sources:
+                taken = [m['data'].source_id for m in room_hauls]
+
+                for sid in Memory.rooms[room].sources:
+                    if not taken.includes(sid):
+                        self.launch_child_process('remotehaul', {'room_name': self._data.room_name,
+                                                                 'haul_room': room,
                                                                  'source_id': sid})
 
         # if self.scheduler.count_by_name('remotemine', self._pid) < len(should_mine):

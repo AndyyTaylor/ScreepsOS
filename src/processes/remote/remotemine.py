@@ -16,7 +16,7 @@ class RemoteMine(CreepProcess):
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
         self.mine_room = Game.rooms[self._data.mine_room]
-
+        print('remote mining', self._data.mine_room)
         if _.isUndefined(self._data.has_init):
             self.init()
 
