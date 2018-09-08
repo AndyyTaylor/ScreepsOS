@@ -29,11 +29,11 @@ class Logistics(CreepProcess):
 
     def run_creep(self, creep):
         haul = self._data.sources[creep.memory.haul_ind]
-
+        cont = Game.getObjectById(haul.cont_id)
         if creep.is_full():
             creep.set_task('deposit', {'target_id': self.room.storage.id})
         elif creep.is_empty() or creep.is_idle():
-            if not _.isNull(haul.cont_id):
+            if not _.isNull(haul.cont_id) and _.sum(cont.store) > 0:
                 creep.set_task('withdraw', {'target_id': haul.cont_id})
             else:
                 creep.set_task('gather')

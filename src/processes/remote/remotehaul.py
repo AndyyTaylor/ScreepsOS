@@ -18,7 +18,6 @@ class RemoteHaul(CreepProcess):
             self.haul_room = Game.rooms[self._data.haul_room]
 
     def _run(self):
-        print('remote hauling', self._data.haul_room)
         if _.isUndefined(self._data.has_init):
             self.init()
 
@@ -26,21 +25,30 @@ class RemoteHaul(CreepProcess):
 
     def run_creep(self, creep):
         source = Game.getObjectById(self._data.source_id)
-        if _.isNull(source):
-            creep.moveTo(__new__(RoomPosition(25, 25, self._data.haul_room)))
-        else:
-            creep.moveTo(source)
+        if creep.is_full():
+            creep.set_task("deposit", {'target_id': self.room.storage.id})
+        elif creep.is_empty() or creep.is_idle():
+            if creep.room.name != self._data.haul_room:
+                if not _.isNull(source):
+                    creep.moveTo(source)
+                else:
+                    creep.moveTo(__new__(RoomPosition(25, 25, self._data.haul_room)))
+            else:
+                creep.set_task("gather")
 
         creep.run_current_task()
 
     def needs_creeps(self):
-        return len(self._data.creep_names) < 0
+        return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) == 1 and \
             not _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energyAvailable):
+        if _.isUndefined(self._data.has_init):
+            self.init()
+
         body = [WORK, MOVE, CARRY, MOVE]
         mod = [CARRY, MOVE]
         total_carry = 1

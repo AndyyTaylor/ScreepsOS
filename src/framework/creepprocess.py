@@ -55,7 +55,6 @@ class CreepProcess(Process):
             elif ticket['completed']:
                 # print(self._pid, 'early assigning', ticket['result']['name'])
                 Memory.creeps[ticket['result']['name']].assigned = self._pid
-                Memory.creeps[ticket['result']['name']].early = True
                 self._data.creep_names.append(ticket['result']['name'])
                 self.ticketer.delete_ticket(self._data.spawn_tickets[0])
                 self._data.spawn_tickets.splice(0, 1)

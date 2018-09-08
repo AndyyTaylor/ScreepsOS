@@ -9,7 +9,8 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN or
                                 s.structureType == STRUCTURE_EXTENSION or
-                                s.structureType == STRUCTURE_TOWER)
+                                (s.structureType == STRUCTURE_TOWER and
+                                    s.energy < s.energyCapacity * js_global.TOWER_MIN))
     }, 'construction_sites': {
         'get': lambda: this.find(FIND_CONSTRUCTION_SITES)
     }, 'spawns': {
@@ -49,7 +50,7 @@ def _is_full():
     spawns_full = this.energyAvailable == this.energyCapacityAvailable
     towers_full = True
     for tower in this.towers:
-        if tower.energy < tower.energyCapacity:
+        if tower.energy < tower.energyCapacity * js_global.TOWER_MIN:
             towers_full = False
             break
 
@@ -66,6 +67,11 @@ def _get_spawn_energy():
             has_miner = True
         elif creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) < 1:
             has_hauler = True
+
+            if not _.isUndefined(creep.room.storage):
+                spos = creep.room.storage.pos
+                if creep.pos.x == spos.x + 1 and creep.pos.y == spos.y + 1:
+                    has_hauler = False
 
     if not has_hauler or not has_miner:
         return 300
@@ -93,12 +99,18 @@ def _get_additional_workers():
         this.memory.dropped_energy = this.total_dropped_energy()
         this.memory.dropped_energy_tick = Game.time
 
-        stored = this.storage.store[RESOURCE_ENERGY]
-        avg = (js_global.STORAGE_MAX[this.rcl] + js_global.STORAGE_MIN[this.rcl]) / 2
-        if this.total_dropped_energy() > 1000 or stored > js_global.STORAGE_MAX[this.rcl]:
-            this.memory.additional_workers += 1
-        elif this.total_dropped_energy() < 200 or stored < avg:
-            this.memory.additional_workers -= 1
+        if not _.isUndefined(this.storage):
+            stored = this.storage.store[RESOURCE_ENERGY]
+            avg = (js_global.STORAGE_MAX[this.rcl] + js_global.STORAGE_MIN[this.rcl]) / 2
+            if stored > js_global.STORAGE_MAX[this.rcl]:
+                this.memory.additional_workers += 1
+            elif stored < avg:
+                this.memory.additional_workers -= 1
+        else:
+            if this.total_dropped_energy() > 1000:
+                this.memory.additional_workers += 1
+            elif this.total_dropped_energy() < 200:
+                this.memory.additional_workers -= 1
 
         this.memory.additional_workers = max(0, this.memory.additional_workers)
 

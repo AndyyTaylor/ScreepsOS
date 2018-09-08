@@ -11,7 +11,7 @@ __pragma__('noalias', 'values')
 class Management(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('management', pid, 3, data)
+        super().__init__('management', pid, 2, data)
 
         if self._pid != -1:
             self.room = Game.rooms[self._data.room_name]

@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 class UpgradeSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('upggradesite', pid, 5, data)
+        super().__init__('upgradesite', pid, 5, data)
 
         if pid != -1:
             self.room = Game.rooms[self._data.room_name]
@@ -46,7 +46,8 @@ class UpgradeSite(CreepProcess):
             return len(self._data.creep_names) < 1 + self.room.get_additional_workers()
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0
+        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
+            _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]

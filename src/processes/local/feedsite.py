@@ -11,7 +11,7 @@ __pragma__('noalias', 'values')
 class FeedSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('feedsite', pid, 2, data)
+        super().__init__('feedsite', pid, 1, data)
 
         if self._pid != -1:
             self.room = Game.rooms[self._data.room_name]
@@ -48,8 +48,7 @@ class FeedSite(CreepProcess):
                     creep.set_task('gather')
             elif not creep.room.is_full() and not creep.is_empty():
                 creep.set_task('feed')
-            elif not _.isNull(cont) and _.sum(cont.store) < cont.storeCapacity and not \
-                    creep.is_empty():
+            elif not _.isNull(cont) and _.sum(cont.store) < cont.storeCapacity:
                 creep.set_task('deposit', {'target_id': self._data.withdraw_id})
 
             if creep.is_idle():
@@ -67,20 +66,27 @@ class FeedSite(CreepProcess):
             _.isUndefined(creep.memory.haul_ind)
 
     def gen_body(self, energy):
-        body = [CARRY, MOVE]
-        mod = [CARRY, MOVE]
-        carry_count = 1
+        if self.room.rcl >= 4:
+            body = [CARRY, CARRY, MOVE]
+            mod = [CARRY, CARRY, MOVE]
+            carry_mod = 2
+            carry_count = 2
+        else:
+            body = [CARRY, MOVE]
+            mod = [CARRY, MOVE]
+            carry_mod = 1
+            carry_count = 1
 
-        if self.room.rcl < 6:
+        if self.room.rcl < 5:
             max_carry = 300
-        elif self.room.rcl < 8:
-            max_carry = 400
+        elif self.room.rcl < 7:
+            max_carry = 600
         else:
             max_carry = 600
 
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
-            carry_count += 1
+            carry_count += carry_mod
 
         return body, None
 

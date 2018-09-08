@@ -11,7 +11,6 @@ class Kernel():
 
     def __init__(self):
         self.new_upload = self.check_version()
-        Memory.os.kernel.finished = False
 
         self.validate_memory()
 
@@ -25,6 +24,8 @@ class Kernel():
             self.unassign_creeps()
 
     def start(self):
+        Memory.os.kernel.finished = False
+
         if _.isUndefined(self.ticketer):
             self.ticketer = Ticketer()  # Has to be declared after kernel finishes init
 

@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 class Remote(Process):
 
     def __init__(self, pid, data={}):
-        super().__init__('remote', pid, 4, data)
+        super().__init__('remote', pid, 3, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]

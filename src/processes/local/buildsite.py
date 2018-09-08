@@ -46,7 +46,8 @@ class BuildSite(CreepProcess):
         return len(self._data.creep_names) < 1 + self.room.get_additional_workers()  # Scale this
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0
+        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
+            _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]
