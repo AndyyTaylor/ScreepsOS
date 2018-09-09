@@ -81,6 +81,10 @@ class Kernel():
 
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
+
+            if not room.is_city():
+                continue
+
             stats = {}
 
             stats.rcl = {

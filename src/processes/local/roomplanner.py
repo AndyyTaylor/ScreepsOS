@@ -53,7 +53,7 @@ class RoomPlanner(Process):
             if self.build(type, pos['x'] - 1, pos['y'] - 1):
                 return True
 
-        tickets = _.filter(self.ticketer.get_tickets_by_type("build"),
+        tickets = _.filter(self.ticketer.get_tickets_by_type("build", self._data.room_name),
                            lambda t: t['data']['type'] == type)
         for ticket in tickets:
             if self.build(type, ticket['data']['x'], ticket['data']['y'], False):

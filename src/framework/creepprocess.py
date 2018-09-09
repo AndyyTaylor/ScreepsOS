@@ -17,6 +17,9 @@ class CreepProcess(Process):
         if _.isUndefined(self._data.spawn_tickets):
             self._data.spawn_tickets = []
 
+        if pid != -1:
+            self.room = Game.rooms[self._data.room_name]
+
     def run(self):
         if self.needs_creeps():
             self.assign_creeps()
@@ -62,7 +65,7 @@ class CreepProcess(Process):
         if not self.needs_creeps():
             return
 
-        for name in Object.keys(Game.creeps):
+        for name in self.room.creeps:
             creep = Game.creeps[name]
 
             # if creep.memory.early:
@@ -83,7 +86,8 @@ class CreepProcess(Process):
                 memory = {}
 
             tid = self.ticketer.add_ticket('spawn', self._pid,
-                                           {'body': body, 'memory': memory})
+                                           {'body': body, 'memory': memory,
+                                            'city': self._data.room_name})
             self._data.spawn_tickets.append(tid)
 
         # Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], random.randint(0, 10000))

@@ -1,6 +1,9 @@
 
 from defs import *  # noqa
 
+__pragma__('noalias', 'keys')
+__pragma__('noalias', 'name')
+
 
 Object.defineProperties(Room.prototype, {
     'flags': {
@@ -33,8 +36,19 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: this.find(FIND_TOMBSTONES)
     }, 'sources': {
         'get': lambda: this.find(FIND_SOURCES)
+    }, 'creeps': {
+        'get': lambda: this._get_creeps()
     }
 })
+
+
+def _get_creeps():
+    if _.isUndefined(this._creeps):
+        name = this.name
+        this._creeps = _.filter(Object.keys(Game.creeps),
+                                lambda c: Game.creeps[c].memory.city == name)
+
+    return this._creeps
 
 
 def _get_sources():
@@ -141,3 +155,4 @@ Room.prototype.get_spawn_energy = _get_spawn_energy
 Room.prototype.total_dropped_energy = _total_dropped_energy
 Room.prototype.get_additional_workers = _get_additional_workers
 Room.prototype.basic_matrix = _basic_matrix
+Room.prototype._get_creeps = _get_creeps

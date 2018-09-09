@@ -15,7 +15,10 @@ class Remote(Process):
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
 
-        should_mine = ['W58S2']
+        if self._data.room_name == 'W59S2':
+            should_mine = ['W58S2']
+        else:
+            should_mine = []
 
         if self.scheduler.count_by_name('reserve', self._pid) < len(should_mine):
             is_reserving = []
@@ -58,13 +61,35 @@ class Remote(Process):
                                                                  'haul_room': room,
                                                                  'source_id': sid})
 
-        # if self.scheduler.count_by_name('remotemine', self._pid) < len(should_mine):
-            # is_mining = []
-            #
-            # for proc in self.scheduler.proc_by_name('remotemine', self._pid):
-            #     is_mining.append(proc['data'].mine_room)
-            #
-            # for mine_room in should_mine:
-            #     if not is_mining.includes(mine_room):
-                    # self.launch_child_process('remotemine', {'room_name': self._data.room_name,
-                    #                                          'mine_room': mine_room})
+        if self._data.room_name == 'W59S2':
+            to_claim = []
+        else:
+            to_claim = []
+
+        claims = self.scheduler.proc_by_name('claim', self._pid)
+        if len(claims) < len(to_claim):
+            taken = [m['data'].target_room for m in claims]
+
+            for target_room in to_claim:
+                if not _.isUndefined(Game.rooms[target_room]) and Game.rooms[target_room].is_city():
+                    continue
+
+                if not taken.includes(target_room):
+                    self.launch_child_process('claim', {'room_name': self._data.room_name,
+                                                        'target_room': target_room})
+
+        to_work = []
+        for name in Object.keys(Game.rooms):
+            room = Game.rooms[name]
+            if room.is_city() and len(room.spawns) < 1:
+                to_work.append(name)
+
+        print(to_work)
+        works = self.scheduler.proc_by_name('remotework', self._pid)
+        if len(works) < len(to_work):
+            taken = [m['data'].target_room for m in works]
+
+            for target_room in to_work:
+                if not taken.includes(target_room):
+                    self.launch_child_process('remotework', {'room_name': self._data.room_name,
+                                                             'target_room': target_room})

@@ -96,7 +96,9 @@ class MineSite(CreepProcess):
                 if terrain.terrain != 'wall':
                     tid = self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_CONTAINER,
                                                                         'x': terrain.x,
-                                                                        'y': terrain.y})
+                                                                        'y': terrain.y,
+                                                                        'city': self._data.room_name
+                                                                        })
                     self._data.build_tickets.append(tid)
 
                     break

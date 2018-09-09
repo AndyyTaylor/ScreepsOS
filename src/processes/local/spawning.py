@@ -38,11 +38,11 @@ class Spawning(Process):
                         # print('spawning', body)
                         ticket['completed'] = True
                         ticket['result']['name'] = name
-                        Memory.creeps[name] = {'created': Game.time}
+                        Memory.creeps[name] = {'created': Game.time, 'city': self._data.room_name}
                         if ticket['data']['memory']:
                             Memory.creeps[name] = Object.assign(Memory.creeps[name],
                                                                 ticket['data']['memory'])
 
     def get_spawn_ticket(self):
-        ticket = self.ticketer.get_highest_priority('spawn')
+        ticket = self.ticketer.get_highest_priority('spawn', self._data.room_name)
         return ticket

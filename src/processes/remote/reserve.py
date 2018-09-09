@@ -61,7 +61,7 @@ class Reserve(CreepProcess):
         return False
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(CLAIM) > 0
+        return creep.getActiveBodyparts(CLAIM) > 1
 
     def gen_body(self, energyAvailable):
         body = [CLAIM, MOVE, CLAIM, MOVE]
