@@ -80,7 +80,7 @@ class FeedSite(CreepProcess):
         if self.room.rcl < 5:
             max_carry = 300
         elif self.room.rcl < 7:
-            max_carry = 600
+            max_carry = 450
         else:
             max_carry = 600
 

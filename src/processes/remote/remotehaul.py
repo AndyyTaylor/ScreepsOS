@@ -53,7 +53,7 @@ class RemoteHaul(CreepProcess):
         mod = [CARRY, MOVE]
         total_carry = 1
 
-        max_carry = 10 * self._data.path_length * 2 / 50
+        max_carry = 10 * self._data.path_length * 2 * 1.2 / 50
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_carry < max_carry:
             total_carry += 1

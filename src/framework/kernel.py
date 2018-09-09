@@ -83,6 +83,9 @@ class Kernel():
             room = Game.rooms[name]
             stats = {}
 
+            if not room.is_city():
+                continue
+
             stats.rcl = {
                 'level': room.controller.level,
                 'progress': room.controller.progress,
@@ -103,6 +106,20 @@ class Kernel():
 
             stats.stored = {
                 'energy': stored_energy
+            }
+
+            total_spawns = len(room.spawns)
+            num_working = 0
+            for spawn in room.spawns:
+                if not _.isNull(spawn.spawning):
+                    num_working += 1
+
+            stats.spawning = {
+                'totalSpawns': total_spawns,
+                'numWorking': num_working,
+                'percBusy': num_working / total_spawns,
+                'isFull': 1 if room.is_full() else 0,
+                'energyPerc': room.energyAvailable / room.energyCapacityAvailable
             }
 
             Memory.stats.rooms[name] = stats
