@@ -56,10 +56,12 @@ class CreepProcess(Process):
                 print("Dang ticket disappeared:", self._data.spawn_tickets[0])
                 self._data.spawn_tickets.splice(0, 1)
             elif ticket['completed']:
-                # print(self._pid, 'early assigning', ticket['result']['name'])
-                Memory.creeps[ticket['result']['name']].assigned = self._pid
-                self._data.creep_names.append(ticket['result']['name'])
-                self.ticketer.delete_ticket(self._data.spawn_tickets[0])
+                if not _.isUndefined(Memory.creeps[ticket['result']['name']]):
+                    Memory.creeps[ticket['result']['name']].assigned = self._pid
+                    self._data.creep_names.append(ticket['result']['name'])
+                    self.ticketer.delete_ticket(self._data.spawn_tickets[0])
+                else:
+                    print("Wtf")
                 self._data.spawn_tickets.splice(0, 1)
 
         if not self.needs_creeps():

@@ -16,7 +16,7 @@ class Remote(Process):
         self.room = Game.rooms[self._data.room_name]
 
         if self._data.room_name == 'W59S2':
-            should_mine = ['W58S2']
+            should_mine = ['W58S2', 'W59S1']
         else:
             should_mine = []
 
@@ -33,7 +33,7 @@ class Remote(Process):
 
         rmines = self.scheduler.proc_by_name('remotemine', self._pid)
         for room in should_mine:
-            if _.isUndefined(Memory.rooms[room].num_sources):
+            if _.isUndefined(Memory.rooms[room]) or _.isUndefined(Memory.rooms[room].num_sources):
                 continue
 
             room_mines = _.filter(rmines, lambda m: m['data'].mine_room == room)
@@ -48,7 +48,7 @@ class Remote(Process):
 
         rhauls = self.scheduler.proc_by_name('remotehaul', self._pid)
         for room in should_mine:
-            if _.isUndefined(Memory.rooms[room].num_sources):
+            if _.isUndefined(Memory.rooms[room]) or _.isUndefined(Memory.rooms[room].num_sources):
                 continue
 
             room_hauls = _.filter(rhauls, lambda m: m['data'].haul_room == room)

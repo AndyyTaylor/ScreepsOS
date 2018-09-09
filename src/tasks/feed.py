@@ -41,7 +41,7 @@ class Feed(Task):
         if not locations:
             return
 
-        target = creep.pos.findClosestByRange(locations)
+        target = creep.pos.findClosestByPath(locations)
 
         return target
 
