@@ -52,9 +52,11 @@ class RepairSite(CreepProcess):
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]
         mod = [WORK, CARRY, MOVE]
+        total_work = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy:
+        while self.get_body_cost(body.concat(mod)) <= energy and total_work < 10:
             body = body.concat(mod)
+            total_work += 1
 
         return body, None
 

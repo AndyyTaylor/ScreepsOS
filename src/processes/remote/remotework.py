@@ -23,10 +23,13 @@ class RemoteWork(CreepProcess):
         if creep.room.name != self._data.target_room:
             creep.moveTo(__new__(RoomPosition(25, 25, self._data.target_room)))
         else:
-            if creep.is_empty():
-                sources = self.target_room.find(FIND_SOURCES_ACTIVE)
-                if len(sources) > 0:
-                    creep.set_task('harvest', {'source_id': sources[0].id})
+            if creep.is_empty() and creep.is_idle():
+                if self.target_room.total_dropped_energy() > 100:
+                    creep.set_task('gather')
+                else:
+                    sources = self.target_room.find(FIND_SOURCES_ACTIVE)
+                    if len(sources) > 0:
+                        creep.set_task('harvest', {'source_id': sources[0].id})
             elif creep.is_full() or creep.is_idle():
                 sites = self.target_room.find(FIND_CONSTRUCTION_SITES)
                 if len(sites) > 0:
@@ -38,7 +41,7 @@ class RemoteWork(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
+        return creep.getActiveBodyparts(WORK) > 1 and creep.getActiveBodyparts(CARRY) > 0 and \
             not _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energyAvailable):
@@ -51,3 +54,13 @@ class RemoteWork(CreepProcess):
             body = body.concat(mod)
 
         return body, {'remote': True}
+
+    def is_completed(self):
+        target_room = Game.rooms[self._data.target_room]
+        if _.isUndefined(target_room):
+            return False
+
+        if target_room.rcl < 3 or len(target_room.spawns) == 0:
+            return False
+
+        return True

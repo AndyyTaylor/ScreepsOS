@@ -17,6 +17,7 @@ class City(Process):
 
         sources = room.get_sources()
 
+        remotes = ['W58S2']
         one_of = ['roomplanner', 'spawning', 'defence', 'logistics']
 
         if room.rcl >= 5:
@@ -25,7 +26,8 @@ class City(Process):
 
         for name in one_of:
             if self.scheduler.count_by_name(name, self._pid) < 1:
-                self.launch_child_process(name, {'room_name': self._data.main_room})
+                self.launch_child_process(name, {'room_name': self._data.main_room,
+                                                 'remotes': remotes})
 
         needed_paths = _.filter(base['feedpaths'], lambda p: p['rcl'] <= room.rcl)
         if self.scheduler.count_by_name('feedsite', self._pid) < len(needed_paths):

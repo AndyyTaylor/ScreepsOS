@@ -16,7 +16,7 @@ class Remote(Process):
         self.room = Game.rooms[self._data.room_name]
 
         if self._data.room_name == 'W59S2':
-            should_mine = ['W58S2', 'W59S1']
+            should_mine = ['W58S2']  # , 'W59S1'
         else:
             should_mine = []
 
@@ -81,7 +81,7 @@ class Remote(Process):
         to_work = []
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
-            if room.is_city() and len(room.spawns) < 1:
+            if room.is_city() and (len(room.spawns) < 1 or room.rcl < 3):
                 to_work.append(name)
 
         works = self.scheduler.proc_by_name('remotework', self._pid)

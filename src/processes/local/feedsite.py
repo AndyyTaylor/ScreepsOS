@@ -6,6 +6,7 @@ from framework.creepprocess import CreepProcess
 
 __pragma__('noalias', 'keys')
 __pragma__('noalias', 'values')
+__pragma__('noalias', 'name')
 
 
 class FeedSite(CreepProcess):
@@ -87,7 +88,7 @@ class FeedSite(CreepProcess):
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
             carry_count += carry_mod
-
+        print(carry_count, max_carry // 50, max_carry, self.get_body_cost(body.concat(mod)), energy, self.room.name)
         return body, None
 
     def init(self):

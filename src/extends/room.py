@@ -60,6 +60,11 @@ def _is_city():
         and this.controller.owner.username == js_global.USERNAME
 
 
+def _is_remote():
+    return not _.isUndefined(this.controller) and not _.isUndefined(this.controller.reservation) \
+        and this.controller.reservation.username == js_global.USERNAME
+
+
 def _is_full():
     spawns_full = this.energyAvailable == this.energyCapacityAvailable
     towers_full = True
@@ -79,7 +84,8 @@ def _get_spawn_energy():
     for creep in creeps:
         if creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3:
             has_miner = True
-        elif creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) < 1:
+        elif not has_hauler and creep.getActiveBodyparts(CARRY) > 0 and \
+                creep.getActiveBodyparts(WORK) < 1:
             has_hauler = True
 
             if not _.isUndefined(creep.room.storage):
@@ -150,6 +156,7 @@ def _basic_matrix(ignore_creeps=False):
 
 Room.prototype.get_sources = _get_sources
 Room.prototype.is_city = _is_city
+Room.prototype.is_remote = _is_remote
 Room.prototype.is_full = _is_full
 Room.prototype.get_spawn_energy = _get_spawn_energy
 Room.prototype.total_dropped_energy = _total_dropped_energy

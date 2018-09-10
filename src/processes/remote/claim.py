@@ -11,11 +11,13 @@ __pragma__('noalias', 'name')
 class Claim(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('claim', pid, 6, data)
+        super().__init__('claim', pid, 4, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
         self.target_room = Game.rooms[self._data.target_room]
+
+        print('claiming', self._data.room_name, len(self._data.creep_names))
 
         self.run_creeps()
 
@@ -45,3 +47,10 @@ class Claim(CreepProcess):
         body = [CLAIM, MOVE]
 
         return body, None
+
+    def is_completed(self):
+        target_room = Game.rooms[self._data.target_room]
+        if not _.isUndefined(target_room) and target_room.is_city():
+            return True
+
+        return False

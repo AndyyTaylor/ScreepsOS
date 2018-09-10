@@ -47,19 +47,37 @@ class RoomPlanner(Process):
                 if self.lay_structures(type):
                     break
 
-    def lay_structures(self, type):
-        positions = base['buildings'][type]['pos']
-        for pos in positions:
-            if self.build(type, pos['x'] - 1, pos['y'] - 1):
-                return True
+        for name in self._data.remotes:
+            room = Game.rooms[name]
+            if _.isUndefined(room):
+                continue
 
-        tickets = _.filter(self.ticketer.get_tickets_by_type("build", self._data.room_name),
+            res = self.lay_structures(STRUCTURE_ROAD, name)
+            while res:
+                res = self.lay_structures(STRUCTURE_ROAD, name)
+
+    def lay_structures(self, type, room_name=None):
+        if room_name is None:
+            room_name = self._data.room_name
+
+        if room_name == self._data.room_name:
+            positions = base['buildings'][type]['pos']
+            for pos in positions:
+                if self.build(type, pos['x'] - 1, pos['y'] - 1):
+                    return True
+
+        tickets = _.filter(self.ticketer.get_tickets_by_type("build", room_name),
                            lambda t: t['data']['type'] == type)
         for ticket in tickets:
-            if self.build(type, ticket['data']['x'], ticket['data']['y'], False):
+            if self.build(type, ticket['data']['x'], ticket['data']['y'], False, room_name):
                 return True
 
-    def build(self, type, x, y, add_base=True):
+        return False
+
+    def build(self, type, x, y, add_base=True, room_name=None):
+        if room_name is None:
+            room_name = self._data.room_name
+
         if add_base:
             x += self._data.base_x
             y += self._data.base_y
@@ -70,7 +88,7 @@ class RoomPlanner(Process):
 
             return False
         else:
-            return self.room.createConstructionSite(x, y, type) == OK
+            return Game.rooms[room_name].createConstructionSite(x, y, type) == OK
 
     def draw_visual(self, x, y, type):
         structures = self.room.lookForAt(LOOK_STRUCTURES, x, y)

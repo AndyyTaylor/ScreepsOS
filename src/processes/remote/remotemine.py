@@ -11,7 +11,7 @@ __pragma__('noalias', 'name')
 class RemoteMine(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('remotemine', pid, 4, data)
+        super().__init__('remotemine', pid, 5, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
