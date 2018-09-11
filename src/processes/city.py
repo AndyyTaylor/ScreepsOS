@@ -17,7 +17,11 @@ class City(Process):
 
         sources = room.get_sources()
 
-        remotes = ['W58S2']
+        if self._data.main_room == 'W59S2':
+            remotes = ['W58S2', 'W59S1']
+        else:
+            remotes = []
+
         one_of = ['roomplanner', 'spawning', 'defence', 'logistics']
 
         if room.rcl >= 5:

@@ -123,7 +123,16 @@ class Kernel():
                 'numWorking': num_working,
                 'percBusy': num_working / total_spawns,
                 'isFull': 1 if room.is_full() else 0,
-                'energyPerc': room.energyAvailable / room.energyCapacityAvailable
+                'energyPerc': room.energyAvailable / room.energyCapacityAvailable,
+                'waiting': 1 if room.is_full() and num_working < total_spawns else 0
+            }
+
+            energy = 0
+            for tower in room.towers:
+                energy += tower.energy
+
+            stats.towers = {
+                'energy': energy
             }
 
             Memory.stats.rooms[name] = stats

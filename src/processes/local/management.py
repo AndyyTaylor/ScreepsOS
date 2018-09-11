@@ -21,8 +21,6 @@ class Management(CreepProcess):
         if _.isUndefined(self._data.has_init):
             self.init()
 
-        self.place_flag()
-
         self.run_creeps()
 
     def run_creep(self, creep):
@@ -105,17 +103,3 @@ class Management(CreepProcess):
                 return struct.id
 
         return None
-
-    def place_flag(self):
-        flags = self.room.flags
-
-        x, y = self._data.hold_x, self._data.hold_y
-
-        already_placed = False
-        for flag in flags:
-            if flag['name'] == 'Manager(' + str(self._data.room_name) + ')':
-                already_placed = True
-                break
-
-        if not already_placed:
-            self.room.createFlag(x, y, 'Manager(' + str(self._data.room_name) + ')', 'black')

@@ -16,7 +16,7 @@ class Remote(Process):
         self.room = Game.rooms[self._data.room_name]
 
         if self._data.room_name == 'W59S2':
-            should_mine = ['W58S2']  # , 'W59S1'
+            should_mine = ['W58S2', 'W59S1']
         else:
             should_mine = []
 

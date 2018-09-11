@@ -20,8 +20,6 @@ class UpgradeSite(CreepProcess):
         if _.isUndefined(self._data.has_init):
             self.init()
 
-        self.place_flag()
-
         self.run_creeps()
 
     def run_creep(self, creep):
@@ -89,17 +87,3 @@ class UpgradeSite(CreepProcess):
                     return
         else:
             self._data.link_id = link_id
-
-    def place_flag(self):
-        flags = self.room.flags
-
-        x, y = self.controller.pos.x, self.controller.pos.y
-
-        already_placed = False
-        for flag in flags:
-            if flag['name'] == 'UpgradeSite(' + str(self._data.room_name) + ')':
-                already_placed = True
-                break
-
-        if not already_placed:
-            self.room.createFlag(x, y, 'UpgradeSite(' + str(self._data.room_name) + ')', COLOR_BLUE)

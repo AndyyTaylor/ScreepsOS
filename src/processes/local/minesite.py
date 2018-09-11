@@ -19,8 +19,6 @@ class MineSite(CreepProcess):
         if _.isUndefined(self._data.has_init):
             self.init()
 
-        self.place_flag()
-
         self.run_creeps()
 
     def run_creep(self, creep):
@@ -108,17 +106,3 @@ class MineSite(CreepProcess):
 
         self._data.drop_x = drop_pos.x
         self._data.drop_y = drop_pos.y
-
-    def place_flag(self):
-        flags = self.room.flags
-
-        x, y = self.source.pos.x, self.source.pos.y
-
-        already_placed = False
-        for flag in flags:
-            if flag['name'] == 'MineSite(' + str(x) + ',' + str(y) + ')':
-                already_placed = True
-                break
-
-        if not already_placed:
-            self.room.createFlag(x, y, 'MineSite(' + str(x) + ',' + str(y) + ')', COLOR_YELLOW)

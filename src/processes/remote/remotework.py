@@ -34,6 +34,8 @@ class RemoteWork(CreepProcess):
                 sites = self.target_room.find(FIND_CONSTRUCTION_SITES)
                 if len(sites) > 0:
                     creep.set_task('build', {'site_id': sites[0].id})
+                else:
+                    creep.set_task('upgrade')
 
         creep.run_current_task()
 
@@ -49,7 +51,7 @@ class RemoteWork(CreepProcess):
         mod = [WORK, CARRY, MOVE]
         total_work = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energyAvailable:
+        while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 10:
             total_work += 1
             body = body.concat(mod)
 

@@ -22,8 +22,6 @@ class FeedSite(CreepProcess):
         if _.isUndefined(self._data.has_init):
             self.init()
 
-        self.place_flag()
-
         # if not _.isUndefined(self._data.withdraw_id):
         #     self.room.visual.circle(self._data.hold_x, self._data.hold_y,
         #                             {'fill': 'green', 'radius': 0.4})
@@ -88,7 +86,7 @@ class FeedSite(CreepProcess):
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
             carry_count += carry_mod
-        print(carry_count, max_carry // 50, max_carry, self.get_body_cost(body.concat(mod)), energy, self.room.name)
+
         return body, None
 
     def init(self):
@@ -130,17 +128,3 @@ class FeedSite(CreepProcess):
             self._data.positions = positions
 
         self._data.has_init = True
-
-    def place_flag(self):
-        flags = self.room.flags
-
-        x, y = self._data.hold_x, self._data.hold_y
-
-        already_placed = False
-        for flag in flags:
-            if flag['name'] == 'FeedSite(' + str(x) + ',' + str(y) + ')':
-                already_placed = True
-                break
-
-        if not already_placed:
-            self.room.createFlag(x, y, 'FeedSite(' + str(x) + ',' + str(y) + ')', COLOR_GREEN)

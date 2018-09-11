@@ -33,6 +33,7 @@ class Spawning(Process):
                     body = ticket['data']['body']
                     body.sort(reverse=True)
                     result = spawn.spawnCreep(body, name)
+                    print(self._data.room_name, 'spawn', result, body)
 
                     if result == OK:
                         # print('spawning', body)
@@ -42,6 +43,11 @@ class Spawning(Process):
                         if ticket['data']['memory']:
                             Memory.creeps[name] = Object.assign(Memory.creeps[name],
                                                                 ticket['data']['memory'])
+                    elif result == ERR_NOT_ENOUGH_ENERGY and \
+                            self.room.energyAvailable >= self.room.get_spawn_energy():
+                        print(ticket['data']['body'], 'seems invalid')
+                        Game.notify('spawn ticket semes invalid')
+                        self.ticketer.delete_ticket(ticket['tid'])
 
     def get_spawn_ticket(self):
         ticket = self.ticketer.get_highest_priority('spawn', self._data.room_name)
