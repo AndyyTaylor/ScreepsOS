@@ -132,7 +132,10 @@ class Kernel():
                 energy += tower.energy
 
             stats.towers = {
-                'energy': energy
+                'energy': energy,
+                'attack': room.memory.towers.attack,
+                'heal': room.memory.towers.heal,
+                'repair': room.memory.towers.repair
             }
 
             Memory.stats.rooms[name] = stats
