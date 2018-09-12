@@ -93,7 +93,6 @@ def _get_spawn_energy():
                 if creep.pos.x == spos.x + 1 and creep.pos.y == spos.y + 1:
                     has_hauler = False
 
-    print(this.name, 300 if not has_hauler or not has_miner else this.energyCapacityAvailable, has_hauler, has_miner)
     if not has_hauler or not has_miner:
         return 300
 

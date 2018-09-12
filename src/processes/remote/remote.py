@@ -62,7 +62,7 @@ class Remote(Process):
                                                                  'source_id': sid})
 
         if self._data.room_name == 'W59S2':
-            to_claim = ['W59N2']
+            to_claim = ['W51S1']
         else:
             to_claim = []
 
@@ -81,7 +81,7 @@ class Remote(Process):
         to_work = []
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
-            if room.is_city() and (len(room.spawns) < 1 or room.rcl < 3):
+            if room.is_city() and (len(room.spawns) < 1 or room.rcl < 2) and self.room.rcl > 4:
                 to_work.append(name)
 
         works = self.scheduler.proc_by_name('remotework', self._pid)

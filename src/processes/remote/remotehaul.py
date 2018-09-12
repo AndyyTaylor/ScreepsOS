@@ -37,8 +37,12 @@ class RemoteHaul(CreepProcess):
                 creep.set_task("gather")
 
         if creep.memory.task_name == 'deposit':
-            if len(creep.room.repair_sites) > 0:
-                target = creep.pos.findClosestByRange(creep.room.repair_sites)
+            structs = creep.room.find(FIND_STRUCTURES)
+            need_repair = _.filter(structs, lambda s: s.hits < s.hitsMax and
+                                                      s.structureType != STRUCTURE_WALL and
+                                                      s.structureType != STRUCTURE_RAMPART)  # noqa
+            if len(need_repair) > 0:
+                target = creep.pos.findClosestByRange(need_repair)
                 if creep.pos.inRangeTo(target, 3):
                     creep.repair(target)
             elif len(creep.room.construction_sites) > 0:
@@ -61,7 +65,7 @@ class RemoteHaul(CreepProcess):
 
         body = [WORK, CARRY, MOVE]
         mod = [CARRY, CARRY, MOVE]
-        total_carry = 3
+        total_carry = 1
 
         max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
 

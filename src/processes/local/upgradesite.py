@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 class UpgradeSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('upgradesite', pid, 5, data)
+        super().__init__('upgradesite', pid, 3, data)
 
         if pid != -1:
             self.room = Game.rooms[self._data.room_name]
@@ -23,19 +23,22 @@ class UpgradeSite(CreepProcess):
         self.run_creeps()
 
     def run_creep(self, creep):
-        if creep.is_empty():
-            link = Game.getObjectById(self._data.link_id)
-            if not _.isNull(link) and link.energy > 0:
-                creep.set_task('withdraw', {'target_id': self._data.link_id})
-            elif not _.isUndefined(self.room.storage) and \
-                    self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
-                creep.set_task('withdraw', {'target_id': self.room.storage.id})
-            else:
-                creep.set_task('gather')
-        elif creep.is_full() or creep.is_idle():
-            creep.set_task('upgrade')
+        if creep.room != self.room:
+            creep.moveTo(self.room.controller)
+        else:
+            if creep.is_empty():
+                link = Game.getObjectById(self._data.link_id)
+                if not _.isNull(link) and link.energy > 0:
+                    creep.set_task('withdraw', {'target_id': self._data.link_id})
+                elif not _.isUndefined(self.room.storage) and \
+                        self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
+                    creep.set_task('withdraw', {'target_id': self.room.storage.id})
+                else:
+                    creep.set_task('gather')
+            elif creep.is_full() or creep.is_idle():
+                creep.set_task('upgrade')
 
-        creep.run_current_task()
+            creep.run_current_task()
 
     def needs_creeps(self):
         if len(self.room.construction_sites):
