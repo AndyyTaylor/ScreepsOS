@@ -138,6 +138,10 @@ class Kernel():
                 'repair': room.memory.towers.repair
             }
 
+            # room.memory.towers.attack = 0
+            # room.memory.towers.heal = 0
+            # room.memory.towers.repair = 0
+
             Memory.stats.rooms[name] = stats
 
     def log_defence(self):

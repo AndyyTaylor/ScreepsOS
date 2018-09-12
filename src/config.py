@@ -2,7 +2,7 @@
 from defs import *
 
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 826
+js_global.VERSION = 898
 js_global.CONTROLLER_SIGN = 'Placeholder till I think of something cool'
 
 js_global.CREEP_SAY = False
@@ -24,3 +24,5 @@ js_global.STORAGE_MAX = {4: 50000, 5: 200000, 6: 200000, 7: 200000, 8: 200000}
 js_global.MIN_RESERVE_TICKS = 2500
 
 js_global.TOWER_MIN = 0.8
+
+js_global.BODY_ORDER = [ATTACK, RANGED_ATTACK, WORK, CARRY, MOVE, HEAL]

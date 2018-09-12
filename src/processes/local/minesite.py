@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 class MineSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('minesite', pid, 2, data)
+        super().__init__('minesite', pid, 3, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]

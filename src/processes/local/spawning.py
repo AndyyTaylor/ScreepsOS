@@ -31,7 +31,7 @@ class Spawning(Process):
                 if ticket is not None:
                     name = str(random.randint(0, 10000))
                     body = ticket['data']['body']
-                    body.sort(reverse=True)
+                    body.sort(lambda p: js_global.BODY_ORDER.indexOf(p))
                     result = spawn.spawnCreep(body, name)
 
                     if result == OK:

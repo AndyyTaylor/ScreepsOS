@@ -23,7 +23,8 @@ process_classes = {
     'reserve': Reserve,
     'remotehaul': RemoteHaul,
     'claim': Claim,
-    'remotework': RemoteWork
+    'remotework': RemoteWork,
+    'simpleattack': SimpleAttack
 }
 
 

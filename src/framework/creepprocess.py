@@ -4,6 +4,7 @@ from defs import *  # noqa
 from framework.process import Process
 
 __pragma__('noalias', 'keys')
+__pragma__('noalias', 'name')
 
 
 class CreepProcess(Process):
@@ -40,10 +41,19 @@ class CreepProcess(Process):
 
                 continue
 
-            if js_global.CREEP_SAY:
-                creep.say(self.name)
-
-            self.run_creep(creep)
+            if not _.isUndefined(creep.memory.keep_safe) and creep.memory.keep_safe > Game.time \
+                    and _.isUndefined(self._data.military):
+                if creep.pos.x > 47 or creep.pos.x < 3 or creep.pos.y > 47 or creep.pos.y < 3:
+                    creep.moveTo(self.room.controller)
+            elif not _.isUndefined(creep.room.memory) and not \
+                    _.isUndefined(creep.room.memory.threats):
+                if creep.room.memory.threats.safe_tick > Game.time and not self._data.military:
+                    creep.moveTo(self.room.controller)
+                    creep.memory.keep_safe = Game.time + 100
+                else:
+                    self.run_creep(creep)
+            else:
+                self.run_creep(creep)
 
         for name in expired_creeps:
             self._data.creep_names.remove(name)
@@ -53,7 +63,6 @@ class CreepProcess(Process):
             ticket = self.ticketer.get_ticket(self._data.spawn_tickets[0])
 
             if not ticket:
-                print("Dang ticket disappeared:", self._data.spawn_tickets[0])
                 self._data.spawn_tickets.splice(0, 1)
             elif ticket['completed']:
                 if not _.isUndefined(Memory.creeps[ticket['result']['name']]):

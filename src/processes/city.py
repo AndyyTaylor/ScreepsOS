@@ -17,6 +17,11 @@ class City(Process):
 
         sources = room.get_sources()
 
+        if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
+                self._data.main_room == 'W59S2':
+            self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
+                                                       'target_room': 'W54N2'})
+
         if self._data.main_room == 'W59S2':
             remotes = ['W58S2', 'W59S1']
         else:
