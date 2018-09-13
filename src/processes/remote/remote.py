@@ -17,6 +17,8 @@ class Remote(Process):
 
         if self._data.room_name == 'W59S2':
             should_mine = ['W58S2', 'W59S1']
+        elif self._data.room_name == 'W59N2':
+            should_mine = ['W58N2']
         else:
             should_mine = []
 

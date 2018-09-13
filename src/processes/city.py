@@ -20,10 +20,12 @@ class City(Process):
         if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
                 self._data.main_room == 'W59S2':
             self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
-                                                       'target_room': 'W54N2'})
+                                                       'target_room': 'W52N5'})
 
         if self._data.main_room == 'W59S2':
             remotes = ['W58S2', 'W59S1']
+        elif self._data.room_name == 'W59N2':
+            remotes = []
         else:
             remotes = []
 

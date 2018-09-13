@@ -88,8 +88,8 @@ class RemoteHaul(CreepProcess):
 
         self._data.path_length = len(result.path)
 
-        result = PathFinder.search(source.pos, {'pos': start, 'range': 7,
-                                                'roomCallback': lambda r:
+        result = PathFinder.search(source.pos, {'pos': start, 'range': 7},
+                                               {'roomCallback': lambda r:
                                                 self.room.basic_matrix(True)})
         if not result.incomplete:
             for tile in result.path:

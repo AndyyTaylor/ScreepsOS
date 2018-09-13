@@ -93,6 +93,10 @@ def _get_spawn_energy():
                 if creep.pos.x == spos.x + 1 and creep.pos.y == spos.y + 1:
                     has_hauler = False
 
+    if not _.isUndefined(this.storage):
+        if this.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[this.rcl]:
+            has_miner = True
+
     if not has_hauler or not has_miner:
         return 300
 
