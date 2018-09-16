@@ -20,10 +20,7 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN)
     }, 'repair_sites': {
-        'get': lambda: _.filter(this.find(FIND_STRUCTURES),
-                                lambda s: s.structureType != STRUCTURE_WALL and
-                                         s.structureType != STRUCTURE_RAMPART and
-                                          s.hits < s.hitsMax * js_global.MIN_REPAIR)  # noqa
+        'get': lambda: this._get_repair_sites()
     }, 'dropped_energy': {
         'get': lambda: _.filter(this.find(FIND_DROPPED_RESOURCES),
                                 lambda r: r.resourceType == RESOURCE_ENERGY)
@@ -49,6 +46,17 @@ def _get_creeps():
                                 lambda c: Game.creeps[c].memory.city == name)
 
     return this._creeps
+
+
+def _get_repair_sites():
+    wall_hits = this.memory.wall_hits
+
+    return _.filter(this.find(FIND_STRUCTURES),
+                            lambda s: ((s.structureType != STRUCTURE_WALL and
+                                       s.structureType != STRUCTURE_RAMPART and
+                                       s.hits < s.hitsMax * js_global.MIN_REPAIR) or
+                                       (s.structureType == STRUCTURE_RAMPART and
+                                        s.hits < wall_hits)))  # noqa
 
 
 def _get_sources():
@@ -126,7 +134,7 @@ def _get_additional_workers():
         if not _.isUndefined(this.storage):
             stored = this.storage.store[RESOURCE_ENERGY]
             avg = (js_global.STORAGE_MAX[this.rcl] + js_global.STORAGE_MIN[this.rcl]) / 2
-            if stored > js_global.STORAGE_MAX[this.rcl]:
+            if stored > js_global.STORAGE_MAX[this.rcl] or this.total_dropped_energy() > 1000:
                 this.memory.additional_workers += 1
             elif stored < avg:
                 this.memory.additional_workers -= 1
@@ -167,3 +175,4 @@ Room.prototype.total_dropped_energy = _total_dropped_energy
 Room.prototype.get_additional_workers = _get_additional_workers
 Room.prototype.basic_matrix = _basic_matrix
 Room.prototype._get_creeps = _get_creeps
+Room.prototype._get_repair_sites = _get_repair_sites

@@ -30,7 +30,7 @@ class SimpleAttack(CreepProcess):
             creep.memory.attacking = True
         elif creep.hits < creep.hitsMax * 0.7:
             creep.memory.attacking = False
-        creep.say(creep.memory.attacking)
+
         if creep.memory.attacking:
             if _.isUndefined(self.target_room) or creep.room != self.target_room:
                 creep.moveTo(__new__(RoomPosition(25, 25, self._data.target_room)))
@@ -102,10 +102,7 @@ class SimpleAttack(CreepProcess):
         creep.run_current_task()
 
     def needs_creeps(self):
-        if Game.time < 9408551 + 5000:
-            return len(self._data.creep_names) < 1
-        else:
-            return False
+        return len(self._data.creep_names) < 2
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(ATTACK) > 0 or creep.getActiveBodyparts(RANGED_ATTACK) > 0

@@ -29,14 +29,6 @@ class RoomPlanner(Process):
         self.lay_structures(STRUCTURE_LAB)
         self.lay_structures(STRUCTURE_CONTAINER)
 
-        if Object.keys(js_global.WALL_WIDTH).includes(self.room.rcl):
-            self.visualise_walls(js_global.WALL_WIDTH[self.room.rcl])
-
-        # tickets = self.ticketer.get_tickets_by_type('build')
-        # for ticket in tickets:
-        #     self.build(ticket['data']['type'], int(ticket['data']['x']),
-        #                int(ticket['data']['y']), False)
-        #     print(int(ticket['data']['x']), int(ticket['data']['y']))
         self.vis_enabled = False
 
         if len(self.room.construction_sites) < 1:
@@ -44,8 +36,13 @@ class RoomPlanner(Process):
                 if type == STRUCTURE_ROAD and self.room.rcl < js_global.ROAD_RCL:
                     continue
 
-                if self.lay_structures(type):
-                    break
+                if type == STRUCTURE_RAMPART:
+                    if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+                        if self.build_walls(js_global.WALL_WIDTH[str(self.room.rcl)]):
+                            break
+                else:
+                    if self.lay_structures(type):
+                        break
 
         for name in self._data.remotes:
             room = Game.rooms[name]
@@ -143,7 +140,7 @@ class RoomPlanner(Process):
             # If no flag exists
             self.place_base()
 
-    def visualise_walls(self, width):
+    def build_walls(self, width):
         start_x = self._data.base_x - 1
         start_y = self._data.base_y - 1
 
@@ -155,7 +152,10 @@ class RoomPlanner(Process):
                         min(abs(start_y - yy), abs(start_y + base['height'] + 1 - yy)) > width:
                     continue
 
-                self.vis.rect(xx - 0.5, yy - 0.5, 1, 1, {'fill': 'green', 'opacity': 0.3})
+                if self.vis_enabled:
+                    self.vis.rect(xx - 0.5, yy - 0.5, 1, 1, {'fill': 'green', 'opacity': 0.3})
+                else:
+                    self.room.createConstructionSite(xx, yy, STRUCTURE_RAMPART)
 
     def place_base(self):
         valid = [[True for y in range(50)] for x in range(50)]
