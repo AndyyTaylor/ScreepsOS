@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 class MineSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('minesite', pid, 3, data)
+        super().__init__('minesite', pid, 2, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
@@ -39,7 +39,7 @@ class MineSite(CreepProcess):
             if creep:
                 total += creep.getActiveBodyparts(WORK)
 
-        if total >= 6:
+        if total >= 5:
             return False
 
         if _.isUndefined(self._data.adj_tiles):
@@ -103,6 +103,22 @@ class MineSite(CreepProcess):
         elif deposit_id is not None:
             drop_pos = Game.getObjectById(deposit_id).pos
             self._data.drop_type = 'container'
+
+        if not _.isUndefined(self.room.storage):
+            start = self.room.storage.pos
+            result = PathFinder.search(self.source.pos, {'pos': start, 'range': 7},
+                                                        {'roomCallback': lambda r:
+                                                         self.room.basic_matrix(True)})
+            if not result.incomplete:
+                for tile in result.path:
+                    if tile.x == 0 or tile.x == 49 or tile.y == 0 or tile.y == 49:
+                        continue
+
+                    self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_ROAD,
+                                                                  'x': tile.x,
+                                                                  'y': tile.y,
+                                                                  'city': tile.roomName
+                                                                  })
 
         self._data.drop_x = drop_pos.x
         self._data.drop_y = drop_pos.y

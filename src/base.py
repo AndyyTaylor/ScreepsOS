@@ -1,7 +1,7 @@
 base = {
     "name": "Base Version 1",
-    "width": 11,
-    "height": 11,
+    "width": 10,
+    "height": 10,
     "manager": {"x": 6, "y": 6},
     "central_link": {"x": 7, "y": 5},
     "feedpaths": [

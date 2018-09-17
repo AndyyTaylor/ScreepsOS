@@ -15,7 +15,7 @@ Object.defineProperties(Room.prototype, {
                                 (s.structureType == STRUCTURE_TOWER and
                                     s.energy < s.energyCapacity * js_global.TOWER_MIN))
     }, 'construction_sites': {
-        'get': lambda: this.find(FIND_CONSTRUCTION_SITES)
+        'get': lambda: this.find(FIND_MY_CONSTRUCTION_SITES)
     }, 'spawns': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN)
@@ -126,7 +126,8 @@ def _get_additional_workers():
         if not _.isUndefined(this.storage):
             stored = this.storage.store[RESOURCE_ENERGY]
             avg = (js_global.STORAGE_MAX[this.rcl] + js_global.STORAGE_MIN[this.rcl]) / 2
-            if stored > js_global.STORAGE_MAX[this.rcl]:
+            if stored > js_global.STORAGE_MAX[this.rcl] and \
+                    this.energyAvailable == this.energyCapacity:
                 this.memory.additional_workers += 1
             elif stored < avg:
                 this.memory.additional_workers -= 1

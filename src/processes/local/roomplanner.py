@@ -29,8 +29,8 @@ class RoomPlanner(Process):
         self.lay_structures(STRUCTURE_LAB)
         self.lay_structures(STRUCTURE_CONTAINER)
 
-        if Object.keys(js_global.WALL_WIDTH).includes(self.room.rcl):
-            self.visualise_walls(js_global.WALL_WIDTH[self.room.rcl])
+        if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+            self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
 
         # tickets = self.ticketer.get_tickets_by_type('build')
         # for ticket in tickets:
@@ -149,10 +149,10 @@ class RoomPlanner(Process):
 
         width -= 1
 
-        for xx in range(start_x, start_x + base['width'] + 2):
-            for yy in range(start_y, start_y + base['height'] + 2):
-                if min(abs(start_x - xx), abs(start_x + base['width'] + 1 - xx)) > width and \
-                        min(abs(start_y - yy), abs(start_y + base['height'] + 1 - yy)) > width:
+        for xx in range(start_x, start_x + base['width'] + 3):
+            for yy in range(start_y, start_y + base['height'] + 3):
+                if min(abs(start_x - xx), abs(start_x + base['width'] + 2 - xx)) > width and \
+                        min(abs(start_y - yy), abs(start_y + base['height'] + 2 - yy)) > width:
                     continue
 
                 self.vis.rect(xx - 0.5, yy - 0.5, 1, 1, {'fill': 'green', 'opacity': 0.3})

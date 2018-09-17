@@ -17,23 +17,26 @@ class City(Process):
 
         sources = room.get_sources()
 
-        if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
-                self._data.main_room == 'W59S2':
-            self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
-                                                       'target_room': 'W52N5'})
+        # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
+        #         self._data.main_room == 'W59S2':
+        #     self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
+        #                                                'target_room': 'W52N5'})
 
         if self._data.main_room == 'W59S2':
             remotes = ['W58S2', 'W59S1']
-        elif self._data.room_name == 'W59N2':
-            remotes = []
+        elif self._data.main_room == 'W51S1':
+            remotes = ['W51S2']
         else:
             remotes = []
 
-        one_of = ['roomplanner', 'spawning', 'defence', 'logistics']
+        one_of = ['roomplanner', 'spawning', 'defence']
+
+        if room.rcl >= 4 and not _.isUndefined(room.storage):
+            one_of.append('logistics')
+            one_of.append('remote')
 
         if room.rcl >= 5:
             one_of.append('management')
-            one_of.append('remote')
 
         for name in one_of:
             if self.scheduler.count_by_name(name, self._pid) < 1:
@@ -68,7 +71,7 @@ class City(Process):
                                                             'room_name': self._data.main_room})
 
         if self.scheduler.count_by_name('repairsite', self._pid) < 1 and \
-                len(room.repair_sites) > 0 and room.rcl < 5:
+                len(room.repair_sites) > 0:
             self.launch_child_process('repairsite', {'site_id': room.repair_sites[0].id,
                                                      'room_name': self._data.main_room})
 
