@@ -33,7 +33,8 @@ class SimpleAttack(CreepProcess):
 
         if creep.memory.attacking:
             if (_.isUndefined(self.target_room) or creep.room != self.target_room) and \
-                    (creep.room.find(FIND_HOSTILE_CREEPS)) < 1:
+                    (len(creep.room.hostile_military) < 1 or
+                     creep.distToClosest(creep.room.hostile_military) > 4):
                 creep.moveTo(__new__(RoomPosition(25, 25, self._data.target_room)),
                              {'maxOps': 5000, 'range': 20})
             else:
@@ -111,7 +112,11 @@ class SimpleAttack(CreepProcess):
                         creep.rangedAttack(target)
 
         if not has_attacked:
-            creep.heal(creep)
+            if len(creep.room.walls) > 0 and \
+                    creep.distToClosest(creep.room.walls) == 1:
+                creep.attack(creep.pos.findClosestByRange(creep.room.walls))
+            else:
+                creep.heal(creep)
 
         creep.run_current_task()
 

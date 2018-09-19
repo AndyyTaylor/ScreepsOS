@@ -33,9 +33,10 @@ class CreepProcess(Process):
             creep = Game.creeps[name]
 
             if not creep:
-                if (not Memory.creeps[name] or
-                        not Memory.creeps[name]['created'] or
-                        Memory.creeps[name]['created'] < Game.time - 100):
+                cmemory = Memory.creeps[name]
+                if (_.isUndefined(cmemory) or
+                        _.isUndefined(cmemory['created']) or
+                        cmemory['created'] < Game.time - cmemory['spawnTime']):
 
                     expired_creeps.append(name)
 

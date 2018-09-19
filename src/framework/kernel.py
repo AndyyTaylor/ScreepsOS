@@ -247,8 +247,8 @@ class Kernel():
 
     def clear_memory(self):
         for name in Object.keys(Memory.creeps):
-            if not Game.creeps[name] and (not Memory.creeps['created'] or
-                                          Memory.creeps['created'] < Game.time - 100):
+            if not Game.creeps[name] and (not Memory.creeps[name]['created'] or
+                                          Memory.creeps[name]['created'] < Game.time - Memory.creeps[name]['spawnTime']):  # noqa
                 del Memory.creeps[name]
 
     def validate_memory(self):

@@ -6,16 +6,16 @@ __pragma__('noalias', 'name')
 
 
 Object.defineProperties(Room.prototype, {
-    'flags': {
+    'creeps': {
+        'get': lambda: this._get_creeps()
+    }, 'flags': {
         'get': lambda: this.find(FIND_FLAGS)
     }, 'feed_locations': {
-        'get': lambda: _.filter(this.find(FIND_STRUCTURES),
-                                lambda s: s.structureType == STRUCTURE_SPAWN or
-                                s.structureType == STRUCTURE_EXTENSION or
-                                (s.structureType == STRUCTURE_TOWER and
-                                    s.energy < s.energyCapacity * js_global.TOWER_MIN))
+        'get': lambda: this._get_feed_locations()
     }, 'construction_sites': {
         'get': lambda: this.find(FIND_MY_CONSTRUCTION_SITES)
+    }, 'hostile_military': {
+        'get': lambda: this._get_hostile_military()
     }, 'spawns': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN)
@@ -36,10 +36,44 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: this.find(FIND_TOMBSTONES)
     }, 'sources': {
         'get': lambda: this.find(FIND_SOURCES)
-    }, 'creeps': {
-        'get': lambda: this._get_creeps()
+    }, 'structures': {
+        'get': lambda: this.find(FIND_STRUCTURES)
+    }, 'walls': {
+        'get': lambda: this._get_walls()
     }
 })
+
+
+def _get_hostile_military():
+    if _.isUndefined(this._hostile_military):
+        this._hostile_military = _.filter(this.find(FIND_HOSTILE_CREEPS),
+                                          lambda c:
+                                          c.getActiveBodyparts(ATTACK) +
+                                          c.getActiveBodyparts(RANGED_ATTACK) +
+                                          c.getActiveBodyparts(HEAL) > 0)
+
+    return this._hostile_military
+
+
+def _get_feed_locations():
+    if _.isUndefined(this._feed_locations):
+        this._feed_locations = _.filter(this.structures,
+                                        lambda s:
+                                            s.structureType == STRUCTURE_SPAWN or
+                                            s.structureType == STRUCTURE_EXTENSION or
+                                            (s.structureType == STRUCTURE_TOWER and
+                                             s.energy < s.energyCapacity * js_global.TOWER_MIN))
+
+    return this._feed_locations
+
+
+def _get_walls():
+    if _.isUndefined(this._walls):
+        this._walls = _.filter(this.structures,
+                               lambda s: s.structureType == STRUCTURE_WALL or
+                                         s.structureType == STRUCTURE_RAMPART)  # noqa
+
+    return this._walls
 
 
 def _get_creeps():
@@ -167,5 +201,8 @@ Room.prototype.is_full = _is_full
 Room.prototype.get_spawn_energy = _get_spawn_energy
 Room.prototype.total_dropped_energy = _total_dropped_energy
 Room.prototype.get_additional_workers = _get_additional_workers
+Room.prototype._get_feed_locations = _get_feed_locations
+Room.prototype._get_hostile_military = _get_hostile_military
+Room.prototype._get_walls = _get_walls
 Room.prototype.basic_matrix = _basic_matrix
 Room.prototype._get_creeps = _get_creeps

@@ -38,7 +38,8 @@ class Spawning(Process):
                         # print('spawning', body)
                         ticket['completed'] = True
                         ticket['result']['name'] = name
-                        Memory.creeps[name] = {'created': Game.time, 'city': self._data.room_name}
+                        Memory.creeps[name] = {'created': Game.time, 'city': self._data.room_name,
+                                               'spawnTime': len(body) * 3 + 10}  # Safe buffer of 10
                         if ticket['data']['memory']:
                             Memory.creeps[name] = Object.assign(Memory.creeps[name],
                                                                 ticket['data']['memory'])
