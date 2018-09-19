@@ -119,15 +119,16 @@ def _get_additional_workers():
 
         return 0
 
-    if Game.time > this.memory.dropped_energy_tick + 750:
+    if Game.time > this.memory.dropped_energy_tick + 750 and \
+            this.energyAvailable == this.energyCapacityAvailable:
         this.memory.dropped_energy = this.total_dropped_energy()
         this.memory.dropped_energy_tick = Game.time
 
         if not _.isUndefined(this.storage):
             stored = this.storage.store[RESOURCE_ENERGY]
             avg = (js_global.STORAGE_MAX[this.rcl] + js_global.STORAGE_MIN[this.rcl]) / 2
-            if stored > js_global.STORAGE_MAX[this.rcl] and \
-                    this.energyAvailable == this.energyCapacity:
+
+            if stored > js_global.STORAGE_MAX[this.rcl]:
                 this.memory.additional_workers += 1
             elif stored < avg:
                 this.memory.additional_workers -= 1
@@ -142,7 +143,7 @@ def _get_additional_workers():
     return this.memory.additional_workers
 
 
-def _basic_matrix(ignore_creeps=False):
+def _basic_matrix(ignore_creeps=False):  # Should pass in actual room name
     costs = __new__(PathFinder.CostMatrix)
 
     structures = this.find(FIND_STRUCTURES)

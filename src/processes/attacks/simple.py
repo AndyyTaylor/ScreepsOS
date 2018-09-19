@@ -30,10 +30,12 @@ class SimpleAttack(CreepProcess):
             creep.memory.attacking = True
         elif creep.hits < creep.hitsMax * 0.7:
             creep.memory.attacking = False
-        creep.say(creep.memory.attacking)
+
         if creep.memory.attacking:
-            if _.isUndefined(self.target_room) or creep.room != self.target_room:
-                creep.moveTo(__new__(RoomPosition(25, 25, self._data.target_room)))
+            if (_.isUndefined(self.target_room) or creep.room != self.target_room) and \
+                    (creep.room.find(FIND_HOSTILE_CREEPS)) < 1:
+                creep.moveTo(__new__(RoomPosition(25, 25, self._data.target_room)),
+                             {'maxOps': 5000, 'range': 20})
             else:
                 target_creeps = _.filter(creep.room.find(FIND_HOSTILE_CREEPS),
                                          lambda c: c.getActiveBodyparts(ATTACK) > 0 or
@@ -55,17 +57,28 @@ class SimpleAttack(CreepProcess):
                         structures = _.filter(creep.room.find(FIND_STRUCTURES), lambda s:
                                               s.structureType != STRUCTURE_ROAD and
                                               s.structureType != STRUCTURE_WALL and
-                                              s.structureType != STRUCTURE_RAMPART)
+                                              s.structureType != STRUCTURE_RAMPART and
+                                              s.structureType != STRUCTURE_CONTROLLER)
                         if len(structures) > 0:
                             target = creep.pos.findClosestByRange(structures)
+                        else:
+                            creeps = creep.room.find(FIND_HOSTILE_CREEPS)
+
+                            if len(creeps) > 0:
+                                target = creep.pos.findClosestByRange(creeps)
+                                is_creep = True
 
                 if not _.isUndefined(target):
                     if is_creep:
                         if target.getActiveBodyparts(RANGED_ATTACK) > 0 or \
-                                creep.getActiveBodyparts(RANGED_ATTACK) == 0:
-                            creep.moveTo(target)
+                                creep.getActiveBodyparts(RANGED_ATTACK) == 0 or \
+                                not creep.pos.inRangeTo(target, 3) or \
+                                target.getActiveBodyparts(ATTACK) == 0:
+                            creep.moveTo(target, {'visualizePathStyle': {},
+                                                  'ignoreDestructibleStructures': True})
                     else:
-                        creep.moveTo(target)
+                        creep.moveTo(target, {'visualizePathStyle': {},
+                                              'ignoreDestructibleStructures': True})
 
                     if creep.pos.isNearTo(target):
                         if creep.getActiveBodyparts(ATTACK) > 0:
@@ -77,7 +90,8 @@ class SimpleAttack(CreepProcess):
                         creep.rangedAttack(target)
         else:
             if creep.room.name == self._data.target_room or creep.pos.x > 47 or creep.pos.x < 3 or \
-                    creep.pos.y > 47 or creep.pos.y < 3:
+                    creep.pos.y > 47 or creep.pos.y < 3 or \
+                    len(creep.room.find(FIND_HOSTILE_CREEPS)) > 0:
                 creep.moveTo(self.room.controller)
 
             target_creeps = _.filter(creep.room.find(FIND_HOSTILE_CREEPS),
@@ -102,13 +116,10 @@ class SimpleAttack(CreepProcess):
         creep.run_current_task()
 
     def needs_creeps(self):
-        if Game.time < 9408551 + 5000:
-            return len(self._data.creep_names) < 1
-        else:
-            return False
+        return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(ATTACK) > 0 or creep.getActiveBodyparts(RANGED_ATTACK) > 0
+        return creep.getActiveBodyparts(ATTACK) > 1 and creep.getActiveBodyparts(HEAL) == 1
 
     def gen_body(self, energy):
         body = [ATTACK, MOVE, MOVE, HEAL]

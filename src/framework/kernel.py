@@ -10,9 +10,9 @@ __pragma__('noalias', 'keys')
 class Kernel():
 
     def __init__(self):
-        self.new_upload = self.check_version()
-
         self.validate_memory()
+
+        self.new_upload = self.check_version()
 
         self.scheduler = Scheduler()
 
@@ -137,6 +137,8 @@ class Kernel():
                 'heal': room.memory.towers.heal,
                 'repair': room.memory.towers.repair
             }
+
+            stats.additionalWorkers = room.get_additional_workers()  # Room rcl 1 9528657
 
             # room.memory.towers.attack = 0
             # room.memory.towers.heal = 0

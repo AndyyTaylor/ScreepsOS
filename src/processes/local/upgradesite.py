@@ -41,7 +41,7 @@ class UpgradeSite(CreepProcess):
             creep.run_current_task()
 
     def needs_creeps(self):
-        if len(self.room.construction_sites):
+        if len(self.room.construction_sites) > 0:
             return len(self._data.creep_names) < 1  # Scale this
         else:
             return len(self._data.creep_names) < 1 + self.room.get_additional_workers()

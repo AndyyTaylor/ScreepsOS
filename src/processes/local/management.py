@@ -61,14 +61,14 @@ class Management(CreepProcess):
             _.isUndefined(creep.memory.haul_ind)
 
     def gen_body(self, energy):
-        body = [CARRY, MOVE]
-        mod = [CARRY, MOVE]
-        carry_count = 1
+        body = [CARRY, CARRY, MOVE]
+        mod = [CARRY, CARRY, MOVE]
+        carry_count = 2
 
-        max_carry = 300
+        max_carry = 500
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
-            carry_count += 1
+            carry_count += 2
 
         return body, None
 

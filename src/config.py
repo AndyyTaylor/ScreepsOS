@@ -1,8 +1,9 @@
 
 from defs import *
-
+# he's at 465k into rcl5 i'm at 161k into rcl 4
+# 102k into rcl 5 i'm at 388k into rcl 4
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 951
+js_global.VERSION = 1003
 js_global.CONTROLLER_SIGN = 'Placeholder till I think of something cool'
 
 js_global.CREEP_SAY = False

@@ -62,7 +62,7 @@ class RemoteWork(CreepProcess):
         if _.isUndefined(target_room):
             return False
 
-        if target_room.rcl < 3 or len(target_room.spawns) == 0:
+        if target_room.rcl < 2 or len(target_room.spawns) == 0:
             return False
 
         return True

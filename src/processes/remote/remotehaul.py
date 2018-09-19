@@ -41,10 +41,9 @@ class RemoteHaul(CreepProcess):
             need_repair = _.filter(structs, lambda s: s.hits < s.hitsMax and
                                                       s.structureType != STRUCTURE_WALL and
                                                       s.structureType != STRUCTURE_RAMPART)  # noqa
-            if len(need_repair) > 0:
-                target = creep.pos.findClosestByRange(need_repair)
-                if creep.pos.inRangeTo(target, 3):
-                    creep.repair(target)
+            if len(need_repair) > 0 and \
+                    creep.pos.inRangeTo(creep.pos.findClosestByRange(need_repair), 3):
+                creep.repair(creep.pos.findClosestByRange(need_repair))
             elif len(creep.room.construction_sites) > 0:
                 target = creep.pos.findClosestByRange(creep.room.construction_sites)
                 if creep.pos.inRangeTo(target, 3):
@@ -53,7 +52,17 @@ class RemoteHaul(CreepProcess):
         creep.run_current_task()
 
     def needs_creeps(self):
-        return len(self._data.creep_names) < 1
+        max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
+        total_carry = 0
+
+        for name in self._data.creep_names:
+            creep = Game.creeps[name]
+            if _.isUndefined(creep):
+                continue
+
+            total_carry += creep.getActiveBodyparts(CARRY)
+
+        return total_carry < max_carry
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) == 1 and \
@@ -68,6 +77,13 @@ class RemoteHaul(CreepProcess):
         total_carry = 1
 
         max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
+
+        for name in self._data.creep_names:
+            creep = Game.creeps[name]
+            if _.isUndefined(creep):
+                continue
+
+            max_carry -= creep.getActiveBodyparts(CARRY)
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_carry < max_carry:
             total_carry += 2

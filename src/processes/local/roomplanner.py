@@ -49,12 +49,10 @@ class RoomPlanner(Process):
 
         for name in self._data.remotes:
             room = Game.rooms[name]
-            if _.isUndefined(room):
+            if _.isUndefined(room) or len(room.construction_sites) > 10:
                 continue
 
-            res = self.lay_structures(STRUCTURE_ROAD, name)
-            while res:
-                res = self.lay_structures(STRUCTURE_ROAD, name)
+            self.lay_structures(STRUCTURE_ROAD, name)
 
     def lay_structures(self, type, room_name=None):
         if room_name is None:

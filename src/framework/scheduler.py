@@ -55,6 +55,11 @@ class Scheduler():
             self.current_priority += 1
             self.current_index = 0
 
+        if _.isUndefined(self.processes[str(pid)]):
+            print(pid, 'is fucked')
+            self.delete_process(pid)
+            return self.get_next_process()
+
         return self.create_process(pid)
 
     def queue_processes(self):
