@@ -79,7 +79,7 @@ class SimpleAttack(CreepProcess):
                                                   'ignoreDestructibleStructures': True})
                     else:
                         creep.moveTo(target, {'visualizePathStyle': {},
-                                              'ignoreDestructibleStructures': True})
+                                              'ignoreDestructibleStructures': False})
 
                     if creep.pos.isNearTo(target):
                         if creep.getActiveBodyparts(ATTACK) > 0:

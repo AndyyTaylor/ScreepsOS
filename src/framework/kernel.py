@@ -30,6 +30,7 @@ class Kernel():
             self.ticketer = Ticketer()  # Has to be declared after kernel finishes init
 
         self.last_cpu = 0
+        self.process_cpu = {}
 
         self.launch_cities()  # Launch Empire
 
@@ -48,7 +49,18 @@ class Kernel():
 
         while process is not None:
             # print('running', process.name)
+            if _.isUndefined(self.process_cpu[process.name]):
+                self.process_cpu[process.name] = {'total': 0, 'count': 0, 'max': 0}
+
+            start = Game.cpu.getUsed()
             process.run()
+            end = Game.cpu.getUsed()
+
+            diff = end - start
+            self.process_cpu[process.name]['total'] += diff
+            self.process_cpu[process.name]['count'] += 1
+            self.process_cpu[process.name]['max'] = max(diff, self.process_cpu[process.name]['max'])
+
             process = self.scheduler.get_next_process()
 
         Memory.stats.cpu.run = self.get_cpu_diff()
@@ -69,10 +81,12 @@ class Kernel():
         self.log_defence()
         self.log_rooms()
         self.log_resources()
+        self.log_processes()
 
         Memory.stats.credits = Game.market.credits
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket
+        Memory.stats.memory = {'size': RawMemory.js_get().length}
 
         Memory.os.kernel.finished = True
 
@@ -145,6 +159,9 @@ class Kernel():
             # room.memory.towers.repair = 0
 
             Memory.stats.rooms[name] = stats
+
+    def log_processes(self):
+        Memory.stats.processes.cpu = self.process_cpu
 
     def log_defence(self):
         Memory.stats.defence = {
@@ -248,6 +265,7 @@ class Kernel():
     def clear_memory(self):
         for name in Object.keys(Memory.creeps):
             if not Game.creeps[name] and (not Memory.creeps[name]['created'] or
+                                          _.isUndefined(Memory.creeps[name]['spawnTime']) or
                                           Memory.creeps[name]['created'] < Game.time - Memory.creeps[name]['spawnTime']):  # noqa
                 del Memory.creeps[name]
 

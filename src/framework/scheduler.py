@@ -97,10 +97,11 @@ class Scheduler():
     def delete_process(self, pid):
         proc = self.processes[str(pid)]
 
-        index = self.queue[proc['priority']].indexOf(int(pid))
+        if not _.isUndefined(proc):
+            index = self.queue[proc['priority']].indexOf(int(pid))
 
-        del self.processes[str(pid)]
-        self.queue[str(proc['priority'])].splice(index, 1)
+            del self.processes[str(pid)]
+            self.queue[str(proc['priority'])].splice(index, 1)
 
         self._grouped_by_name = undefined
 

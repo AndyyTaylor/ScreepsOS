@@ -21,6 +21,10 @@ class Remote(Process):
             should_mine = ['W51S2']
         elif self._data.room_name == 'W59N2':
             should_mine = ['W59N1']
+        elif self._data.room_name == 'W53N5':
+            should_mine = ['W53N4']
+        elif self._data.room_name == 'W54N2':
+            should_mine = ['W55N2']
         else:
             should_mine = []
 
@@ -65,8 +69,8 @@ class Remote(Process):
                                                                  'haul_room': room,
                                                                  'source_id': sid})
 
-        if self._data.room_name == 'W59S2':
-            to_claim = ['W54N2']
+        if self._data.room_name == 'W51S1':
+            to_claim = []
         else:
             to_claim = []
 

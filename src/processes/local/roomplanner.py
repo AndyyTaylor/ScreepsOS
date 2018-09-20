@@ -1,4 +1,5 @@
 
+import random
 from defs import *  # noqa
 
 from framework.process import Process
@@ -19,32 +20,34 @@ class RoomPlanner(Process):
 
         self.load_base_pos()
 
-        self.vis_enabled = True
+        # self.vis_enabled = True
+        #
+        # self.lay_structures(STRUCTURE_EXTENSION)
+        # self.lay_structures(STRUCTURE_SPAWN)
+        # self.lay_structures(STRUCTURE_TOWER)
+        # self.lay_structures(STRUCTURE_ROAD)
+        # self.lay_structures(STRUCTURE_TERMINAL)
+        # self.lay_structures(STRUCTURE_LAB)
+        # self.lay_structures(STRUCTURE_CONTAINER)
+        #
+        # if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+        #     self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+        #
+        # # tickets = self.ticketer.get_tickets_by_type('build')
+        # # for ticket in tickets:
+        # #     self.build(ticket['data']['type'], int(ticket['data']['x']),
+        # #                int(ticket['data']['y']), False)
+        # #     print(int(ticket['data']['x']), int(ticket['data']['y']))
+        # self.vis_enabled = False
 
-        self.lay_structures(STRUCTURE_EXTENSION)
-        self.lay_structures(STRUCTURE_SPAWN)
-        self.lay_structures(STRUCTURE_TOWER)
-        self.lay_structures(STRUCTURE_ROAD)
-        self.lay_structures(STRUCTURE_TERMINAL)
-        self.lay_structures(STRUCTURE_LAB)
-        self.lay_structures(STRUCTURE_CONTAINER)
-
-        if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
-            self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
-
-        # tickets = self.ticketer.get_tickets_by_type('build')
-        # for ticket in tickets:
-        #     self.build(ticket['data']['type'], int(ticket['data']['x']),
-        #                int(ticket['data']['y']), False)
-        #     print(int(ticket['data']['x']), int(ticket['data']['y']))
-        self.vis_enabled = False
-
+        has_laid = False
         if len(self.room.construction_sites) < 1:
             for type in js_global.BUILD_ORDER:
                 if type == STRUCTURE_ROAD and self.room.rcl < js_global.ROAD_RCL:
                     continue
 
                 if self.lay_structures(type):
+                    has_laid = True
                     break
 
         for name in self._data.remotes:
@@ -52,7 +55,13 @@ class RoomPlanner(Process):
             if _.isUndefined(room) or len(room.construction_sites) > 10:
                 continue
 
-            self.lay_structures(STRUCTURE_ROAD, name)
+            if self.lay_structures(STRUCTURE_ROAD, name):
+                has_laid = True
+
+        if not has_laid:
+            self.sleep(500 + random.randint(0, 10))
+        else:
+            self.sleep(random.randint(0, 10))
 
     def lay_structures(self, type, room_name=None):
         if room_name is None:

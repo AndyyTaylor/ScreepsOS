@@ -19,9 +19,8 @@ class Process():
             self._data.build_tickets = []
 
     def run(self):
-        # Check if process is sleeping
-
-        self._run()
+        if _.isUndefined(self._data.sleep) or Game.time > self._data.sleep:
+            self._run()
 
     def launch_child_process(self, name, data={}):
         data['parent'] = self._pid
@@ -36,3 +35,6 @@ class Process():
 
     def kill(self):
         self._killed = True
+
+    def sleep(self, duration):
+        self._data.sleep = Game.time + duration

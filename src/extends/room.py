@@ -186,6 +186,8 @@ def _basic_matrix(ignore_creeps=False):  # Should pass in actual room name
                 struct.structureType != STRUCTURE_ROAD and \
                 (struct.structureType != STRUCTURE_RAMPART or not struct.my):
             costs.set(struct.pos.x, struct.pos.y, 0xff)
+        elif struct.structureType == STRUCTURE_ROAD:
+            costs.set(struct.pos.x, struct.pos.y, 1)
 
     if not ignore_creeps:
         for creep in this.find(FIND_CREEPS):

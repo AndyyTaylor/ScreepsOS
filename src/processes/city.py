@@ -17,11 +17,10 @@ class City(Process):
 
         sources = room.get_sources()
 
-        if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
-                (self._data.main_room == 'W59N2' or self._data.main_room == 'W56N1' or
-                 self._data.main_room == 'W54N2' or self._data.main_room == 'W59S2'):
-            self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
-                                                       'target_room': 'W57N6'})
+        # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
+        #         (self._data.main_room == 'W51S1'):
+        #     self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
+        #                                                'target_room': 'W52S6'})
 
         if self._data.main_room == 'W59S2':
             remotes = ['W58S2', 'W59S1']
@@ -29,6 +28,10 @@ class City(Process):
             remotes = ['W51S2']
         elif self._data.main_room == 'W59N2':
             remotes = ['W59N1']
+        elif self._data.main_room == 'W53N5':
+            remotes = ['W53N4']
+        elif self._data.main_room == 'W54N2':
+            remotes = ['W55N2']
         else:
             remotes = []
 

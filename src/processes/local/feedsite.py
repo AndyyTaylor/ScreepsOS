@@ -65,7 +65,7 @@ class FeedSite(CreepProcess):
             _.isUndefined(creep.memory.haul_ind)
 
     def gen_body(self, energy):
-        if self.room.rcl >= 4:
+        if self.room.rcl > 4:
             body = [CARRY, CARRY, MOVE]
             mod = [CARRY, CARRY, MOVE]
             carry_mod = 2
