@@ -10,13 +10,12 @@ __pragma__('noalias', 'values')
 class RepairSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('repairsite', pid, 4, data)
+        super().__init__('repairsite', pid, 3, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
         self.controller = self.room.controller
 
-        self.place_flag()
         self.run_creeps()
 
     def run_creep(self, creep):
@@ -46,34 +45,16 @@ class RepairSite(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0
+        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
+            _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]
         mod = [WORK, CARRY, MOVE]
+        total_work = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy:
+        while self.get_body_cost(body.concat(mod)) <= energy and total_work < 10:
             body = body.concat(mod)
+            total_work += 1
 
         return body, None
-
-    def place_flag(self):
-        flags = self.room.flags
-
-        site = Game.getObjectById(self._data.site_id)
-        if not site:
-            return
-
-        x, y = site.pos.x, site.pos.y
-
-        already_placed = False
-        for flag in flags:
-            if flag['name'] == 'RepairSite(' + str(self._data.room_name) + ')':
-                if flag['pos']['x'] == x and flag['pos']['y'] == y:
-                    already_placed = True
-                    break
-                else:
-                    flag.remove()
-
-        if not already_placed:
-            self.room.createFlag(x, y, 'RepairSite(' + str(self._data.room_name) + ')', COLOR_RED)

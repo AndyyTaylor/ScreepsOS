@@ -6,12 +6,13 @@ from framework.creepprocess import CreepProcess
 
 __pragma__('noalias', 'keys')
 __pragma__('noalias', 'values')
+__pragma__('noalias', 'name')
 
 
 class FeedSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('feedsite', pid, 2, data)
+        super().__init__('feedsite', pid, 1, data)
 
         if self._pid != -1:
             self.room = Game.rooms[self._data.room_name]
@@ -20,8 +21,6 @@ class FeedSite(CreepProcess):
     def _run(self):
         if _.isUndefined(self._data.has_init):
             self.init()
-
-        self.place_flag()
 
         # if not _.isUndefined(self._data.withdraw_id):
         #     self.room.visual.circle(self._data.hold_x, self._data.hold_y,
@@ -44,12 +43,11 @@ class FeedSite(CreepProcess):
                     creep.set_task('withdraw', {'target_id': self._data.withdraw_id})
                 elif not _.isUndefined(storage) and storage.store[RESOURCE_ENERGY] > 0:
                     creep.set_task('withdraw', {'target_id': storage.id})
-                elif _.isUndefined(creep.room.storage):
+                elif _.isUndefined(creep.room.storage) or storage.store[RESOURCE_ENERGY] == 0:
                     creep.set_task('gather')
             elif not creep.room.is_full() and not creep.is_empty():
                 creep.set_task('feed')
-            elif not _.isNull(cont) and _.sum(cont.store) < cont.storeCapacity and not \
-                    creep.is_empty():
+            elif not _.isNull(cont) and _.sum(cont.store) < cont.storeCapacity:
                 creep.set_task('deposit', {'target_id': self._data.withdraw_id})
 
             if creep.is_idle():
@@ -67,20 +65,27 @@ class FeedSite(CreepProcess):
             _.isUndefined(creep.memory.haul_ind)
 
     def gen_body(self, energy):
-        body = [CARRY, MOVE]
-        mod = [CARRY, MOVE]
-        carry_count = 1
+        if self.room.rcl > 4:
+            body = [CARRY, CARRY, MOVE]
+            mod = [CARRY, CARRY, MOVE]
+            carry_mod = 2
+            carry_count = 2
+        else:
+            body = [CARRY, MOVE]
+            mod = [CARRY, MOVE]
+            carry_mod = 1
+            carry_count = 1
 
-        if self.room.rcl < 6:
+        if self.room.rcl < 5:
             max_carry = 300
-        elif self.room.rcl < 8:
-            max_carry = 400
+        elif self.room.rcl < 7:
+            max_carry = 450
         else:
             max_carry = 600
 
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
-            carry_count += 1
+            carry_count += carry_mod
 
         return body, None
 
@@ -113,7 +118,7 @@ class FeedSite(CreepProcess):
 
                 result = PathFinder.search(start, goal,
                                            {'roomCallback': lambda r:
-                                            self.room.basic_matrix(ignore_creeps=True)})
+                                            self.room.basic_matrix(True)})
 
                 for position in result.path:
                     positions.append(position)
@@ -123,17 +128,3 @@ class FeedSite(CreepProcess):
             self._data.positions = positions
 
         self._data.has_init = True
-
-    def place_flag(self):
-        flags = self.room.flags
-
-        x, y = self._data.hold_x, self._data.hold_y
-
-        already_placed = False
-        for flag in flags:
-            if flag['name'] == 'FeedSite(' + str(x) + ',' + str(y) + ')':
-                already_placed = True
-                break
-
-        if not already_placed:
-            self.room.createFlag(x, y, 'FeedSite(' + str(x) + ',' + str(y) + ')', COLOR_GREEN)

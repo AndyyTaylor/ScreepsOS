@@ -3,12 +3,29 @@ from defs import *  # noqa
 
 from tasks import *  # noqa
 
+classes_by_name = {
+    'harvest': Harvest,
+    'gather': Gather,
+    'upgrade': Upgrade,
+    'travel': Travel,
+    'feed': Feed,
+    'build': Build,
+    'repair': Repair,
+    'withdraw': Withdraw,
+    'deposit': Deposit
+}
 
 Object.defineProperties(Creep.prototype, {
     'assigned': {
         'get': lambda: this.memory.assigned
     },
 })
+
+
+def _distToClosest(objects):
+    closest = this.pos.findClosestByRange(objects)
+
+    return this.pos.getRangeTo(closest)
 
 
 def _assign(pid):
@@ -38,18 +55,6 @@ def _is_idle():
 
 
 def _get_task_instance(name, data={}):
-    classes_by_name = {
-        'harvest': Harvest,
-        'gather': Gather,
-        'upgrade': Upgrade,
-        'travel': Travel,
-        'feed': Feed,
-        'build': Build,
-        'repair': Repair,
-        'withdraw': Withdraw,
-        'deposit': Deposit
-    }
-
     TaskClass = classes_by_name[name]
 
     return TaskClass(data)
@@ -69,6 +74,7 @@ def _is_full():
     return _.sum(this.carry) == this.carryCapacity
 
 
+Creep.prototype.distToClosest = _distToClosest
 Creep.prototype.assign = _assign
 Creep.prototype.unassign = _unassign
 Creep.prototype.set_task = _set_task

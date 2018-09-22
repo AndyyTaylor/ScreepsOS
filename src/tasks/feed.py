@@ -25,6 +25,15 @@ class Feed(Task):
         else:
             creep.transfer(target, RESOURCE_ENERGY)
 
+            target = self.select_target(creep, creep.room)
+
+            if not target:
+                self._data.completed = True
+                return
+
+            if not creep.pos.isNearTo(target):
+                creep.moveTo(target)
+
     def select_target(self, creep, room):
         locations = _.filter(room.feed_locations,
                              lambda s: s.energy < s.energyCapacity)
@@ -32,7 +41,7 @@ class Feed(Task):
         if not locations:
             return
 
-        target = creep.pos.findClosestByRange(locations)
+        target = creep.pos.findClosestByPath(locations)
 
         return target
 

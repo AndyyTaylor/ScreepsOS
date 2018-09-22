@@ -1,4 +1,5 @@
 
+import random
 from defs import *  # noqa
 
 from framework.process import Process
@@ -11,7 +12,7 @@ __pragma__('noalias', 'values')
 class RoomPlanner(Process):
 
     def __init__(self, pid, data={}):
-        super().__init__('roomplanner', pid, 4, data)
+        super().__init__('roomplanner', pid, 3, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
@@ -19,47 +20,71 @@ class RoomPlanner(Process):
 
         self.load_base_pos()
 
-        self.vis_enabled = True
+        # self.vis_enabled = True
+        #
+        # self.lay_structures(STRUCTURE_EXTENSION)
+        # self.lay_structures(STRUCTURE_SPAWN)
+        # self.lay_structures(STRUCTURE_TOWER)
+        # self.lay_structures(STRUCTURE_ROAD)
+        # self.lay_structures(STRUCTURE_TERMINAL)
+        # self.lay_structures(STRUCTURE_LAB)
+        # self.lay_structures(STRUCTURE_CONTAINER)
+        #
+        # if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+        #     self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+        #
+        # # tickets = self.ticketer.get_tickets_by_type('build')
+        # # for ticket in tickets:
+        # #     self.build(ticket['data']['type'], int(ticket['data']['x']),
+        # #                int(ticket['data']['y']), False)
+        # #     print(int(ticket['data']['x']), int(ticket['data']['y']))
+        # self.vis_enabled = False
 
-        self.lay_structures(STRUCTURE_EXTENSION)
-        self.lay_structures(STRUCTURE_SPAWN)
-        self.lay_structures(STRUCTURE_TOWER)
-        self.lay_structures(STRUCTURE_ROAD)
-        self.lay_structures(STRUCTURE_TERMINAL)
-        self.lay_structures(STRUCTURE_LAB)
-        self.lay_structures(STRUCTURE_CONTAINER)
-
-        if Object.keys(js_global.WALL_WIDTH).includes(self.room.rcl):
-            self.visualise_walls(js_global.WALL_WIDTH[self.room.rcl])
-
-        # tickets = self.ticketer.get_tickets_by_type('build')
-        # for ticket in tickets:
-        #     self.build(ticket['data']['type'], int(ticket['data']['x']),
-        #                int(ticket['data']['y']), False)
-        #     print(int(ticket['data']['x']), int(ticket['data']['y']))
-        self.vis_enabled = False
-
+        has_laid = False
         if len(self.room.construction_sites) < 1:
             for type in js_global.BUILD_ORDER:
                 if type == STRUCTURE_ROAD and self.room.rcl < js_global.ROAD_RCL:
                     continue
 
                 if self.lay_structures(type):
+                    has_laid = True
                     break
 
-    def lay_structures(self, type):
-        positions = base['buildings'][type]['pos']
-        for pos in positions:
-            if self.build(type, pos['x'] - 1, pos['y'] - 1):
-                return True
+        for name in self._data.remotes:
+            room = Game.rooms[name]
+            if _.isUndefined(room) or len(room.construction_sites) > 10:
+                continue
 
-        tickets = _.filter(self.ticketer.get_tickets_by_type("build"),
+            if self.lay_structures(STRUCTURE_ROAD, name):
+                has_laid = True
+
+        if not has_laid:
+            self.sleep(500 + random.randint(0, 10))
+        else:
+            self.sleep(random.randint(0, 10))
+
+    def lay_structures(self, type, room_name=None):
+        if room_name is None:
+            room_name = self._data.room_name
+
+        if room_name == self._data.room_name:
+            positions = base['buildings'][type]['pos']
+            for pos in positions:
+                if self.build(type, pos['x'] - 1, pos['y'] - 1):
+                    return True
+
+        tickets = _.filter(self.ticketer.get_tickets_by_type("build", room_name),
                            lambda t: t['data']['type'] == type)
         for ticket in tickets:
-            if self.build(type, ticket['data']['x'], ticket['data']['y'], False):
+            if self.build(type, ticket['data']['x'], ticket['data']['y'], False, room_name):
                 return True
 
-    def build(self, type, x, y, add_base=True):
+        return False
+
+    def build(self, type, x, y, add_base=True, room_name=None):
+        if room_name is None:
+            room_name = self._data.room_name
+
         if add_base:
             x += self._data.base_x
             y += self._data.base_y
@@ -70,7 +95,7 @@ class RoomPlanner(Process):
 
             return False
         else:
-            return self.room.createConstructionSite(x, y, type) == OK
+            return Game.rooms[room_name].createConstructionSite(x, y, type) == OK
 
     def draw_visual(self, x, y, type):
         structures = self.room.lookForAt(LOOK_STRUCTURES, x, y)
@@ -131,10 +156,10 @@ class RoomPlanner(Process):
 
         width -= 1
 
-        for xx in range(start_x, start_x + base['width'] + 2):
-            for yy in range(start_y, start_y + base['height'] + 2):
-                if min(abs(start_x - xx), abs(start_x + base['width'] + 1 - xx)) > width and \
-                        min(abs(start_y - yy), abs(start_y + base['height'] + 1 - yy)) > width:
+        for xx in range(start_x, start_x + base['width'] + 3):
+            for yy in range(start_y, start_y + base['height'] + 3):
+                if min(abs(start_x - xx), abs(start_x + base['width'] + 2 - xx)) > width and \
+                        min(abs(start_y - yy), abs(start_y + base['height'] + 2 - yy)) > width:
                     continue
 
                 self.vis.rect(xx - 0.5, yy - 0.5, 1, 1, {'fill': 'green', 'opacity': 0.3})

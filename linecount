@@ -1,0 +1,3 @@
+cd src
+find . -path ./defs -prune -o -name '*.py' | xargs wc -l
+cd ..

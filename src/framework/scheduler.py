@@ -17,7 +17,15 @@ process_classes = {
     'repairsite': RepairSite,
     'defence': Defence,
     'logistics': Logistics,
-    'management': Management
+    'management': Management,
+    'remote': Remote,
+    'remotemine': RemoteMine,
+    'reserve': Reserve,
+    'remotehaul': RemoteHaul,
+    'claim': Claim,
+    'remotework': RemoteWork,
+    'simpleattack': SimpleAttack,
+    'sappattack': SappAttack
 }
 
 
@@ -46,6 +54,11 @@ class Scheduler():
         if self.current_index >= len(pids):
             self.current_priority += 1
             self.current_index = 0
+
+        if _.isUndefined(self.processes[str(pid)]):
+            print(pid, 'is fucked')
+            self.delete_process(pid)
+            return self.get_next_process()
 
         return self.create_process(pid)
 
@@ -84,10 +97,11 @@ class Scheduler():
     def delete_process(self, pid):
         proc = self.processes[str(pid)]
 
-        index = self.queue[proc['priority']].indexOf(int(pid))
+        if not _.isUndefined(proc):
+            index = self.queue[proc['priority']].indexOf(int(pid))
 
-        del self.processes[str(pid)]
-        self.queue[str(proc['priority'])].splice(index, 1)
+            del self.processes[str(pid)]
+            self.queue[str(proc['priority'])].splice(index, 1)
 
         self._grouped_by_name = undefined
 

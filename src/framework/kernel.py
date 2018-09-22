@@ -10,10 +10,9 @@ __pragma__('noalias', 'keys')
 class Kernel():
 
     def __init__(self):
-        self.new_upload = self.check_version()
-        Memory.os.kernel.finished = False
-
         self.validate_memory()
+
+        self.new_upload = self.check_version()
 
         self.scheduler = Scheduler()
 
@@ -25,10 +24,13 @@ class Kernel():
             self.unassign_creeps()
 
     def start(self):
+        Memory.os.kernel.finished = False
+
         if _.isUndefined(self.ticketer):
             self.ticketer = Ticketer()  # Has to be declared after kernel finishes init
 
         self.last_cpu = 0
+        self.process_cpu = {}
 
         self.launch_cities()  # Launch Empire
 
@@ -47,7 +49,20 @@ class Kernel():
 
         while process is not None:
             # print('running', process.name)
+            if _.isUndefined(self.process_cpu[process.name]):
+                self.process_cpu[process.name] = {'total': 0, 'count': 0, 'max': 0}
+
+            start = Game.cpu.getUsed()
             process.run()
+            end = Game.cpu.getUsed()
+
+            diff = end - start
+            self.process_cpu[process.name]['total'] += diff
+            self.process_cpu[process.name]['count'] += 1
+            self.process_cpu[process.name]['max'] = max(diff, self.process_cpu[process.name]['max'])
+            self.process_cpu[process.name]['avg'] = self.process_cpu[process.name]['total'] / \
+                self.process_cpu[process.name]['count']
+
             process = self.scheduler.get_next_process()
 
         Memory.stats.cpu.run = self.get_cpu_diff()
@@ -68,10 +83,12 @@ class Kernel():
         self.log_defence()
         self.log_rooms()
         self.log_resources()
+        self.log_processes()
 
         Memory.stats.credits = Game.market.credits
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket
+        Memory.stats.memory = {'size': RawMemory.js_get().length}
 
         Memory.os.kernel.finished = True
 
@@ -80,7 +97,14 @@ class Kernel():
 
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
+
+            if not room.is_city():
+                continue
+
             stats = {}
+
+            if not room.is_city():
+                continue
 
             stats.rcl = {
                 'level': room.controller.level,
@@ -104,7 +128,42 @@ class Kernel():
                 'energy': stored_energy
             }
 
+            total_spawns = len(room.spawns)
+            num_working = 0
+            for spawn in room.spawns:
+                if not _.isNull(spawn.spawning):
+                    num_working += 1
+
+            stats.spawning = {
+                'totalSpawns': total_spawns,
+                'numWorking': num_working,
+                'percBusy': num_working / total_spawns,
+                'isFull': 1 if room.is_full() else 0,
+                'energyPerc': room.energyAvailable / room.energyCapacityAvailable,
+                'waiting': 1 if room.is_full() and num_working < total_spawns else 0
+            }
+
+            energy = 0
+            for tower in room.towers:
+                energy += tower.energy
+
+            stats.towers = {
+                'energy': energy,
+                'attack': room.memory.towers.attack,
+                'heal': room.memory.towers.heal,
+                'repair': room.memory.towers.repair
+            }
+
+            stats.additionalWorkers = room.get_additional_workers()  # Room rcl 1 9528657
+
+            # room.memory.towers.attack = 0
+            # room.memory.towers.heal = 0
+            # room.memory.towers.repair = 0
+
             Memory.stats.rooms[name] = stats
+
+    def log_processes(self):
+        Memory.stats.processes.cpu = self.process_cpu
 
     def log_defence(self):
         Memory.stats.defence = {
@@ -207,8 +266,9 @@ class Kernel():
 
     def clear_memory(self):
         for name in Object.keys(Memory.creeps):
-            if not Game.creeps[name] and (not Memory.creeps['created'] or
-                                          Memory.creeps['created'] < Game.time - 100):
+            if not Game.creeps[name] and (not Memory.creeps[name]['created'] or
+                                          _.isUndefined(Memory.creeps[name]['spawnTime']) or
+                                          Memory.creeps[name]['created'] < Game.time - Memory.creeps[name]['spawnTime']):  # noqa
                 del Memory.creeps[name]
 
     def validate_memory(self):

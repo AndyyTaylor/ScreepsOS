@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 class MineSite(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('minesite', pid, 3, data)
+        super().__init__('minesite', pid, 2, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
@@ -18,8 +18,6 @@ class MineSite(CreepProcess):
 
         if _.isUndefined(self._data.has_init):
             self.init()
-
-        self.place_flag()
 
         self.run_creeps()
 
@@ -41,7 +39,7 @@ class MineSite(CreepProcess):
             if creep:
                 total += creep.getActiveBodyparts(WORK)
 
-        if total >= 6:
+        if total >= 5:
             return False
 
         if _.isUndefined(self._data.adj_tiles):
@@ -50,7 +48,8 @@ class MineSite(CreepProcess):
         return len(self._data.creep_names) < self._data.adj_tiles
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3
+        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3 and \
+            _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energyAvailable):
         # Should have no carry before link, and get carry when link exists
@@ -95,7 +94,9 @@ class MineSite(CreepProcess):
                 if terrain.terrain != 'wall':
                     tid = self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_CONTAINER,
                                                                         'x': terrain.x,
-                                                                        'y': terrain.y})
+                                                                        'y': terrain.y,
+                                                                        'city': self._data.room_name
+                                                                        })
                     self._data.build_tickets.append(tid)
 
                     break
@@ -103,19 +104,21 @@ class MineSite(CreepProcess):
             drop_pos = Game.getObjectById(deposit_id).pos
             self._data.drop_type = 'container'
 
+        if not _.isUndefined(self.room.storage):
+            start = self.room.storage.pos
+            result = PathFinder.search(self.source.pos, {'pos': start, 'range': 7},
+                                                        {'roomCallback': lambda r:
+                                                         self.room.basic_matrix(True)})
+            if not result.incomplete:
+                for tile in result.path:
+                    if tile.x == 0 or tile.x == 49 or tile.y == 0 or tile.y == 49:
+                        continue
+
+                    self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_ROAD,
+                                                                  'x': tile.x,
+                                                                  'y': tile.y,
+                                                                  'city': tile.roomName
+                                                                  })
+
         self._data.drop_x = drop_pos.x
         self._data.drop_y = drop_pos.y
-
-    def place_flag(self):
-        flags = self.room.flags
-
-        x, y = self.source.pos.x, self.source.pos.y
-
-        already_placed = False
-        for flag in flags:
-            if flag['name'] == 'MineSite(' + str(x) + ',' + str(y) + ')':
-                already_placed = True
-                break
-
-        if not already_placed:
-            self.room.createFlag(x, y, 'MineSite(' + str(x) + ',' + str(y) + ')', COLOR_YELLOW)

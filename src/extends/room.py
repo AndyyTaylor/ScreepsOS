@@ -1,17 +1,21 @@
 
 from defs import *  # noqa
 
+__pragma__('noalias', 'keys')
+__pragma__('noalias', 'name')
+
 
 Object.defineProperties(Room.prototype, {
-    'flags': {
+    'creeps': {
+        'get': lambda: this._get_creeps()
+    }, 'flags': {
         'get': lambda: this.find(FIND_FLAGS)
     }, 'feed_locations': {
-        'get': lambda: _.filter(this.find(FIND_STRUCTURES),
-                                lambda s: s.structureType == STRUCTURE_SPAWN or
-                                s.structureType == STRUCTURE_EXTENSION or
-                                s.structureType == STRUCTURE_TOWER)
+        'get': lambda: this._get_feed_locations()
     }, 'construction_sites': {
-        'get': lambda: this.find(FIND_CONSTRUCTION_SITES)
+        'get': lambda: this.find(FIND_MY_CONSTRUCTION_SITES)
+    }, 'hostile_military': {
+        'get': lambda: this._get_hostile_military()
     }, 'spawns': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN)
@@ -32,8 +36,53 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: this.find(FIND_TOMBSTONES)
     }, 'sources': {
         'get': lambda: this.find(FIND_SOURCES)
+    }, 'structures': {
+        'get': lambda: this.find(FIND_STRUCTURES)
+    }, 'walls': {
+        'get': lambda: this._get_walls()
     }
 })
+
+
+def _get_hostile_military():
+    if _.isUndefined(this._hostile_military):
+        this._hostile_military = _.filter(this.find(FIND_HOSTILE_CREEPS),
+                                          lambda c:
+                                          c.getActiveBodyparts(ATTACK) +
+                                          c.getActiveBodyparts(RANGED_ATTACK) +
+                                          c.getActiveBodyparts(HEAL) > 0)
+
+    return this._hostile_military
+
+
+def _get_feed_locations():
+    if _.isUndefined(this._feed_locations):
+        this._feed_locations = _.filter(this.structures,
+                                        lambda s:
+                                            s.structureType == STRUCTURE_SPAWN or
+                                            s.structureType == STRUCTURE_EXTENSION or
+                                            (s.structureType == STRUCTURE_TOWER and
+                                             s.energy < s.energyCapacity * js_global.TOWER_MIN))
+
+    return this._feed_locations
+
+
+def _get_walls():
+    if _.isUndefined(this._walls):
+        this._walls = _.filter(this.structures,
+                               lambda s: s.structureType == STRUCTURE_WALL or
+                                         s.structureType == STRUCTURE_RAMPART)  # noqa
+
+    return this._walls
+
+
+def _get_creeps():
+    if _.isUndefined(this._creeps):
+        name = this.name
+        this._creeps = _.filter(Object.keys(Game.creeps),
+                                lambda c: Game.creeps[c].memory.city == name)
+
+    return this._creeps
 
 
 def _get_sources():
@@ -45,11 +94,16 @@ def _is_city():
         and this.controller.owner.username == js_global.USERNAME
 
 
+def _is_remote():
+    return not _.isUndefined(this.controller) and not _.isUndefined(this.controller.reservation) \
+        and this.controller.reservation.username == js_global.USERNAME
+
+
 def _is_full():
     spawns_full = this.energyAvailable == this.energyCapacityAvailable
     towers_full = True
     for tower in this.towers:
-        if tower.energy < tower.energyCapacity:
+        if tower.energy < tower.energyCapacity * js_global.TOWER_MIN:
             towers_full = False
             break
 
@@ -64,8 +118,18 @@ def _get_spawn_energy():
     for creep in creeps:
         if creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3:
             has_miner = True
-        elif creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) < 1:
+        elif not has_hauler and creep.getActiveBodyparts(CARRY) > 0 and \
+                creep.getActiveBodyparts(WORK) < 1:
             has_hauler = True
+
+            if not _.isUndefined(creep.room.storage):
+                spos = creep.room.storage.pos
+                if creep.pos.x == spos.x + 1 and creep.pos.y == spos.y + 1:
+                    has_hauler = False
+
+    if not _.isUndefined(this.storage):
+        if this.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[this.rcl]:
+            has_miner = True
 
     if not has_hauler or not has_miner:
         return 300
@@ -89,23 +153,31 @@ def _get_additional_workers():
 
         return 0
 
-    if Game.time > this.memory.dropped_energy_tick + 750:
+    if Game.time > this.memory.dropped_energy_tick + 750 and \
+            this.energyAvailable == this.energyCapacityAvailable:
         this.memory.dropped_energy = this.total_dropped_energy()
         this.memory.dropped_energy_tick = Game.time
 
-        stored = this.storage.store[RESOURCE_ENERGY]
-        avg = (js_global.STORAGE_MAX[this.rcl] + js_global.STORAGE_MIN[this.rcl]) / 2
-        if this.total_dropped_energy() > 1000 or stored > js_global.STORAGE_MAX[this.rcl]:
-            this.memory.additional_workers += 1
-        elif this.total_dropped_energy() < 200 or stored < avg:
-            this.memory.additional_workers -= 1
+        if not _.isUndefined(this.storage):
+            stored = this.storage.store[RESOURCE_ENERGY]
+            avg = (js_global.STORAGE_MAX[this.rcl] + js_global.STORAGE_MIN[this.rcl]) / 2
+
+            if stored > js_global.STORAGE_MAX[this.rcl]:
+                this.memory.additional_workers += 1
+            elif stored < avg:
+                this.memory.additional_workers -= 1
+        else:
+            if this.total_dropped_energy() > 1000:
+                this.memory.additional_workers += 1
+            elif this.total_dropped_energy() < 200:
+                this.memory.additional_workers -= 1
 
         this.memory.additional_workers = max(0, this.memory.additional_workers)
 
     return this.memory.additional_workers
 
 
-def _basic_matrix(ignore_creeps=False):
+def _basic_matrix(ignore_creeps=False):  # Should pass in actual room name
     costs = __new__(PathFinder.CostMatrix)
 
     structures = this.find(FIND_STRUCTURES)
@@ -114,6 +186,8 @@ def _basic_matrix(ignore_creeps=False):
                 struct.structureType != STRUCTURE_ROAD and \
                 (struct.structureType != STRUCTURE_RAMPART or not struct.my):
             costs.set(struct.pos.x, struct.pos.y, 0xff)
+        elif struct.structureType == STRUCTURE_ROAD:
+            costs.set(struct.pos.x, struct.pos.y, 1)
 
     if not ignore_creeps:
         for creep in this.find(FIND_CREEPS):
@@ -124,8 +198,13 @@ def _basic_matrix(ignore_creeps=False):
 
 Room.prototype.get_sources = _get_sources
 Room.prototype.is_city = _is_city
+Room.prototype.is_remote = _is_remote
 Room.prototype.is_full = _is_full
 Room.prototype.get_spawn_energy = _get_spawn_energy
 Room.prototype.total_dropped_energy = _total_dropped_energy
 Room.prototype.get_additional_workers = _get_additional_workers
+Room.prototype._get_feed_locations = _get_feed_locations
+Room.prototype._get_hostile_military = _get_hostile_military
+Room.prototype._get_walls = _get_walls
 Room.prototype.basic_matrix = _basic_matrix
+Room.prototype._get_creeps = _get_creeps

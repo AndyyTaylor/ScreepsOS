@@ -35,25 +35,26 @@ class Ticketer():
     def get_ticket(self, tid):
         return self.tickets[tid]
 
-    def get_highest_priority(self, type):
+    def get_highest_priority(self, type, city=None):
         highest_priority = 99
         highest_ticket = None
         for tid in Object.keys(self.tickets):
             ticket = self.tickets[tid]
 
             if ticket['type'] == type and ticket['priority'] < highest_priority \
-                    and not ticket['completed']:
+                    and not ticket['completed'] and \
+                    (city is None or ticket['data']['city'] == city):
                 highest_ticket = ticket
                 highest_priority = ticket['priority']
 
         return highest_ticket
 
-    def get_tickets_by_type(self, type):
+    def get_tickets_by_type(self, type, city=None):
         tickets = []
 
         for tid in Object.keys(self.tickets):
             ticket = self.tickets[tid]
-            if ticket['type'] == type:
+            if ticket['type'] == type and (city is None or ticket['data']['city'] == city):
                 tickets.append(ticket)
 
         return tickets

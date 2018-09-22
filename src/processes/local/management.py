@@ -11,7 +11,7 @@ __pragma__('noalias', 'values')
 class Management(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('management', pid, 3, data)
+        super().__init__('management', pid, 2, data)
 
         if self._pid != -1:
             self.room = Game.rooms[self._data.room_name]
@@ -20,8 +20,6 @@ class Management(CreepProcess):
     def _run(self):
         if _.isUndefined(self._data.has_init):
             self.init()
-
-        self.place_flag()
 
         self.run_creeps()
 
@@ -63,14 +61,14 @@ class Management(CreepProcess):
             _.isUndefined(creep.memory.haul_ind)
 
     def gen_body(self, energy):
-        body = [CARRY, MOVE]
-        mod = [CARRY, MOVE]
-        carry_count = 1
+        body = [CARRY, CARRY, MOVE]
+        mod = [CARRY, CARRY, MOVE]
+        carry_count = 2
 
-        max_carry = 300
+        max_carry = 500
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
-            carry_count += 1
+            carry_count += 2
 
         return body, None
 
@@ -105,17 +103,3 @@ class Management(CreepProcess):
                 return struct.id
 
         return None
-
-    def place_flag(self):
-        flags = self.room.flags
-
-        x, y = self._data.hold_x, self._data.hold_y
-
-        already_placed = False
-        for flag in flags:
-            if flag['name'] == 'Manager(' + str(self._data.room_name) + ')':
-                already_placed = True
-                break
-
-        if not already_placed:
-            self.room.createFlag(x, y, 'Manager(' + str(self._data.room_name) + ')', 'black')

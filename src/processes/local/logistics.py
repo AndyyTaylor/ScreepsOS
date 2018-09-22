@@ -18,10 +18,11 @@ class Logistics(CreepProcess):
         if _.isUndefined(self._data.sinks):
             self._data.sinks = []
 
-    def _run(self):
-        self.room = Game.rooms[self._data.room_name]
-        self.vis = self.room.visual
+        if pid != -1:
+            self.room = Game.rooms[self._data.room_name]
+            self.vis = self.room.visual
 
+    def _run(self):
         if _.isUndefined(self._data.has_init):
             self.init()
 
@@ -29,11 +30,11 @@ class Logistics(CreepProcess):
 
     def run_creep(self, creep):
         haul = self._data.sources[creep.memory.haul_ind]
-
+        cont = Game.getObjectById(haul.cont_id)
         if creep.is_full():
             creep.set_task('deposit', {'target_id': self.room.storage.id})
         elif creep.is_empty() or creep.is_idle():
-            if not _.isNull(haul.cont_id):
+            if not _.isNull(haul.cont_id) and _.sum(cont.store) > 100:
                 creep.set_task('withdraw', {'target_id': haul.cont_id})
             else:
                 creep.set_task('gather')
@@ -48,9 +49,18 @@ class Logistics(CreepProcess):
             and not _.isUndefined(creep.memory.haul_ind)
 
     def gen_body(self, energyAvailable):
-        body = [CARRY, MOVE]
-        mod = [CARRY, MOVE]
-        total_carry = 1
+        if self._data.room_name == 'W59S2':
+            print("Log create body")
+        if self.room.rcl < 5:  # Should check path cost
+            body = [CARRY, MOVE]
+            mod = [CARRY, MOVE]
+            total_carry = 1
+            carry_mod = 1
+        else:
+            body = [CARRY, CARRY, MOVE]
+            mod = [CARRY, CARRY, MOVE]
+            total_carry = 2
+            carry_mod = 2
 
         indexes = [i for i in range(len(self._data.sources))]
         for name in self._data.creep_names:
@@ -63,7 +73,7 @@ class Logistics(CreepProcess):
         max_carry = haul['bandwidth'] / 50
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_carry < max_carry:
-            total_carry += 1
+            total_carry += carry_mod
             body = body.concat(mod)
 
         return body, {'haul_ind': indexes[0]}
