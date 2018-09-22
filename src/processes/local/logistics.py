@@ -49,8 +49,6 @@ class Logistics(CreepProcess):
             and not _.isUndefined(creep.memory.haul_ind)
 
     def gen_body(self, energyAvailable):
-        if self._data.room_name == 'W59S2':
-            print("Log create body")
         if self.room.rcl < 5:  # Should check path cost
             body = [CARRY, MOVE]
             mod = [CARRY, MOVE]

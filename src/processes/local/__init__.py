@@ -8,3 +8,4 @@ from processes.local.repairsite import RepairSite
 from processes.local.defence import Defence
 from processes.local.logistics import Logistics
 from processes.local.management import Management
+from processes.local.mineralsite import MineralSite

@@ -59,7 +59,7 @@ class RoomPlanner(Process):
                 has_laid = True
 
         if not has_laid:
-            self.sleep(500 + random.randint(0, 10))
+            self.sleep(100 + random.randint(0, 10))
         else:
             self.sleep(random.randint(0, 10))
 

@@ -8,6 +8,8 @@ __pragma__('noalias', 'name')
 Object.defineProperties(Room.prototype, {
     'creeps': {
         'get': lambda: this._get_creeps()
+    }, 'center': {
+        'get': lambda: this._get_center()
     }, 'flags': {
         'get': lambda: this.find(FIND_FLAGS)
     }, 'feed_locations': {
@@ -19,6 +21,8 @@ Object.defineProperties(Room.prototype, {
     }, 'spawns': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN)
+    }, 'mineral': {
+        'get': lambda: this.find(FIND_MINERALS)[0]
     }, 'repair_sites': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType != STRUCTURE_WALL and
@@ -42,6 +46,17 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: this._get_walls()
     }
 })
+
+
+def _get_center():
+    if not _.isUndefined(this.storage):
+        return this.storage.pos
+    elif not _.isUndefined(Game.flags[this.name]):
+        pos = Game.flags[this.name].pos
+
+        return __new__(RoomPosition(pos.x + 5, pos.y + 5, this.name))
+    else:
+        return __new__(RoomPosition(25, 25, this.name))
 
 
 def _get_hostile_military():
@@ -208,3 +223,4 @@ Room.prototype._get_hostile_military = _get_hostile_military
 Room.prototype._get_walls = _get_walls
 Room.prototype.basic_matrix = _basic_matrix
 Room.prototype._get_creeps = _get_creeps
+Room.prototype._get_center = _get_center

@@ -12,10 +12,11 @@ class MineSite(CreepProcess):
     def __init__(self, pid, data={}):
         super().__init__('minesite', pid, 2, data)
 
-    def _run(self):
-        self.room = Game.rooms[self._data.room_name]
-        self.source = Game.getObjectById(self._data.source_id)
+        if pid != -1:
+            self.room = Game.rooms[self._data.room_name]
+            self.source = Game.getObjectById(self._data.source_id)
 
+    def _run(self):
         if _.isUndefined(self._data.has_init):
             self.init()
 
@@ -23,14 +24,21 @@ class MineSite(CreepProcess):
 
     def run_creep(self, creep):
         if self._data.creep_names.indexOf(creep.js_name) == 0:
-            empty = len(self.room.lookForAt(LOOK_CREEPS, self._data.drop_x, self._data.drop_y)) == 0
-            if (creep.pos.x != self._data.drop_x or creep.pos.y != self._data.drop_y) and empty:
-                creep.set_task('travel', {'dest_x': self._data.drop_x, 'dest_y': self._data.drop_y,
-                                          'dest_room_name': self._data.room_name})
+            self.move_to_drop(creep)
+
         if creep.is_idle():
             creep.set_task('harvest', {'source_id': self._data.source_id})
 
         creep.run_current_task()
+
+    def move_to_drop(self, creep):
+        if creep.pos.x == self._data.drop_x and creep.pos.y == self._data.drop_y:
+            return
+
+        is_empty = len(self.room.lookForAt(LOOK_CREEPS, self._data.drop_x, self._data.drop_y)) == 0
+        if is_empty:
+            creep.set_task('travel', {'dest_x': self._data.drop_x, 'dest_y': self._data.drop_y,
+                                      'dest_room_name': self._data.room_name})
 
     def needs_creeps(self):
         total = 0
@@ -52,58 +60,39 @@ class MineSite(CreepProcess):
             _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energyAvailable):
-        # Should have no carry before link, and get carry when link exists
-
-        body = [WORK, MOVE]
-        mod = [WORK, MOVE]
+        mod = [WORK, WORK, MOVE]
         total_work = 1
 
+        if self.get_ideal_deposit() == STRUCTURE_LINK:
+            body = [WORK, CARRY, CARRY, CARRY, MOVE, MOVE]
+        else:
+            body = [WORK, WORK, MOVE]
+
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 6:
-            total_work += 1
+            total_work += 2
             body = body.concat(mod)
 
         return body, None
 
-    def init(self):  # This should request certain buildings. container / link etc
+    def init(self):
         self._data.has_init = True
 
-        pos = self.source.pos
-        terrain = self.room.lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1,
-                                          pos.y + 1, pos.x + 1, True)
+        drop_pos, drop_type = self.load_terrain()
+        drop_pos, drop_type, deposit_id = self.load_deposit(drop_pos, drop_type)
 
-        deposit_id = None
-        drop_pos = None
-        adj_tiles = 0
-        for tile in terrain:
-            if tile.terrain != 'wall':
-                adj_tiles += 1
-                drop_pos = {'x': tile.x, 'y': tile.y}
+        ideal_deposit = self.get_ideal_deposit()
+        if deposit_id is None or drop_type != ideal_deposit:
+            if deposit_id is not None:
+                Game.getObjectById(deposit_id).destroy()
+                deposit_id = None
+                drop_type = 'floor'
 
-        self._data.adj_tiles = adj_tiles
-        self._data.drop_type = 'floor'
+            if ideal_deposit == STRUCTURE_LINK:
+                self.build_link(drop_pos)
+            else:
+                self.build_container(drop_pos)
 
-        x, y = pos.x, pos.y
-        nearby_structs = self.room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
-        for struct in nearby_structs:
-            if struct.structure.structureType == STRUCTURE_CONTAINER:
-                deposit_id = struct.structure.id
-
-        if deposit_id is None and len(self._data.build_tickets) < 1:
-            nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
-            for terrain in nearby_terrain:
-                if terrain.terrain != 'wall':
-                    tid = self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_CONTAINER,
-                                                                        'x': terrain.x,
-                                                                        'y': terrain.y,
-                                                                        'city': self._data.room_name
-                                                                        })
-                    self._data.build_tickets.append(tid)
-
-                    break
-        elif deposit_id is not None:
-            drop_pos = Game.getObjectById(deposit_id).pos
-            self._data.drop_type = 'container'
-
+        # Build to room.center instead
         if not _.isUndefined(self.room.storage):
             start = self.room.storage.pos
             result = PathFinder.search(self.source.pos, {'pos': start, 'range': 7},
@@ -122,3 +111,81 @@ class MineSite(CreepProcess):
 
         self._data.drop_x = drop_pos.x
         self._data.drop_y = drop_pos.y
+        self._data.drop_type = drop_type
+
+    def load_terrain(self):
+        adj_tiles = 0
+        drop_pos = None
+        pos = self.source.pos
+        terrain = self.room.lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1,
+                                          pos.y + 1, pos.x + 1, True)
+        for tile in terrain:
+            if tile.terrain != 'wall':
+                adj_tiles += 1
+                drop_pos = {'x': tile.x, 'y': tile.y}
+
+        self._data.adj_tiles = adj_tiles
+
+        return drop_pos, 'floor'
+
+    def load_deposit(self, drop_pos, drop_type):
+        deposit_id = None
+        x, y = self.source.pos.x, self.source.pos.y
+        nearby_structs = self.room.lookForAtArea(LOOK_STRUCTURES, y - 2, x - 2, y + 2, x + 2, True)
+        for struct in nearby_structs:
+            type = struct.structure.structureType
+            if type == STRUCTURE_LINK or (type == STRUCTURE_CONTAINER and deposit_id is None):
+                deposit_id = struct.structure.id
+                drop_type = type
+
+        if deposit_id is not None:
+            drop_pos = Game.getObjectById(deposit_id).pos
+
+        return drop_pos, drop_type, deposit_id
+
+    def get_ideal_deposit(self):
+        if self.room.rcl < 6:
+            return STRUCTURE_CONTAINER
+        elif self.room.rcl > 6:
+            return STRUCTURE_LINK
+        else:
+            furthest_dist = 0
+            is_furthest = False
+
+            for source in self.room.sources:
+                dist = len(self.room.center.findPathTo(source))
+                if dist > furthest_dist:
+                    furthest_dist = dist
+                    is_furthest = (source == self.source)
+
+            if is_furthest:
+                return STRUCTURE_LINK
+            else:
+                return STRUCTURE_CONTAINER
+
+    def build_link(self, pos):
+        x, y = pos.x, pos.y
+        nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
+
+        for terrain in nearby_terrain:
+            if terrain.terrain != 'wall' and (terrain.x != x or terrain.y != y):
+                ticket = {
+                    'type': STRUCTURE_LINK,
+                    'x': terrain.x,
+                    'y': terrain.y,
+                    'city': self._data.room_name
+                }
+                tid = self.ticketer.add_ticket('build', self._pid, ticket)
+                self._data.build_tickets.append(tid)
+
+                break
+
+    def build_container(self, pos):
+        ticket = {
+            'type': STRUCTURE_LINK,
+            'x': pos.x,
+            'y': pos.y,
+            'city': self._data.room_name
+        }
+        tid = self.ticketer.add_ticket('build', self._pid, ticket)
+        self._data.build_tickets.append(tid)

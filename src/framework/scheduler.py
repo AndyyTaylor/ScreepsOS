@@ -25,7 +25,8 @@ process_classes = {
     'claim': Claim,
     'remotework': RemoteWork,
     'simpleattack': SimpleAttack,
-    'sappattack': SappAttack
+    'sappattack': SappAttack,
+    'mineralsite': MineralSite
 }
 
 

@@ -92,3 +92,7 @@ class City(Process):
                 if not taken_ids.includes(source_id):
                     self.launch_child_process('minesite', {'source_id': source_id,
                                                            'room_name': self._data.main_room})
+
+        if self.scheduler.count_by_name('mineralsite', self._pid) < 1 and room.rcl >= 6:
+            self.launch_child_process('mineralsite', {'mineral_id': room.mineral.id,
+                                                      'room_name': self._data.main_room})
