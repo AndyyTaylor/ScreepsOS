@@ -29,7 +29,17 @@ class MineSite(CreepProcess):
         if creep.is_idle():
             creep.set_task('harvest', {'source_id': self._data.source_id})
 
-        creep.run_current_task()
+        if self._data.drop_type == STRUCTURE_LINK:
+            link = Game.getObjectById(self._data.deposit_id)
+            if link.energy > 0 and link.cooldown == 0:
+                link.transferEnergy(self.room.cent_link)
+
+            if creep.is_full():
+                creep.transfer(link, RESOURCE_ENERGY)
+            else:
+                creep.run_current_task()
+        else:
+            creep.run_current_task()
 
     def move_to_drop(self, creep):
         if creep.pos.x == self._data.drop_x and creep.pos.y == self._data.drop_y:
@@ -56,12 +66,17 @@ class MineSite(CreepProcess):
         return len(self._data.creep_names) < self._data.adj_tiles
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3 and \
-            _.isUndefined(creep.memory.remote)
+        if self.get_ideal_deposit() == STRUCTURE_LINK:
+            return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
+                creep.getActiveBodyparts(CARRY) < 5 and \
+                _.isUndefined(creep.memory.remote)
+        else:
+            return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) == 0 and \
+                _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energyAvailable):
         mod = [WORK, WORK, MOVE]
-        total_work = 1
+        total_work = 2
 
         if self.get_ideal_deposit() == STRUCTURE_LINK:
             body = [WORK, CARRY, CARRY, CARRY, MOVE, MOVE]
@@ -112,6 +127,7 @@ class MineSite(CreepProcess):
         self._data.drop_x = drop_pos.x
         self._data.drop_y = drop_pos.y
         self._data.drop_type = drop_type
+        self._data.deposit_id = deposit_id
 
     def load_terrain(self):
         adj_tiles = 0
@@ -138,7 +154,7 @@ class MineSite(CreepProcess):
                 deposit_id = struct.structure.id
                 drop_type = type
 
-        if deposit_id is not None:
+        if deposit_id is not None and drop_type != STRUCTURE_LINK:
             drop_pos = Game.getObjectById(deposit_id).pos
 
         return drop_pos, drop_type, deposit_id

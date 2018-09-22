@@ -36,7 +36,7 @@ class Management(CreepProcess):
 
                 if self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
                     if center_link.energy > 0:
-                        if up_link.energy < up_link.energyCapacity:
+                        if up_link.energy < up_link.energyCapacity and center_link.cooldown == 0:
                             center_link.transferEnergy(up_link)
                         elif creep.is_full():
                             creep.transfer(self.room.storage, RESOURCE_ENERGY)
