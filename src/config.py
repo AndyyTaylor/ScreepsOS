@@ -3,14 +3,14 @@ from defs import *
 # he's at 465k into rcl5 i'm at 161k into rcl 4
 # 102k into rcl 5 i'm at 388k into rcl 4
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 1093
+js_global.VERSION = 1099
 js_global.CONTROLLER_SIGN = 'Placeholder till I think of something cool'
 
 js_global.CREEP_SAY = False
 
 js_global.BUILD_ORDER = [STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_EXTENSION, STRUCTURE_STORAGE,
-                         STRUCTURE_TERMINAL, STRUCTURE_LINK, STRUCTURE_CONTAINER, STRUCTURE_ROAD,
-                         STRUCTURE_LAB]
+                         STRUCTURE_TERMINAL, STRUCTURE_LINK, STRUCTURE_CONTAINER,
+                         STRUCTURE_EXTRACTOR, STRUCTURE_ROAD, STRUCTURE_LAB]
 js_global.WALL_WIDTH = {6: 1, 7: 3, 8: 10}
 js_global.ROAD_RCL = 4
 

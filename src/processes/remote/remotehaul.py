@@ -60,7 +60,7 @@ class RemoteHaul(CreepProcess):
             if _.isUndefined(creep):
                 continue
 
-            total_carry += creep.getActiveBodyparts(CARRY)
+            total_carry += creep.getActiveBodyparts(CARRY) - 1  # promote big creeps
 
         return total_carry < max_carry
 

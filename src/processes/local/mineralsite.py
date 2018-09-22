@@ -20,8 +20,6 @@ class MineralSite(CreepProcess):
         if _.isUndefined(self._data.has_init):
             self.init()
 
-        print("Mineral site running")
-
         self.run_creeps()
 
     def run_creep(self, creep):
@@ -106,6 +104,23 @@ class MineralSite(CreepProcess):
                                                                   'y': tile.y,
                                                                   'city': tile.roomName
                                                                   })
+
+        has_extractor = False
+        structs = self.room.lookForAt(LOOK_STRUCTURES, self.mineral)
+        for struct in structs:
+            if struct.structureType == STRUCTURE_EXTRACTOR:
+                has_extractor = True
+                break
+
+        if not has_extractor:
+            ticket = {
+                'type': STRUCTURE_EXTRACTOR,
+                'x': self.mineral.pos.x,
+                'y': self.mineral.pos.y,
+                'city': self._data.room_name
+            }
+            self.ticketer.add_ticket('build', self._pid, ticket)
+            print("extractor at", self.mineral.pos)
 
         self._data.drop_x = drop_pos.x
         self._data.drop_y = drop_pos.y

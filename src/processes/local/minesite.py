@@ -34,12 +34,10 @@ class MineSite(CreepProcess):
             if link.energy > 0 and link.cooldown == 0:
                 link.transferEnergy(self.room.cent_link)
 
-            if creep.is_full():
+            if _.sum(creep.carry) + 12 >= creep.carryCapacity:  # Don't drop any resources
                 creep.transfer(link, RESOURCE_ENERGY)
-            else:
-                creep.run_current_task()
-        else:
-            creep.run_current_task()
+
+        creep.run_current_task()
 
     def move_to_drop(self, creep):
         if creep.pos.x == self._data.drop_x and creep.pos.y == self._data.drop_y:
@@ -79,7 +77,7 @@ class MineSite(CreepProcess):
         total_work = 2
 
         if self.get_ideal_deposit() == STRUCTURE_LINK:
-            body = [WORK, CARRY, CARRY, CARRY, MOVE, MOVE]
+            body = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
         else:
             body = [WORK, WORK, MOVE]
 
