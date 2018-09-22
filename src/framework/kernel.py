@@ -60,6 +60,8 @@ class Kernel():
             self.process_cpu[process.name]['total'] += diff
             self.process_cpu[process.name]['count'] += 1
             self.process_cpu[process.name]['max'] = max(diff, self.process_cpu[process.name]['max'])
+            self.process_cpu[process.name]['avg'] = self.process_cpu[process.name]['total'] / \
+                self.process_cpu[process.name]['count']
 
             process = self.scheduler.get_next_process()
 
