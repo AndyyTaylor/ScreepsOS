@@ -24,6 +24,9 @@ Object.defineProperties(Room.prototype, {
     }, 'spawns': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN)
+    }, 'terminal': {
+        'get': lambda: _.filter(this.find(FIND_STRUCTURES),
+                                lambda s: s.structureType == STRUCTURE_TERMINAL)[0]
     }, 'mineral': {
         'get': lambda: this.find(FIND_MINERALS)[0]
     }, 'repair_sites': {
