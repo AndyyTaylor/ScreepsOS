@@ -112,21 +112,23 @@ class Kernel():
                 'progressTotal': room.controller.progressTotal
             }
 
-            stored_energy = 0
-            if not _.isUndefined(room.storage):
-                stored_energy += room.storage.store[RESOURCE_ENERGY]
+            resources = {'energy': 0}
+            stores = _.filter(room.find(FIND_STRUCTURES),
+                              lambda s: s.structureType == STRUCTURE_CONTAINER or
+                                        s.structureType == STRUCTURE_LINK or
+                                        s.structureType == STRUCTURE_STORAGE)  # noqa
 
-            for struct in _.filter(room.find(FIND_STRUCTURES),
-                                   lambda s: s.structureType == STRUCTURE_CONTAINER or
-                                             s.structureType == STRUCTURE_LINK):  # noqa
-                if struct.structureType == STRUCTURE_CONTAINER:
-                    stored_energy += struct.store[RESOURCE_ENERGY]
+            for store in stores:
+                if _.isUndefined(store.store):
+                    resources[RESOURCE_ENERGY] += store.energy
                 else:
-                    stored_energy += struct.energy
+                    for rtype in Object.keys(store.store):
+                        if not Object.keys(resources).includes(rtype):
+                            resources[rtype] = store.store[rtype]
+                        else:
+                            resources[rtype] += store.store[rtype]
 
-            stats.stored = {
-                'energy': stored_energy
-            }
+            stats.stored = resources
 
             total_spawns = len(room.spawns)
             num_working = 0
