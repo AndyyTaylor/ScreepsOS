@@ -121,7 +121,7 @@ class Logistics(CreepProcess):
         mineral = self.room.mineral
         result = PathFinder.search(self.room.center, {'pos': mineral.pos, 'range': 1},
                                    lambda r: self.room.basic_matrix())
-        amt = 2
+        amt = 3
         dist = len(result.path)
 
         cont_id = None
