@@ -58,10 +58,10 @@ class RoomPlanner(Process):
             if self.lay_structures(STRUCTURE_ROAD, name):
                 has_laid = True
 
-        if not has_laid:
-            self.sleep(100 + random.randint(0, 10))
+        if not has_laid and len(self.room.construction_sites) == 0:
+            self.sleep(500 + random.randint(0, 10))
         else:
-            self.sleep(random.randint(0, 10))
+            self.sleep(random.randint(0, 30))
 
     def lay_structures(self, type, room_name=None):
         if room_name is None:
@@ -76,6 +76,7 @@ class RoomPlanner(Process):
 
         tickets = _.filter(self.ticketer.get_tickets_by_type("build", room_name),
                            lambda t: t['data']['type'] == type)
+
         for ticket in tickets:
             if self.build(type, ticket['data']['x'], ticket['data']['y'], False, room_name):
                 return True

@@ -52,7 +52,6 @@ class MineralSite(CreepProcess):
         self._data.has_init = True
 
         pos = self.mineral.pos
-        print(self._data.mineral_id, pos)
 
         deposit_id = None
         x, y = pos.x, pos.y

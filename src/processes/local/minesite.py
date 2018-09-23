@@ -94,16 +94,20 @@ class MineSite(CreepProcess):
         drop_pos, drop_type, deposit_id = self.load_deposit(drop_pos, drop_type)
 
         ideal_deposit = self.get_ideal_deposit()
-        if deposit_id is None or drop_type != ideal_deposit:
-            if deposit_id is not None:
-                Game.getObjectById(deposit_id).destroy()
-                deposit_id = None
-                drop_type = 'floor'
+        if self._data.room_name == 'W51S1' or self._data.room_name == 'W59S2':
+            print(ideal_deposit, self.source.pos)
+            if deposit_id is None or drop_type != ideal_deposit:
+                if deposit_id is not None:
+                    # Game.getObjectById(deposit_id).destroy()
+                    print("destroy", Game.getObjectById(deposit_id).structureType,
+                          Game.getObjectById(deposit_id).pos)
+                    deposit_id = None
+                    drop_type = 'floor'
 
-            if ideal_deposit == STRUCTURE_LINK:
-                self.build_link(drop_pos)
-            else:
-                self.build_container(drop_pos)
+                if ideal_deposit == STRUCTURE_LINK:
+                    self.build_link(drop_pos)
+                else:
+                    self.build_container(drop_pos)
 
         # Build to room.center instead
         if not _.isUndefined(self.room.storage):
@@ -133,10 +137,21 @@ class MineSite(CreepProcess):
         pos = self.source.pos
         terrain = self.room.lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1,
                                           pos.y + 1, pos.x + 1, True)
+        structs = self.room.lookForAtArea(LOOK_STRUCTURES, pos.y - 1, pos.x - 1,
+                                          pos.y + 1, pos.x + 1)
+
         for tile in terrain:
             if tile.terrain != 'wall':
-                adj_tiles += 1
-                drop_pos = {'x': tile.x, 'y': tile.y}
+                walkable = True
+                for struct in structs[tile.y][tile.x]:
+                    type = struct.structureType
+                    if type != STRUCTURE_ROAD and type != STRUCTURE_CONTAINER:
+                        walkable = False
+                        break
+
+                if walkable:
+                    adj_tiles += 1
+                    drop_pos = {'x': tile.x, 'y': tile.y}
 
         self._data.adj_tiles = adj_tiles
 
@@ -196,7 +211,7 @@ class MineSite(CreepProcess):
 
     def build_container(self, pos):
         ticket = {
-            'type': STRUCTURE_LINK,
+            'type': STRUCTURE_CONTAINER,
             'x': pos.x,
             'y': pos.y,
             'city': self._data.room_name
