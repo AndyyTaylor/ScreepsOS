@@ -40,9 +40,10 @@ class FeedSite(CreepProcess):
                 storage = creep.room.storage
                 if not creep.room.is_full() and not _.isNull(cont) and \
                         cont.store[RESOURCE_ENERGY] > 0:
-                    creep.set_task('withdraw', {'target_id': self._data.withdraw_id})
+                    creep.set_task('withdraw', {'target_id': self._data.withdraw_id,
+                                                'type': RESOURCE_ENERGY})
                 elif not _.isUndefined(storage) and storage.store[RESOURCE_ENERGY] > 0:
-                    creep.set_task('withdraw', {'target_id': storage.id})
+                    creep.set_task('withdraw', {'target_id': storage.id, 'type': RESOURCE_ENERGY})
                 elif _.isUndefined(creep.room.storage) or storage.store[RESOURCE_ENERGY] == 0:
                     creep.set_task('gather')
             elif not creep.room.is_full() and not creep.is_empty():

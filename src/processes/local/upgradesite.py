@@ -31,8 +31,10 @@ class UpgradeSite(CreepProcess):
                 if not _.isNull(link) and link.energy > 0:
                     creep.set_task('withdraw', {'target_id': self._data.link_id})
                 elif not _.isUndefined(self.room.storage) and \
-                        self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
-                    creep.set_task('withdraw', {'target_id': self.room.storage.id})
+                        self.room.storage.store[RESOURCE_ENERGY] > \
+                        js_global.STORAGE_MIN[self.room.rcl]:
+                    creep.set_task('withdraw', {'target_id': self.room.storage.id,
+                                                'type': RESOURCE_ENERGY})
                 else:
                     creep.set_task('gather')
             elif creep.is_full() or creep.is_idle():

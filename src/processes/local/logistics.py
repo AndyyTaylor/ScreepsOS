@@ -30,6 +30,10 @@ class Logistics(CreepProcess):
 
     def run_creep(self, creep):
         haul = self._data.sources[creep.memory.haul_ind]
+        if _.isUndefined(haul):  # Sources / sinks has changed
+            creep.suicide()
+            return
+
         cont = Game.getObjectById(haul.cont_id)
         if creep.is_full():
             creep.set_task('deposit', {'target_id': self.room.storage.id})
@@ -81,22 +85,52 @@ class Logistics(CreepProcess):
             self.kill()
             return
 
+        self.load_sources()  # like room sources..
+        if self.room.rcl >= 6:
+            self.load_mineral()
+
+        self._data.has_init = True
+
+    def load_sources(self):
         for source in self.room.sources:
             result = PathFinder.search(self.room.storage.pos, {'pos': source.pos, 'range': 1},
                                        lambda r: self.room.basic_matrix())
             amt = 10
             dist = len(result.path)
 
-            cont_id = None
-            structs = self.room.lookForAtArea(LOOK_STRUCTURES, source.pos.y - 1, source.pos.x - 1,
-                                              source.pos.y + 1, source.pos.x + 1, True)
+            cont_id = None  # 2 for links, but be careful of sources near controllers
+            structs = self.room.lookForAtArea(LOOK_STRUCTURES, source.pos.y - 2, source.pos.x - 2,
+                                              source.pos.y + 2, source.pos.x + 2, True)
 
+            has_link = False
             for struct in structs:
-                if struct.structure.structureType == STRUCTURE_CONTAINER:
-                    cont_id = struct.structure.id
+                if struct.structure.structureType == STRUCTURE_LINK:
+                    has_link = True
                     break
+                elif struct.structure.structureType == STRUCTURE_CONTAINER:
+                    cont_id = struct.structure.id
+                    break  # Cont will be removed upon link construction
+
+            if has_link:
+                continue  # Don't add as we don't need hauler
 
             self._data.sources.append({'pos': source.pos, 'cont_id': cont_id,
                                        'bandwidth': amt * dist * 2 * 1.2})
 
-        self._data.has_init = True
+    def load_mineral(self):
+        mineral = self.room.mineral
+        result = PathFinder.search(self.room.center, {'pos': mineral.pos, 'range': 1},
+                                   lambda r: self.room.basic_matrix())
+        amt = 2
+        dist = len(result.path)
+
+        cont_id = None
+        structs = self.room.lookForAtArea(LOOK_STRUCTURES, mineral.pos.y - 1, mineral.pos.x - 1,
+                                          mineral.pos.y + 1, mineral.pos.x + 1, True)
+        for struct in structs:
+            if struct.structure.structureType == STRUCTURE_CONTAINER:
+                cont_id = struct.structure.id
+                break  # Cont will be removed upon link construction
+
+        self._data.sources.append({'pos': mineral.pos, 'cont_id': cont_id,
+                                   'bandwidth': amt * dist * 2 * 1.2})

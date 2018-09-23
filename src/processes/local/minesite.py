@@ -66,11 +66,11 @@ class MineSite(CreepProcess):
     def is_valid_creep(self, creep):
         if self.get_ideal_deposit() == STRUCTURE_LINK:
             return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
-                creep.getActiveBodyparts(CARRY) < 5 and \
+                creep.getActiveBodyparts(CARRY) < 5 and creep.getActiveBodyparts(WORK) < 10 and \
                 _.isUndefined(creep.memory.remote)
         else:
             return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) == 0 and \
-                _.isUndefined(creep.memory.remote)
+                creep.getActiveBodyparts(WORK) < 10 and _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energyAvailable):
         mod = [WORK, WORK, MOVE]
@@ -95,7 +95,6 @@ class MineSite(CreepProcess):
 
         ideal_deposit = self.get_ideal_deposit()
         if self._data.room_name == 'W51S1' or self._data.room_name == 'W59S2':
-            print(ideal_deposit, self.source.pos)
             if deposit_id is None or drop_type != ideal_deposit:
                 if deposit_id is not None:
                     # Game.getObjectById(deposit_id).destroy()
@@ -182,8 +181,8 @@ class MineSite(CreepProcess):
             is_furthest = False
 
             for source in self.room.sources:
-                dist = len(self.room.center.findPathTo(source))
-                if dist > furthest_dist:
+                dist = self.room.center.getRangeTo(source)  # Replace with path
+                if dist > furthest_dist:                    # once I sort out costmatrices
                     furthest_dist = dist
                     is_furthest = (source == self.source)
 

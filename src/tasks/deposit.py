@@ -3,6 +3,9 @@ from defs import *  # noqa
 
 from framework.task import Task
 
+__pragma__('noalias', 'keys')
+__pragma__('noalias', 'values')
+
 
 class Deposit(Task):
 
@@ -17,7 +20,12 @@ class Deposit(Task):
         if not creep.pos.isNearTo(target):
             creep.moveTo(target)
         else:
-            creep.transfer(target, RESOURCE_ENERGY)
+            type = RESOURCE_ENERGY
+            if not _.isUndefined(self._data.type):
+                type = self._data.type
+            elif not _.isUndefined(target.store):
+                type = Object.keys(creep.carry).pop()
+            creep.transfer(target, type)
 
     def is_completed(self, creep):
         target = Game.getObjectById(self._data.target_id)

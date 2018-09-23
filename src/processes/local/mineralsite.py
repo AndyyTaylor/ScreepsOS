@@ -23,27 +23,39 @@ class MineralSite(CreepProcess):
         self.run_creeps()
 
     def run_creep(self, creep):
-        creep.say("Harvest mineral")
+        self.move_to_drop(creep)
+
+        if creep.is_idle():
+            creep.set_task('harvest', {'source_id': self._data.mineral_id})
 
         creep.run_current_task()
 
+    def move_to_drop(self, creep):
+        if creep.pos.x == self._data.drop_x and creep.pos.y == self._data.drop_y:
+            return
+
+        is_empty = len(self.room.lookForAt(LOOK_CREEPS, self._data.drop_x, self._data.drop_y)) == 0
+        if is_empty:
+            creep.set_task('travel', {'dest_x': self._data.drop_x, 'dest_y': self._data.drop_y,
+                                      'dest_room_name': self._data.room_name})
+
     def needs_creeps(self):
-        if _.isUndefined(self._data.extractor_id):
+        if not self._data.has_extractor:
             return False
 
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 1 and \
+        return creep.getActiveBodyparts(WORK) > 10 and creep.getActiveBodyparts(CARRY) < 1 and \
             _.isUndefined(creep.memory.remote)
 
     def gen_body(self, energyAvailable):
         body = [WORK, WORK, MOVE]
         mod = [WORK, WORK, MOVE]
-        total_work = 1
+        total_work = 2
 
-        while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 6:
-            total_work += 1
+        while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 15:
+            total_work += 2
             body = body.concat(mod)
 
         return body, None
@@ -98,11 +110,13 @@ class MineralSite(CreepProcess):
                     if tile.x == 0 or tile.x == 49 or tile.y == 0 or tile.y == 49:
                         continue
 
-                    self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_ROAD,
-                                                                  'x': tile.x,
-                                                                  'y': tile.y,
-                                                                  'city': tile.roomName
-                                                                  })
+                    ticket = {
+                        'type': STRUCTURE_ROAD,
+                        'x': tile.x,
+                        'y': tile.y,
+                        'city': tile.roomName
+                    }
+                    self.ticketer.add_ticket('build', self._pid, ticket)
 
         has_extractor = False
         structs = self.room.lookForAt(LOOK_STRUCTURES, self.mineral)
@@ -119,7 +133,7 @@ class MineralSite(CreepProcess):
                 'city': self._data.room_name
             }
             self.ticketer.add_ticket('build', self._pid, ticket)
-            print("extractor at", self.mineral.pos)
 
         self._data.drop_x = drop_pos.x
         self._data.drop_y = drop_pos.y
+        self._data.has_extractor = has_extractor
