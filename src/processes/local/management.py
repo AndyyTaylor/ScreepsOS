@@ -95,16 +95,16 @@ class Management(CreepProcess):
 
         storage = self.room.storage
         for rtype in Object.keys(storage.store):
-            if storage.store[rtype] < 1000:
+            if storage.store[rtype] < 5000:
                 continue
 
-            if _.isUndefined(terminal.store[rtype]) or terminal.store[rtype] < 1000:
+            if _.isUndefined(terminal.store[rtype]) or terminal.store[rtype] < 5000:
                 if creep.carry[rtype] > 0:
                     if not _.isUndefined(terminal.store[rtype]):
-                        amt = min(creep.carry[rtype], 1000 - terminal.store[rtype])
+                        amt = min(creep.carry[rtype], 5000 - terminal.store[rtype])
                     else:
                         amt = creep.carry[rtype]
-                    amt = min(amt, storage.store[rtype] - 1000)
+                    amt = min(amt, storage.store[rtype] - 5000)
                     creep.transfer(terminal, rtype, amt)
                 elif creep.is_full():
                     creep.transfer(storage, Object.keys(creep.carry).pop())
