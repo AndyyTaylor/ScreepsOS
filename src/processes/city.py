@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from extends import *  # noqa
 from base import base
 
 from framework.process import Process
@@ -72,7 +73,7 @@ class City(Process):
                 taken_ids.append(proc['data'].site_id)
 
             for site_id in site_ids:
-                if not taken_ids.includes(source_id):
+                if not taken_ids.includes(site_id):
                     self.launch_child_process('buildsite', {'site_id': site_id,
                                                             'room_name': self._data.main_room})
 

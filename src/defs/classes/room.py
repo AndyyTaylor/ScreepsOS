@@ -101,6 +101,22 @@ class _PathPos:
         self.direction = direction
 
 
+class _Event:
+    """
+    :type event: int
+    :type objectId: str
+    :type data: Dict[str, Any]
+    """
+
+    def __init__(self, event: int, objectId: str, data: Dict[str, Any]) -> None:
+        """
+        WARNING: This constructor is purely for type completion, and does not exist in the game.
+        """
+        self.event = event  # type: int
+        self.objectId = objectId  # type: str
+        self.data = data  # type: Dict[str, Any]
+
+
 # noinspection PyPep8Naming
 class Room:
     """
@@ -114,6 +130,8 @@ class Room:
     :type name: str
     :type visual: Any
     """
+
+    prototype = None  # type: Type[Room]
 
     def __init__(self, controller: Optional[StructureController], storage: Optional[StructureStorage],
                  terminal: Optional[StructureTerminal], energyAvailable: int, energyCapacityAvailable: int,
@@ -157,6 +175,9 @@ class Room:
 
     def findPath(self, fromPos: RoomPosition, toPos: RoomPosition, opts: Dict[str, Any]) \
             -> List[Union[_PathPos, Dict[str, Any]]]:
+        pass
+
+    def getEventLog(self, raw: bool = False) -> List[_Event]:
         pass
 
     def getPositionAt(self, x: int, y: int) -> RoomPosition:

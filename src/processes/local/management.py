@@ -67,6 +67,7 @@ class Management(CreepProcess):
         center_link = Game.getObjectById(self._data.cent_link_id)
         if _.isNull(center_link):
             return False
+        name: str = 'hey'
 
         if center_link.energy == 0:
             return False
