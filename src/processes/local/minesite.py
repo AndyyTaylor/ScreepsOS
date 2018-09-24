@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from typing import cast
 
 from framework.creepprocess import CreepProcess
 
@@ -35,7 +36,10 @@ class MineSite(CreepProcess):
                 link.transferEnergy(self.room.cent_link)
 
             if _.sum(creep.carry) + 12 >= creep.carryCapacity:  # Don't drop any resources
-                creep.transfer(link, RESOURCE_ENERGY)
+                if not creep.pos.isNearTo(link):
+                    creep.moveTo(link)
+                else:
+                    creep.transfer(link, RESOURCE_ENERGY)
 
         creep.run_current_task()
 
@@ -97,9 +101,8 @@ class MineSite(CreepProcess):
         if self._data.room_name == 'W51S1' or self._data.room_name == 'W59S2':
             if deposit_id is None or drop_type != ideal_deposit:
                 if deposit_id is not None:
-                    # Game.getObjectById(deposit_id).destroy()
-                    print("destroy", Game.getObjectById(deposit_id).structureType,
-                          Game.getObjectById(deposit_id).pos)
+                    Game.getObjectById(deposit_id).destroy()
+
                     deposit_id = None
                     drop_type = 'floor'
 

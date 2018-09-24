@@ -49,8 +49,7 @@ class Logistics(CreepProcess):
         return len(self._data.creep_names) < len(self._data.sources)
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) < 1 and creep.getActiveBodyparts(CARRY) > 0 \
-            and not _.isUndefined(creep.memory.haul_ind)
+        return creep.memory.role == 'hauler'
 
     def gen_body(self, energyAvailable):
         if self.room.rcl < 5:  # Should check path cost
@@ -78,7 +77,7 @@ class Logistics(CreepProcess):
             total_carry += carry_mod
             body = body.concat(mod)
 
-        return body, {'haul_ind': indexes[0]}
+        return body, {'haul_ind': indexes[0], 'role': 'hauler'}
 
     def init(self):
         if _.isUndefined(self.room.storage):

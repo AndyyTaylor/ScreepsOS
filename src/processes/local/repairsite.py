@@ -46,8 +46,7 @@ class RepairSite(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
-            _.isUndefined(creep.memory.remote)
+        return creep.memory.role == 'worker'
 
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]
@@ -58,4 +57,4 @@ class RepairSite(CreepProcess):
             body = body.concat(mod)
             total_work += 1
 
-        return body, None
+        return body, {'role': 'worker'}

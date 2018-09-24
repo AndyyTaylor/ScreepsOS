@@ -85,6 +85,12 @@ class Kernel():
         self.log_resources()
         self.log_processes()
 
+        Memory.stats.tickets = {}
+        Memory.stats.tickets.count = {
+            'spawn': len(self.ticketer.get_tickets_by_type('spawn')),
+            'build': len(self.ticketer.get_tickets_by_type('build'))
+        }
+
         Memory.stats.credits = Game.market.credits
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket

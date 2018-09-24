@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from typing import cast
 
 from framework.creepprocess import CreepProcess
 
@@ -41,6 +42,10 @@ class MineralSite(CreepProcess):
 
     def needs_creeps(self):
         if not self._data.has_extractor:
+            return False
+
+        mineral = Game.getObjectById(self._data.mineral_id)
+        if _.isNull(mineral) or mineral.mineralAmount == 0:
             return False
 
         return len(self._data.creep_names) < 1

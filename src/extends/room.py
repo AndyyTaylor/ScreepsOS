@@ -174,8 +174,7 @@ def _get_additional_workers():
 
         return 0
 
-    if Game.time > this.memory.dropped_energy_tick + 750 and \
-            this.energyAvailable == this.energyCapacityAvailable:
+    if Game.time > this.memory.dropped_energy_tick + 750:
         this.memory.dropped_energy = this.total_dropped_energy()
         this.memory.dropped_energy_tick = Game.time
 
@@ -194,6 +193,7 @@ def _get_additional_workers():
                 this.memory.additional_workers -= 1
 
         this.memory.additional_workers = max(0, this.memory.additional_workers)
+        this.memory.additional_workers = min(7, this.memory.additional_workers)
 
     return this.memory.additional_workers
 

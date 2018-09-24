@@ -80,6 +80,8 @@ class RoomPlanner(Process):
         for ticket in tickets:
             if self.build(type, ticket['data']['x'], ticket['data']['y'], False, room_name):
                 return True
+            else:
+                self.ticketer.delete_ticket(ticket['tid'])
 
         return False
 

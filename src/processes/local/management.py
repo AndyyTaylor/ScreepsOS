@@ -128,8 +128,7 @@ class Management(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) < 1 and \
-            _.isUndefined(creep.memory.haul_ind)
+        return creep.memory.role == 'manager'
 
     def gen_body(self, energy):
         body = [CARRY, CARRY, MOVE]
@@ -141,7 +140,7 @@ class Management(CreepProcess):
             body = body.concat(mod)
             carry_count += 2
 
-        return body, None
+        return body, {'role': 'manager'}
 
     def init(self):
         base_flag = Game.flags[self._data.room_name]
