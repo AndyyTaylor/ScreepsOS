@@ -78,19 +78,17 @@ class MineSite(CreepProcess):
 
     def gen_body(self, energyAvailable):
         mod = [WORK, WORK, MOVE]
-        total_work = 2
 
         if self.get_ideal_deposit() == STRUCTURE_LINK:
-            body = [WORK, CARRY, MOVE]
+            body = [CARRY, CARRY, MOVE]
+            total_work = 0
         else:
             body = [WORK, WORK, MOVE]
+            total_work = 2
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 6:
             total_work += 2
             body = body.concat(mod)
-
-        if total_work == 5 and self.get_ideal_deposit() == STRUCTURE_LINK:
-            body = body.concat([WORK, MOVE])
 
         return body, None
 
