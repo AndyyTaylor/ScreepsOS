@@ -31,4 +31,10 @@ class Withdraw(Task):
     def is_completed(self, creep):
         target = Game.getObjectById(self._data.target_id)
 
-        return creep.is_full() or not target or _.sum(target.store) == 0
+        type = RESOURCE_ENERGY
+        if not _.isUndefined(self._data['type']):
+            type = self._data['type']
+        elif not _.isUndefined(target.store):
+            type = Object.keys(target.store).pop()
+
+        return creep.is_full() or not target or target.store[type] == 0

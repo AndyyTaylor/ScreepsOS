@@ -13,14 +13,20 @@ class Kernel():
         self.validate_memory()
 
         self.new_upload = self.check_version()
+        Memory.stats.resets += 1
+        # self.new_upload = True
 
         self.scheduler = Scheduler()
+
+        if RawMemory.js_get().length > 1000000:
+            self.new_upload = True
 
         if self.new_upload:
             print("-------------------------")
             print("NEW UPLOAD DETECTED -", js_global.VERSION)
             print("-------------------------")
             self.scheduler.kill_all_processes()
+            self.scheduler.load_processes()
             self.unassign_creeps()
 
     def start(self):
@@ -34,6 +40,7 @@ class Kernel():
 
         self.launch_cities()  # Launch Empire
 
+        self.scheduler.load_processes()
         self.scheduler.queue_processes()
         self.ticketer.load_tickets()
 

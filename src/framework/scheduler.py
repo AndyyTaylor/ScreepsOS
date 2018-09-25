@@ -35,8 +35,6 @@ class Scheduler():
     def __init__(self):
         self.validate_memory()
 
-        self.processes = Object.assign({}, self.memory.processes)
-        self.queue = Object.assign({}, self.memory.queue)
         self.completed = []
 
     def get_next_process(self):
@@ -90,6 +88,8 @@ class Scheduler():
             if self.create_process(pid).is_completed():
                 self.delete_process(pid)
 
+        self.save_processes()
+
     def get_priority_of(self, pid):
         proc = self.processes[pid]
 
@@ -142,10 +142,16 @@ class Scheduler():
         return Object.keys(self.processes)
 
     def save_processes(self):
-        pass
+        self.memory.processes = self.processes
+        self.memory.queue = self.queue
+
+    def load_processes(self):
+        self.processes = Object.assign({}, self.memory.processes)
+        self.queue = Object.assign({}, self.memory.queue)
 
     def kill_all_processes(self):
-        pass
+        self.memory.processes = {}
+        self.memory.queue = {}
 
     def validate_memory(self):
         if _.isUndefined(Memory.os.scheduler):

@@ -81,13 +81,16 @@ class MineSite(CreepProcess):
         total_work = 2
 
         if self.get_ideal_deposit() == STRUCTURE_LINK:
-            body = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
+            body = [WORK, CARRY, MOVE]
         else:
             body = [WORK, WORK, MOVE]
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 6:
             total_work += 2
             body = body.concat(mod)
+
+        if total_work == 5 and self.get_ideal_deposit() == STRUCTURE_LINK:
+            body = body.concat([WORK, MOVE])
 
         return body, None
 
@@ -171,6 +174,19 @@ class MineSite(CreepProcess):
 
         if deposit_id is not None and drop_type != STRUCTURE_LINK:
             drop_pos = Game.getObjectById(deposit_id).pos
+        elif drop_type == STRUCTURE_LINK:
+            pos = self.source.pos
+            link = Game.getObjectById(deposit_id)
+            terrain = self.room.lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1,
+                                              pos.y + 1, pos.x + 1, True)
+            for tile in terrain:
+                if tile.terrain == 'wall':
+                    continue
+
+                tpos = __new__(RoomPosition(tile.x, tile.y, self._data.room_name))
+                if tpos.getRangeTo(link) == 1:
+                    drop_pos = tpos
+                    break
 
         return drop_pos, drop_type, deposit_id
 
