@@ -57,8 +57,12 @@ class RemoteHaul(CreepProcess):
 
         for name in self._data.creep_names:
             creep = Game.creeps[name]
+
             if _.isUndefined(creep):
                 continue
+
+            if creep.hits < creep.hitsMax:  # stuffs up calculations
+                return False
 
             total_carry += creep.getActiveBodyparts(CARRY)
 
@@ -83,7 +87,7 @@ class RemoteHaul(CreepProcess):
             if _.isUndefined(creep):
                 continue
 
-            max_carry -= creep.getActiveBodyparts(CARRY) + 1
+            max_carry -= creep.getActiveBodyparts(CARRY)
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_carry < max_carry:
             total_carry += 2
@@ -104,9 +108,7 @@ class RemoteHaul(CreepProcess):
 
         self._data.path_length = len(result.path)
 
-        result = PathFinder.search(source.pos, {'pos': start, 'range': 7},
-                                               {'roomCallback': lambda r:
-                                                self.haul_room.basic_matrix(True)})
+        result = PathFinder.search(source.pos, {'pos': start, 'range': 7})
         if not result.incomplete:
             for tile in result.path:
                 if tile.x == 0 or tile.x == 49 or tile.y == 0 or tile.y == 49:

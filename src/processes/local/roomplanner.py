@@ -100,7 +100,7 @@ class RoomPlanner(Process):
             return False
         else:
             if type == STRUCTURE_ROAD:
-                terrain = Game.map.getRoomTerrain(self._data.room_name)
+                terrain = Game.map.getRoomTerrain(room_name)
                 if terrain.js_get(x, y) == TERRAIN_MASK_WALL:
                     return False
 
