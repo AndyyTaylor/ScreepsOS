@@ -146,11 +146,12 @@ class MineSite(CreepProcess):
         for tile in terrain:
             if tile.terrain != 'wall':
                 walkable = True
-                for struct in structs[tile.y][tile.x]:
-                    type = struct.structureType
-                    if type != STRUCTURE_ROAD and type != STRUCTURE_CONTAINER:
-                        walkable = False
-                        break
+                if not _.isUndefined(structs[tile.y][tile.x]):
+                    for struct in structs[tile.y][tile.x]:
+                        type = struct.structureType
+                        if type != STRUCTURE_ROAD and type != STRUCTURE_CONTAINER:
+                            walkable = False
+                            break
 
                 if walkable:
                     adj_tiles += 1

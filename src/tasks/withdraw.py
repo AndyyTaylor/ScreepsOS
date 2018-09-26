@@ -37,4 +37,6 @@ class Withdraw(Task):
         elif not _.isUndefined(target.store):
             type = Object.keys(target.store).pop()
 
-        return creep.is_full() or not target or target.store[type] == 0
+        return creep.is_full() or not target or \
+            (not _.isUndefined(target.store) and target.store[type] == 0) or \
+            (not _.isUndefined(target.energy) and target.energy == 0)

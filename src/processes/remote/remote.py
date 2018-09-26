@@ -16,7 +16,7 @@ class Remote(Process):
         self.room = Game.rooms[self._data.room_name]
 
         if self._data.room_name == 'W59S2':
-            should_mine = ['W58S2', 'W59S1']
+            should_mine = ['W58S2', 'W59S1', 'W58S1']
         elif self._data.room_name == 'W51S1':
             should_mine = ['W51S2']
         elif self._data.room_name == 'W59N2':
@@ -70,7 +70,7 @@ class Remote(Process):
                                                                  'source_id': sid})
 
         if self._data.room_name == 'W51S1':
-            to_claim = []
+            to_claim = ['W48N1']
         else:
             to_claim = []
 
@@ -93,7 +93,7 @@ class Remote(Process):
                 to_work.append(name)
 
         works = self.scheduler.proc_by_name('remotework', self._pid)
-        if len(works) < len(to_work):
+        if len(works) < len(to_work) and self._data.room_name == 'W51S1':
             taken = [m['data'].target_room for m in works]
 
             for target_room in to_work:

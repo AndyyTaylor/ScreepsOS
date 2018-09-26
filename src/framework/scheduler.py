@@ -55,7 +55,7 @@ class Scheduler():
             self.current_index = 0
 
         if _.isUndefined(self.processes[str(pid)]):
-            print(pid, 'is fucked')
+            # print(pid, 'is fucked')
             self.delete_process(pid)
             return self.get_next_process()
 

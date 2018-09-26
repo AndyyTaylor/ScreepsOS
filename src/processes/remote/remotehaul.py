@@ -83,7 +83,7 @@ class RemoteHaul(CreepProcess):
             if _.isUndefined(creep):
                 continue
 
-            max_carry -= creep.getActiveBodyparts(CARRY)
+            max_carry -= creep.getActiveBodyparts(CARRY) + 1
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_carry < max_carry:
             total_carry += 2
