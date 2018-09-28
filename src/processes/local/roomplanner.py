@@ -104,7 +104,17 @@ class RoomPlanner(Process):
                 if terrain.js_get(x, y) == TERRAIN_MASK_WALL:
                     return False
 
-            return Game.rooms[room_name].createConstructionSite(x, y, type) == OK
+            res = Game.rooms[room_name].createConstructionSite(x, y, type)
+            if res == ERR_INVALID_TARGET:
+                creeps = Game.rooms[room_name].lookForAt(LOOK_CREEPS, x, y)
+                if len(creeps) > 0:
+                    res = OK
+
+            if type == STRUCTURE_CONTAINER:
+                print('cont', res, room_name, x, y)
+            elif type == STRUCTURE_LINK:
+                print('link', res, room_name, x, y)
+            return res == OK
 
     def draw_visual(self, x, y, type):
         structures = self.room.lookForAt(LOOK_STRUCTURES, x, y)

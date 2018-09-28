@@ -99,18 +99,17 @@ class MineSite(CreepProcess):
         drop_pos, drop_type, deposit_id = self.load_deposit(drop_pos, drop_type)
 
         ideal_deposit = self.get_ideal_deposit()
-        if self._data.room_name == 'W51S1' or self._data.room_name == 'W59S2':
-            if deposit_id is None or drop_type != ideal_deposit:
-                if deposit_id is not None:
-                    Game.getObjectById(deposit_id).destroy()
+        if deposit_id is None or drop_type != ideal_deposit:
+            if deposit_id is not None:
+                Game.getObjectById(deposit_id).destroy()
 
-                    deposit_id = None
-                    drop_type = 'floor'
+                deposit_id = None
+                drop_type = 'floor'
 
-                if ideal_deposit == STRUCTURE_LINK:
-                    self.build_link(drop_pos)
-                else:
-                    self.build_container(drop_pos)
+            if ideal_deposit == STRUCTURE_LINK:
+                self.build_link(drop_pos)
+            else:
+                self.build_container(drop_pos)
 
         # Build to room.center instead
         if not _.isUndefined(self.room.storage):

@@ -92,7 +92,7 @@ class MineralSite(CreepProcess):
             nearby_terrain = self.room.lookForAtArea(LOOK_TERRAIN, y - 1, x - 1, y + 1, x + 1, True)
             for terrain in nearby_terrain:
                 if terrain.terrain != 'wall':
-                    print('container', terrain.x, terrain.y)
+                    print('container for mineral', terrain.x, terrain.y, self._data.room_name)
                     tid = self.ticketer.add_ticket('build', self._pid, {'type': STRUCTURE_CONTAINER,
                                                                         'x': terrain.x,
                                                                         'y': terrain.y,
