@@ -58,26 +58,30 @@ class RoomPlanner(Process):
             if self.lay_structures(STRUCTURE_ROAD, name):
                 has_laid = True
 
-        if not has_laid:
+        if not has_laid and len(self.room.construction_sites) == 0:
             self.sleep(500 + random.randint(0, 10))
         else:
-            self.sleep(random.randint(0, 10))
+            self.sleep(random.randint(0, 30))
 
     def lay_structures(self, type, room_name=None):
         if room_name is None:
             room_name = self._data.room_name
 
         if room_name == self._data.room_name:
-            positions = base['buildings'][type]['pos']
-            for pos in positions:
-                if self.build(type, pos['x'] - 1, pos['y'] - 1):
-                    return True
+            if Object.keys(base['buildings']).includes(type):
+                positions = base['buildings'][type]['pos']
+                for pos in positions:
+                    if self.build(type, pos['x'] - 1, pos['y'] - 1):
+                        return True
 
         tickets = _.filter(self.ticketer.get_tickets_by_type("build", room_name),
                            lambda t: t['data']['type'] == type)
+
         for ticket in tickets:
             if self.build(type, ticket['data']['x'], ticket['data']['y'], False, room_name):
                 return True
+            else:
+                self.ticketer.delete_ticket(ticket['tid'])
 
         return False
 
@@ -95,7 +99,22 @@ class RoomPlanner(Process):
 
             return False
         else:
-            return Game.rooms[room_name].createConstructionSite(x, y, type) == OK
+            if type == STRUCTURE_ROAD:
+                terrain = Game.map.getRoomTerrain(room_name)
+                if terrain.js_get(x, y) == TERRAIN_MASK_WALL:
+                    return False
+
+            res = Game.rooms[room_name].createConstructionSite(x, y, type)
+            if res == ERR_INVALID_TARGET:
+                creeps = Game.rooms[room_name].lookForAt(LOOK_CREEPS, x, y)
+                if len(creeps) > 0:
+                    res = OK
+
+            if type == STRUCTURE_CONTAINER:
+                print('cont', res, room_name, x, y)
+            elif type == STRUCTURE_LINK:
+                print('link', res, room_name, x, y)
+            return res == OK
 
     def draw_visual(self, x, y, type):
         structures = self.room.lookForAt(LOOK_STRUCTURES, x, y)

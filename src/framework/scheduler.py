@@ -25,7 +25,8 @@ process_classes = {
     'claim': Claim,
     'remotework': RemoteWork,
     'simpleattack': SimpleAttack,
-    'sappattack': SappAttack
+    'sappattack': SappAttack,
+    'mineralsite': MineralSite
 }
 
 
@@ -34,8 +35,6 @@ class Scheduler():
     def __init__(self):
         self.validate_memory()
 
-        self.processes = Object.assign({}, self.memory.processes)
-        self.queue = Object.assign({}, self.memory.queue)
         self.completed = []
 
     def get_next_process(self):
@@ -56,7 +55,7 @@ class Scheduler():
             self.current_index = 0
 
         if _.isUndefined(self.processes[str(pid)]):
-            print(pid, 'is fucked')
+            # print(pid, 'is fucked')
             self.delete_process(pid)
             return self.get_next_process()
 
@@ -88,6 +87,8 @@ class Scheduler():
         for pid in Object.keys(self.processes):
             if self.create_process(pid).is_completed():
                 self.delete_process(pid)
+
+        self.save_processes()
 
     def get_priority_of(self, pid):
         proc = self.processes[pid]
@@ -141,10 +142,16 @@ class Scheduler():
         return Object.keys(self.processes)
 
     def save_processes(self):
-        pass
+        self.memory.processes = self.processes
+        self.memory.queue = self.queue
+
+    def load_processes(self):
+        self.processes = Object.assign({}, self.memory.processes)
+        self.queue = Object.assign({}, self.memory.queue)
 
     def kill_all_processes(self):
-        pass
+        self.memory.processes = {}
+        self.memory.queue = {}
 
     def validate_memory(self):
         if _.isUndefined(Memory.os.scheduler):

@@ -13,14 +13,20 @@ class Kernel():
         self.validate_memory()
 
         self.new_upload = self.check_version()
+        Memory.stats.resets += 1
+        # self.new_upload = True
 
         self.scheduler = Scheduler()
+
+        if RawMemory.js_get().length > 1000000:
+            self.new_upload = True
 
         if self.new_upload:
             print("-------------------------")
             print("NEW UPLOAD DETECTED -", js_global.VERSION)
             print("-------------------------")
             self.scheduler.kill_all_processes()
+            self.scheduler.load_processes()
             self.unassign_creeps()
 
     def start(self):
@@ -34,6 +40,7 @@ class Kernel():
 
         self.launch_cities()  # Launch Empire
 
+        self.scheduler.load_processes()
         self.scheduler.queue_processes()
         self.ticketer.load_tickets()
 
@@ -85,6 +92,12 @@ class Kernel():
         self.log_resources()
         self.log_processes()
 
+        Memory.stats.tickets = {}
+        Memory.stats.tickets.count = {
+            'spawn': len(self.ticketer.get_tickets_by_type('spawn')),
+            'build': len(self.ticketer.get_tickets_by_type('build'))
+        }
+
         Memory.stats.credits = Game.market.credits
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket
@@ -112,21 +125,23 @@ class Kernel():
                 'progressTotal': room.controller.progressTotal
             }
 
-            stored_energy = 0
-            if not _.isUndefined(room.storage):
-                stored_energy += room.storage.store[RESOURCE_ENERGY]
+            resources = {'energy': 0}
+            stores = _.filter(room.find(FIND_STRUCTURES),
+                              lambda s: s.structureType == STRUCTURE_CONTAINER or
+                                        s.structureType == STRUCTURE_LINK or
+                                        s.structureType == STRUCTURE_STORAGE)  # noqa
 
-            for struct in _.filter(room.find(FIND_STRUCTURES),
-                                   lambda s: s.structureType == STRUCTURE_CONTAINER or
-                                             s.structureType == STRUCTURE_LINK):  # noqa
-                if struct.structureType == STRUCTURE_CONTAINER:
-                    stored_energy += struct.store[RESOURCE_ENERGY]
+            for store in stores:
+                if _.isUndefined(store.store):
+                    resources[RESOURCE_ENERGY] += store.energy
                 else:
-                    stored_energy += struct.energy
+                    for rtype in Object.keys(store.store):
+                        if not Object.keys(resources).includes(rtype):
+                            resources[rtype] = store.store[rtype]
+                        else:
+                            resources[rtype] += store.store[rtype]
 
-            stats.stored = {
-                'energy': stored_energy
-            }
+            stats.stored = resources
 
             total_spawns = len(room.spawns)
             num_working = 0

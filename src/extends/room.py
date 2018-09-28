@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from base import base
 
 __pragma__('noalias', 'keys')
 __pragma__('noalias', 'name')
@@ -8,6 +9,10 @@ __pragma__('noalias', 'name')
 Object.defineProperties(Room.prototype, {
     'creeps': {
         'get': lambda: this._get_creeps()
+    }, 'center': {
+        'get': lambda: this._get_center()
+    }, 'cent_link': {
+        'get': lambda: this._get_cent_link()
     }, 'flags': {
         'get': lambda: this.find(FIND_FLAGS)
     }, 'feed_locations': {
@@ -19,6 +24,11 @@ Object.defineProperties(Room.prototype, {
     }, 'spawns': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType == STRUCTURE_SPAWN)
+    }, 'terminal': {
+        'get': lambda: _.filter(this.find(FIND_STRUCTURES),
+                                lambda s: s.structureType == STRUCTURE_TERMINAL)[0]
+    }, 'mineral': {
+        'get': lambda: this.find(FIND_MINERALS)[0]
     }, 'repair_sites': {
         'get': lambda: _.filter(this.find(FIND_STRUCTURES),
                                 lambda s: s.structureType != STRUCTURE_WALL and
@@ -42,6 +52,17 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: this._get_walls()
     }
 })
+
+
+def _get_center():
+    if not _.isUndefined(this.storage):
+        return this.storage.pos
+    elif not _.isUndefined(Game.flags[this.name]):
+        pos = Game.flags[this.name].pos
+
+        return __new__(RoomPosition(pos.x + 5, pos.y + 5, this.name))
+    else:
+        return __new__(RoomPosition(25, 25, this.name))
 
 
 def _get_hostile_military():
@@ -153,8 +174,7 @@ def _get_additional_workers():
 
         return 0
 
-    if Game.time > this.memory.dropped_energy_tick + 750 and \
-            this.energyAvailable == this.energyCapacityAvailable:
+    if Game.time > this.memory.dropped_energy_tick + 750:
         this.memory.dropped_energy = this.total_dropped_energy()
         this.memory.dropped_energy_tick = Game.time
 
@@ -173,8 +193,22 @@ def _get_additional_workers():
                 this.memory.additional_workers -= 1
 
         this.memory.additional_workers = max(0, this.memory.additional_workers)
+        this.memory.additional_workers = min(7, this.memory.additional_workers)
 
     return this.memory.additional_workers
+
+
+def _get_cent_link():
+    flag = Game.flags[this.name]
+    link_x = flag.pos.x + base['central_link']['x']
+    link_y = flag.pos.y + base['central_link']['y']
+
+    structures = this.lookForAt(LOOK_STRUCTURES, link_x, link_y)
+    for struct in structures:
+        if struct.structureType == STRUCTURE_LINK:
+            return Game.getObjectById(struct.id)
+
+    # return undefined
 
 
 def _basic_matrix(ignore_creeps=False):  # Should pass in actual room name
@@ -208,3 +242,5 @@ Room.prototype._get_hostile_military = _get_hostile_military
 Room.prototype._get_walls = _get_walls
 Room.prototype.basic_matrix = _basic_matrix
 Room.prototype._get_creeps = _get_creeps
+Room.prototype._get_center = _get_center
+Room.prototype._get_cent_link = _get_cent_link

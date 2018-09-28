@@ -23,7 +23,8 @@ class BuildSite(CreepProcess):
         if creep.is_empty():
             if not _.isUndefined(self.room.storage) and \
                     self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
-                creep.set_task('withdraw', {'target_id': self.room.storage.id})
+                creep.set_task('withdraw', {'target_id': self.room.storage.id,
+                                            'type': RESOURCE_ENERGY})
             else:
                 creep.set_task('gather')
         elif creep.is_full() or creep.is_idle():
@@ -45,16 +46,15 @@ class BuildSite(CreepProcess):
         return len(self._data.creep_names) < 1 + self.room.get_additional_workers()  # Scale this
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
-            _.isUndefined(creep.memory.remote)
+        return creep.memory.role == 'worker'
 
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]
         mod = [WORK, CARRY, MOVE]
         count = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy and count < 10:
+        while self.get_body_cost(body.concat(mod)) <= energy and count < 5:
             body = body.concat(mod)
             count += 1
 
-        return body, None
+        return body, {'role': 'worker'}

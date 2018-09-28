@@ -1,7 +1,7 @@
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, Generic
 
 from .creep import Creep
-from .misc_obj import Flag, RoomObject
+from .misc_obj import Flag, RoomObject, Mineral
 # noinspection PyProtectedMember
 from .room import Room, RoomPosition, _Owner
 from .structures import ConstructionSite, OwnedStructure, Structure, StructureSpawn
@@ -257,7 +257,7 @@ class Game:
     time = 0  # type: int
 
     @classmethod
-    def getObjectById(cls, _id: str) -> Optional[RoomObject]:
+    def getObjectById(cls, _id: str) -> Union[Mineral, Structure]:
         pass
 
     @classmethod

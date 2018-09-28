@@ -35,14 +35,21 @@ class FeedSite(CreepProcess):
     def run_creep(self, creep):
         # creep.say("Feeder")
         cont = Game.getObjectById(self._data.withdraw_id)
-        if creep.is_idle():
+
+        storage = creep.room.storage
+        flag = False
+        if not _.isUndefined(storage):
+            if creep.memory.task_name == 'gather' and storage.store[RESOURCE_ENERGY] > 0:
+                flag = True
+
+        if creep.is_idle() or flag:
             if creep.is_empty():
-                storage = creep.room.storage
                 if not creep.room.is_full() and not _.isNull(cont) and \
                         cont.store[RESOURCE_ENERGY] > 0:
-                    creep.set_task('withdraw', {'target_id': self._data.withdraw_id})
+                    creep.set_task('withdraw', {'target_id': self._data.withdraw_id,
+                                                'type': RESOURCE_ENERGY})
                 elif not _.isUndefined(storage) and storage.store[RESOURCE_ENERGY] > 0:
-                    creep.set_task('withdraw', {'target_id': storage.id})
+                    creep.set_task('withdraw', {'target_id': storage.id, 'type': RESOURCE_ENERGY})
                 elif _.isUndefined(creep.room.storage) or storage.store[RESOURCE_ENERGY] == 0:
                     creep.set_task('gather')
             elif not creep.room.is_full() and not creep.is_empty():
@@ -61,8 +68,7 @@ class FeedSite(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) < 1 and \
-            _.isUndefined(creep.memory.haul_ind)
+        return creep.memory.role == 'feeder'
 
     def gen_body(self, energy):
         if self.room.rcl > 4:
@@ -87,7 +93,7 @@ class FeedSite(CreepProcess):
             body = body.concat(mod)
             carry_count += carry_mod
 
-        return body, None
+        return body, {'role': 'feeder'}
 
     def init(self):
         base_flag = Game.flags[self._data.room_name]

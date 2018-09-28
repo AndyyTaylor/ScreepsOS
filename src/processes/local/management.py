@@ -28,37 +28,107 @@ class Management(CreepProcess):
             sit_pos = __new__(RoomPosition(self._data.sit_x,
                                            self._data.sit_y, self._data.room_name))
             if creep.pos.inRangeTo(sit_pos, 0):
-                center_link = Game.getObjectById(self._data.cent_link_id)
-                up_link = Game.getObjectById(self._data.up_link_id)
+                tasks = [self.fill_up_cont, self.clear_cent_link, self.fill_terminal,
+                         self.empty_creep]
 
-                if _.isNull(center_link) or _.isNull(up_link):
-                    return
-
-                if self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
-                    if center_link.energy > 0:
-                        if up_link.energy < up_link.energyCapacity:
-                            center_link.transferEnergy(up_link)
-                        elif creep.is_full():
-                            creep.transfer(self.room.storage, RESOURCE_ENERGY)
-                        else:
-                            creep.withdraw(center_link, RESOURCE_ENERGY)
-                    elif creep.is_empty():
-                        creep.withdraw(self.room.storage, RESOURCE_ENERGY)
-                    elif center_link.energy < center_link.energyCapacity and \
-                            up_link.energy < up_link.energyCapacity and center_link.cooldown == 0:
-                        creep.transfer(center_link, RESOURCE_ENERGY)
+                for task in tasks:
+                    if task(creep):
+                        break
             else:
                 creep.set_task("travel", {"dest_x": self._data.sit_x, "dest_y": self._data.sit_y,
                                           "dest_room_name": self._data.room_name})
 
         creep.run_current_task()
 
+    def fill_up_cont(self, creep):
+        if self.room.storage.store[RESOURCE_ENERGY] < js_global.STORAGE_MIN[self.room.rcl]:
+            return False
+
+        center_link = Game.getObjectById(self._data.cent_link_id)
+        up_link = Game.getObjectById(self._data.up_link_id)
+        if _.isNull(center_link) or _.isNull(up_link):
+            return False
+
+        if center_link.cooldown != 0 or up_link.energy > 700:
+            return False
+
+        if center_link.energy > 0:
+            center_link.transferEnergy(up_link)
+        elif creep.is_empty():
+            creep.withdraw(self.room.storage, RESOURCE_ENERGY)
+        elif creep.carry[RESOURCE_ENERGY] > 0:
+            creep.transfer(center_link, RESOURCE_ENERGY)
+        else:
+            creep.transfer(self.room.storage, Object.keys(creep.carry).pop())
+
+        return True
+
+    def clear_cent_link(self, creep):
+        center_link = Game.getObjectById(self._data.cent_link_id)
+        if _.isNull(center_link):
+            return False
+        name: str = 'hey'
+
+        if center_link.energy == 0:
+            return False
+
+        if not creep.is_full():
+            creep.withdraw(center_link, RESOURCE_ENERGY)
+        else:
+            creep.transfer(self.room.storage, Object.keys(creep.carry).pop())
+
+        return True
+
+    def fill_terminal(self, creep):
+        terminal = self.room.terminal
+        if _.isUndefined(terminal):
+            return False
+
+        reserves = self.room.storage.store[RESOURCE_ENERGY] < js_global.STORAGE_MIN[self.room.rcl]
+        if terminal.store.energy < 30000 and not reserves:
+            if creep.carry[RESOURCE_ENERGY] > 0:
+                amt = min(creep.carry[RESOURCE_ENERGY], 30000 - terminal.store.energy)
+                creep.transfer(terminal, RESOURCE_ENERGY, amt)
+            else:
+                creep.withdraw(self.room.storage, RESOURCE_ENERGY)
+
+            return True
+
+        storage = self.room.storage
+        for rtype in Object.keys(storage.store):
+            if storage.store[rtype] < 5000:
+                continue
+
+            if _.isUndefined(terminal.store[rtype]) or terminal.store[rtype] < 5000:
+                if creep.carry[rtype] > 0:
+                    if not _.isUndefined(terminal.store[rtype]):
+                        amt = min(creep.carry[rtype], 5000 - terminal.store[rtype])
+                    else:
+                        amt = creep.carry[rtype]
+                    amt = min(amt, storage.store[rtype] - 5000)
+                    creep.transfer(terminal, rtype, amt)
+                elif creep.is_full():
+                    creep.transfer(storage, Object.keys(creep.carry).pop())
+                else:
+                    creep.withdraw(storage, rtype)
+
+                return True
+
+        return False
+
+    def empty_creep(self, creep):
+        if _.sum(creep.carry) == 0:
+            return False
+
+        creep.transfer(self.room.storage, Object.keys(creep.carry).pop())
+
+        return True
+
     def needs_creeps(self):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) < 1 and \
-            _.isUndefined(creep.memory.haul_ind)
+        return creep.memory.role == 'manager'
 
     def gen_body(self, energy):
         body = [CARRY, CARRY, MOVE]
@@ -70,7 +140,7 @@ class Management(CreepProcess):
             body = body.concat(mod)
             carry_count += 2
 
-        return body, None
+        return body, {'role': 'manager'}
 
     def init(self):
         base_flag = Game.flags[self._data.room_name]

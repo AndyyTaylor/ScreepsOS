@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from extends import *  # noqa
 from base import base
 
 from framework.process import Process
@@ -23,7 +24,7 @@ class City(Process):
         #                                                'target_room': 'W52S6'})
 
         if self._data.main_room == 'W59S2':
-            remotes = ['W58S2', 'W59S1']
+            remotes = ['W58S2', 'W59S1', 'W58S1']
         elif self._data.main_room == 'W51S1':
             remotes = ['W51S2']
         elif self._data.main_room == 'W59N2':
@@ -72,7 +73,7 @@ class City(Process):
                 taken_ids.append(proc['data'].site_id)
 
             for site_id in site_ids:
-                if not taken_ids.includes(source_id):
+                if not taken_ids.includes(site_id):
                     self.launch_child_process('buildsite', {'site_id': site_id,
                                                             'room_name': self._data.main_room})
 
@@ -92,3 +93,7 @@ class City(Process):
                 if not taken_ids.includes(source_id):
                     self.launch_child_process('minesite', {'source_id': source_id,
                                                            'room_name': self._data.main_room})
+
+        if self.scheduler.count_by_name('mineralsite', self._pid) < 1 and room.rcl >= 6:
+            self.launch_child_process('mineralsite', {'mineral_id': room.mineral.id,
+                                                      'room_name': self._data.main_room})

@@ -30,11 +30,15 @@ class Logistics(CreepProcess):
 
     def run_creep(self, creep):
         haul = self._data.sources[creep.memory.haul_ind]
+        if _.isUndefined(haul):  # Sources / sinks has changed
+            creep.suicide()
+            return
+
         cont = Game.getObjectById(haul.cont_id)
         if creep.is_full():
             creep.set_task('deposit', {'target_id': self.room.storage.id})
         elif creep.is_empty() or creep.is_idle():
-            if not _.isNull(haul.cont_id) and _.sum(cont.store) > 100:
+            if not _.isNull(cont) and _.sum(cont.store) > 100:
                 creep.set_task('withdraw', {'target_id': haul.cont_id})
             else:
                 creep.set_task('gather')
@@ -45,12 +49,9 @@ class Logistics(CreepProcess):
         return len(self._data.creep_names) < len(self._data.sources)
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) < 1 and creep.getActiveBodyparts(CARRY) > 0 \
-            and not _.isUndefined(creep.memory.haul_ind)
+        return creep.memory.role == 'hauler'
 
     def gen_body(self, energyAvailable):
-        if self._data.room_name == 'W59S2':
-            print("Log create body")
         if self.room.rcl < 5:  # Should check path cost
             body = [CARRY, MOVE]
             mod = [CARRY, MOVE]
@@ -76,29 +77,59 @@ class Logistics(CreepProcess):
             total_carry += carry_mod
             body = body.concat(mod)
 
-        return body, {'haul_ind': indexes[0]}
+        return body, {'haul_ind': indexes[0], 'role': 'hauler'}
 
     def init(self):
         if _.isUndefined(self.room.storage):
             self.kill()
             return
 
+        self.load_sources()  # like room sources..
+        if self.room.rcl >= 6:
+            self.load_mineral()
+
+        self._data.has_init = True
+
+    def load_sources(self):
         for source in self.room.sources:
             result = PathFinder.search(self.room.storage.pos, {'pos': source.pos, 'range': 1},
                                        lambda r: self.room.basic_matrix())
             amt = 10
             dist = len(result.path)
 
-            cont_id = None
-            structs = self.room.lookForAtArea(LOOK_STRUCTURES, source.pos.y - 1, source.pos.x - 1,
-                                              source.pos.y + 1, source.pos.x + 1, True)
+            cont_id = None  # 2 for links, but be careful of sources near controllers
+            structs = self.room.lookForAtArea(LOOK_STRUCTURES, source.pos.y - 2, source.pos.x - 2,
+                                              source.pos.y + 2, source.pos.x + 2, True)
 
+            has_link = False
             for struct in structs:
-                if struct.structure.structureType == STRUCTURE_CONTAINER:
-                    cont_id = struct.structure.id
+                if struct.structure.structureType == STRUCTURE_LINK:
+                    has_link = True
                     break
+                elif struct.structure.structureType == STRUCTURE_CONTAINER:
+                    cont_id = struct.structure.id
+                    break  # Cont will be removed upon link construction
+
+            if has_link:
+                continue  # Don't add as we don't need hauler
 
             self._data.sources.append({'pos': source.pos, 'cont_id': cont_id,
                                        'bandwidth': amt * dist * 2 * 1.2})
 
-        self._data.has_init = True
+    def load_mineral(self):
+        mineral = self.room.mineral
+        result = PathFinder.search(self.room.center, {'pos': mineral.pos, 'range': 1},
+                                   lambda r: self.room.basic_matrix())
+        amt = 3
+        dist = len(result.path)
+
+        cont_id = None
+        structs = self.room.lookForAtArea(LOOK_STRUCTURES, mineral.pos.y - 1, mineral.pos.x - 1,
+                                          mineral.pos.y + 1, mineral.pos.x + 1, True)
+        for struct in structs:
+            if struct.structure.structureType == STRUCTURE_CONTAINER:
+                cont_id = struct.structure.id
+                break  # Cont will be removed upon link construction
+
+        self._data.sources.append({'pos': mineral.pos, 'cont_id': cont_id,
+                                   'bandwidth': amt * dist * 2 * 1.2})

@@ -6,6 +6,7 @@ import sys
 import urllib.parse
 import urllib.request
 from argparse import ArgumentParser
+from typing import Union
 
 import ssl
 import base64
@@ -20,7 +21,7 @@ transcrypt_clean_args = transcrypt_arguments + ['-b']
 
 TESTING = False
 
-
+# function cast(A, B) { return B; }
 new_file = ''
 with open('src/config.py', 'r') as f:
     for line in f:
@@ -238,7 +239,18 @@ def upload(config):
     else:
         post_url = '{}/api/user/code'.format(config.url)
 
-    post_data = json.dumps({'modules': module_files, 'branch': config.branch}).encode('utf-8')
+    post_data: Union[str, bytes] = json.dumps({'modules': module_files, 'branch': config.branch}).encode('utf-8')
+    #
+    # post_data = str(post_data)
+    # start = 0
+    # ind = str(post_data).find('cast (', start)
+    # print(str(post_data)[0:10])
+    # while ind != -1:
+    #     new = str(post_data).find('\\t', ind-20, ind)
+    #     start = ind + 1
+    #     ind = str(post_data).find('cast (', start)
+    #
+    # post_data = post_data.encode('utf-8')
 
     auth_pair = config.username.encode('utf-8') + b':' + config.password.encode('utf-8')
 

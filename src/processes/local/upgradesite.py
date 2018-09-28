@@ -31,8 +31,10 @@ class UpgradeSite(CreepProcess):
                 if not _.isNull(link) and link.energy > 0:
                     creep.set_task('withdraw', {'target_id': self._data.link_id})
                 elif not _.isUndefined(self.room.storage) and \
-                        self.room.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[self.room.rcl]:
-                    creep.set_task('withdraw', {'target_id': self.room.storage.id})
+                        self.room.storage.store[RESOURCE_ENERGY] > \
+                        js_global.STORAGE_MIN[self.room.rcl]:
+                    creep.set_task('withdraw', {'target_id': self.room.storage.id,
+                                                'type': RESOURCE_ENERGY})
                 else:
                     creep.set_task('gather')
             elif creep.is_full() or creep.is_idle():
@@ -47,8 +49,7 @@ class UpgradeSite(CreepProcess):
             return len(self._data.creep_names) < 1 + self.room.get_additional_workers()
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
-            _.isUndefined(creep.memory.remote)
+        return creep.memory.role == 'upgrader'
 
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]
@@ -59,7 +60,7 @@ class UpgradeSite(CreepProcess):
             body = body.concat(mod)
             count += 1
 
-        return body, None
+        return body, {'role': 'upgrader'}
 
     def init(self):  # This should request certain buildings. container / link etc
         if self.room.rcl >= 5:
