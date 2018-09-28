@@ -102,11 +102,9 @@ class RemoteHaul(CreepProcess):
 
         source = Game.getObjectById(self._data.source_id)
         start = self.room.storage.pos
-        result = PathFinder.search(start, {'pos': source.pos, 'range': 1,
-                                           'roomCallback': lambda r:
-                                           self.haul_room.basic_matrix(True)})
+        result = PathFinder.search(start, {'pos': source.pos, 'range': 2, 'maxOps': 20000})
 
-        self._data.path_length = len(result.path)
+        self._data.path_length = len(result.path) + 1
 
         result = PathFinder.search(source.pos, {'pos': start, 'range': 7})
         if not result.incomplete:
