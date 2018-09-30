@@ -90,7 +90,7 @@ class MineSite(CreepProcess):
             total_work += 2
             body = body.concat(mod)
 
-        return body, None
+        return body, {'role': 'miner'}
 
     def init(self):
         self._data.has_init = True

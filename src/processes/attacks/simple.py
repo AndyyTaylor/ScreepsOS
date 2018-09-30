@@ -61,7 +61,7 @@ class SimpleAttack(CreepProcess):
                                               s.structureType != STRUCTURE_RAMPART and
                                               s.structureType != STRUCTURE_CONTROLLER)
                         if len(structures) > 0:
-                            target = creep.pos.findClosestByRange(structures)
+                            target = creep.pos.findClosestByPath(structures)
                         else:
                             creeps = creep.room.find(FIND_HOSTILE_CREEPS)
 
@@ -75,11 +75,9 @@ class SimpleAttack(CreepProcess):
                                 creep.getActiveBodyparts(RANGED_ATTACK) == 0 or \
                                 not creep.pos.inRangeTo(target, 3) or \
                                 target.getActiveBodyparts(ATTACK) == 0:
-                            creep.moveTo(target, {'visualizePathStyle': {},
-                                                  'ignoreDestructibleStructures': True})
+                            creep.moveTo(target, {'visualizePathStyle': {}})
                     else:
-                        creep.moveTo(target, {'visualizePathStyle': {},
-                                              'ignoreDestructibleStructures': False})
+                        creep.moveTo(target)
 
                     if creep.pos.isNearTo(target):
                         if creep.getActiveBodyparts(ATTACK) > 0:
@@ -121,7 +119,7 @@ class SimpleAttack(CreepProcess):
         creep.run_current_task()
 
     def needs_creeps(self):
-        return len(self._data.creep_names) < 1
+        return len(self._data.creep_names) < 2
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(ATTACK) > 1 and creep.getActiveBodyparts(HEAL) == 1
@@ -131,7 +129,7 @@ class SimpleAttack(CreepProcess):
         mod = [ATTACK, MOVE]
         attack_count = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy:
+        while self.get_body_cost(body.concat(mod)) <= energy and len(body.concat(mod)) <= 50:
             body = body.concat(mod)
             attack_count += 1  # will count ranged attack after
 

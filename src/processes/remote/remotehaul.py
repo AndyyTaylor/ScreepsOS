@@ -93,7 +93,7 @@ class RemoteHaul(CreepProcess):
             total_carry += 2
             body = body.concat(mod)
 
-        return body, {'remote': True}
+        return body, {'remote': True, 'role': 'rhauler'}
 
     def init(self):
         haul_room = Game.rooms[self._data.haul_room]

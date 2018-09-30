@@ -49,7 +49,7 @@ class RemoteMine(CreepProcess):
             total_work += 1
             body = body.concat(mod)
 
-        return body, {'remote': True}
+        return body, {'remote': True, 'role': 'rminer'}
 
     def init(self):
         mine_room = Game.rooms[self._data.mine_room]
