@@ -24,21 +24,23 @@ class Management(CreepProcess):
         self.run_creeps()
 
     def run_creep(self, creep):
-        if creep.is_idle():
-            sit_pos = __new__(RoomPosition(self._data.sit_x,
-                                           self._data.sit_y, self._data.room_name))
-            if creep.pos.inRangeTo(sit_pos, 0):
-                tasks = [self.fill_up_cont, self.clear_cent_link, self.fill_terminal,
-                         self.empty_creep]
+        sit_pos = __new__(RoomPosition(self._data.sit_x,
+                                       self._data.sit_y, self._data.room_name))
+        if creep.pos.inRangeTo(sit_pos, 0) or creep.memory.task_name == 'gather':
+            if creep.memory.task_name == 'gather':
+                creep.clear_task()
 
-                for task in tasks:
-                    if task(creep):
-                        break
-            else:
-                creep.set_task("travel", {"dest_x": self._data.sit_x, "dest_y": self._data.sit_y,
-                                          "dest_room_name": self._data.room_name})
+            tasks = [self.fill_up_cont, self.clear_cent_link, self.fill_terminal,
+                     self.empty_creep, self.gather]
 
-        creep.run_current_task()
+            for task in tasks:
+                if task(creep):
+                    break
+        else:
+            creep.set_task("travel", {"dest_x": self._data.sit_x, "dest_y": self._data.sit_y,
+                                      "dest_room_name": self._data.room_name})
+
+            creep.run_current_task()
 
     def fill_up_cont(self, creep):
         if self.room.storage.store[RESOURCE_ENERGY] < js_global.STORAGE_MIN[self.room.rcl]:
@@ -141,6 +143,12 @@ class Management(CreepProcess):
             carry_count += 2
 
         return body, {'role': 'manager'}
+
+    def gather(self, creep):
+        creep.set_task('gather')
+        creep.run_current_task()
+
+        return True
 
     def init(self):
         base_flag = Game.flags[self._data.room_name]

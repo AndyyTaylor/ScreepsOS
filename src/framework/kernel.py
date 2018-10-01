@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from math import ceil
 
 from framework.scheduler import Scheduler, process_classes
 from framework.ticketer import Ticketer
@@ -116,9 +117,9 @@ class Kernel():
 
             if room.is_city() or room.is_remote():
                 if not _.isUndefined(Memory.stats.rooms[name]) and not _.isUndefined(Memory.stats.rooms[name].expenses):
-                    expenses = Object.assign({'build': 0, 'repair': 0, 'upgrade': 0}, Memory.stats.rooms[name].expenses)
+                    expenses = Object.assign({'build': 0, 'repair': 0, 'upgrade': 0, 'decay': 0}, Memory.stats.rooms[name].expenses)
                 else:
-                    expenses = {'build': 0, 'repair': 0, 'upgrade': 0}
+                    expenses = {'build': 0, 'repair': 0, 'upgrade': 0, 'decay': 0}
                 income = {'local_harvest': 0, 'remote_harvest': 0}
                 events = room.getEventLog()
                 for event in events:
@@ -133,6 +134,9 @@ class Kernel():
                             income['local_harvest'] += event.data.amount
                         else:
                             income['remote_harvest'] += event.data.amount
+
+                for resource in room.find(FIND_DROPPED_RESOURCES):
+                    expenses['decay'] += ceil(resource.amount / 1000)
 
                 stats.expenses = expenses
                 stats.income = income

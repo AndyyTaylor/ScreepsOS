@@ -32,7 +32,7 @@ class MineSite(CreepProcess):
 
         if self._data.drop_type == STRUCTURE_LINK:
             link = Game.getObjectById(self._data.deposit_id)
-            if link.energy > 0 and link.cooldown == 0:
+            if link.energy > 400 and link.cooldown == 0:
                 link.transferEnergy(self.room.cent_link)
 
             if _.sum(creep.carry) + 12 >= creep.carryCapacity:  # Don't drop any resources
