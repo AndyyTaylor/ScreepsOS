@@ -67,7 +67,8 @@ class Logistics(CreepProcess):
         for name in self._data.creep_names:
             creep = Game.creeps[name]
             if creep and not _.isUndefined(creep.memory.haul_ind):
-                indexes.remove(creep.memory.haul_ind)
+                if indexes.includes(creep.memory.haul_ind):
+                    indexes.remove(creep.memory.haul_ind)
 
         haul = self._data.sources[indexes[0]]
 

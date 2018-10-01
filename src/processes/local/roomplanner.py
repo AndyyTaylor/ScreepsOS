@@ -57,6 +57,8 @@ class RoomPlanner(Process):
 
             if self.lay_structures(STRUCTURE_ROAD, name):
                 has_laid = True
+            elif self.lay_structures(STRUCTURE_CONTAINER, name):
+                has_laid = True
 
         if not has_laid and len(self.room.construction_sites) == 0:
             self.sleep(500 + random.randint(0, 10))

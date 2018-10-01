@@ -113,7 +113,7 @@ class Kernel():
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
 
-            stats = {}
+            stats = Memory.stats.rooms[name] or {}
 
             if room.is_city() or room.is_remote():
                 if not _.isUndefined(Memory.stats.rooms[name]) and not _.isUndefined(Memory.stats.rooms[name].expenses):
@@ -131,6 +131,8 @@ class Kernel():
                         expenses['upgrade'] += event.data.energySpent
                     elif event.event == EVENT_HARVEST:
                         if room.is_city():
+                            if not _.isUndefined(Memory.stats.rooms[name].lharvest):
+                                Memory.stats.rooms[name].lharvest.harvest += event.data.amount
                             income['local_harvest'] += event.data.amount
                         else:
                             income['remote_harvest'] += event.data.amount

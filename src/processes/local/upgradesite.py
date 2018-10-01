@@ -42,7 +42,8 @@ class UpgradeSite(CreepProcess):
 
             sign = self.room.controller.sign
             if (_.isUndefined(sign) or sign.text != js_global.CONTROLLER_SIGN) and _.isUndefined(self._data.no_sign):
-                if creep.moveTo(self.room.controller) == ERR_NO_PATH:
+                res = creep.moveTo(self.room.controller)
+                if res == ERR_NO_PATH or creep.ticksToLive < 1400:
                     self._data.no_sign = True
                 else:
                     creep.set_task('sign')

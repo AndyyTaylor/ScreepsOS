@@ -28,7 +28,11 @@ class RemoteHaul(CreepProcess):
         if creep.is_full():
             creep.set_task("deposit", {'target_id': self.room.storage.id})
         elif creep.is_empty() or creep.is_idle():
-            if creep.room.name != self._data.haul_room:
+            cont = Game.getObjectById(self._data.deposit_id)
+            creep.say(cont)
+            if not _.isNull(cont):
+                creep.set_task('withdraw', {'target_id': cont.id})
+            elif creep.room.name != self._data.haul_room:
                 if not _.isNull(source):
                     creep.moveTo(source)
                 else:
@@ -94,6 +98,8 @@ class RemoteHaul(CreepProcess):
             total_carry += 2
             body = body.concat(mod)
 
+        Memory.stats.rooms[self._data.room_name].rharvest.spawn += self.get_body_cost(body)
+
         return body, {'remote': True, 'role': 'rhauler'}
 
     def init(self):
@@ -106,6 +112,8 @@ class RemoteHaul(CreepProcess):
         result = PathFinder.search(start, {'pos': source.pos, 'range': 2, 'maxOps': 20000})
 
         self._data.path_length = len(result.path) + 1
+
+        self._data.deposit_id = self.load_deposit(source)
 
         result = PathFinder.search(source.pos, {'pos': start, 'range': 7, 'maxOps': 20000})
         if not result.incomplete:
@@ -120,3 +128,14 @@ class RemoteHaul(CreepProcess):
                                                               })
 
         self._data.has_init = True
+
+    def load_deposit(self, source):
+        deposit_id = None
+        x, y = source.pos.x, source.pos.y
+        nearby_structs = self.haul_room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
+        for struct in nearby_structs:
+            if struct.structure.structureType == STRUCTURE_CONTAINER:
+                deposit_id = struct.structure.id
+                break
+
+        return deposit_id

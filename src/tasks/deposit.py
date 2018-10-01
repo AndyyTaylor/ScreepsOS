@@ -25,6 +25,10 @@ class Deposit(Task):
                 type = self._data.type
             elif not _.isUndefined(target.store):
                 type = Object.keys(creep.carry).pop()
+
+            if not _.isUndefined(creep.memory.role) and creep.memory.role == 'rhauler':
+                Memory.stats.rooms[creep.memory.city].rharvest.transfer += creep.carry.energy
+
             creep.transfer(target, type)
 
     def is_completed(self, creep):
