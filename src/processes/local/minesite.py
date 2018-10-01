@@ -80,7 +80,7 @@ class MineSite(CreepProcess):
         mod = [WORK, WORK, MOVE]
 
         if self.get_ideal_deposit() == STRUCTURE_LINK:
-            body = [CARRY, CARRY, MOVE]
+            body = [WORK, CARRY, MOVE]
             total_work = 0
         else:
             body = [WORK, WORK, MOVE]
@@ -90,7 +90,7 @@ class MineSite(CreepProcess):
             total_work += 2
             body = body.concat(mod)
 
-        return body, None
+        return body, {'role': 'miner'}
 
     def init(self):
         self._data.has_init = True

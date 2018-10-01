@@ -3,6 +3,8 @@ from defs import *  # noqa
 
 from framework.task import Task
 
+__pragma__('noalias', 'name')
+
 
 class Feed(Task):
 
@@ -24,6 +26,12 @@ class Feed(Task):
             creep.moveTo(target)
         else:
             creep.transfer(target, RESOURCE_ENERGY)
+
+            if _.isUndefined(Memory.stats.rooms[creep.room.name].expenses.feed):
+                Memory.stats.rooms[creep.room.name].expenses.feed = 0
+
+            Memory.stats.rooms[creep.room.name].expenses.feed += target.energyCapacity
+            print(creep.room.name, Memory.stats.rooms[creep.room.name].expenses.feed)
 
             target = self.select_target(creep, creep.room)
 

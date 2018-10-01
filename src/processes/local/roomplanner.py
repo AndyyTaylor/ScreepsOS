@@ -110,10 +110,6 @@ class RoomPlanner(Process):
                 if len(creeps) > 0:
                     res = OK
 
-            if type == STRUCTURE_CONTAINER:
-                print('cont', res, room_name, x, y)
-            elif type == STRUCTURE_LINK:
-                print('link', res, room_name, x, y)
             return res == OK
 
     def draw_visual(self, x, y, type):

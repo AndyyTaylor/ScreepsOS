@@ -52,7 +52,7 @@ class Management(CreepProcess):
         if center_link.cooldown != 0 or up_link.energy > 700:
             return False
 
-        if center_link.energy > 0:
+        if center_link.energy >= up_link.energyCapacity - up_link.energy:
             center_link.transferEnergy(up_link)
         elif creep.is_empty():
             creep.withdraw(self.room.storage, RESOURCE_ENERGY)

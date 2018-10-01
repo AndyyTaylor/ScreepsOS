@@ -106,74 +106,93 @@ class Kernel():
         Memory.os.kernel.finished = True
 
     def log_rooms(self):
-        Memory.stats.rooms = {}
+        if _.isUndefined(Memory.stats.rooms):
+            Memory.stats.rooms = {}
 
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
 
-            if not room.is_city():
-                continue
-
             stats = {}
 
-            if not room.is_city():
-                continue
-
-            stats.rcl = {
-                'level': room.controller.level,
-                'progress': room.controller.progress,
-                'progressTotal': room.controller.progressTotal
-            }
-
-            resources = {'energy': 0}
-            stores = _.filter(room.find(FIND_STRUCTURES),
-                              lambda s: s.structureType == STRUCTURE_CONTAINER or
-                                        s.structureType == STRUCTURE_LINK or
-                                        s.structureType == STRUCTURE_STORAGE)  # noqa
-
-            for store in stores:
-                if _.isUndefined(store.store):
-                    resources[RESOURCE_ENERGY] += store.energy
+            if room.is_city() or room.is_remote():
+                if not _.isUndefined(Memory.stats.rooms[name]) and not _.isUndefined(Memory.stats.rooms[name].expenses):
+                    expenses = Object.assign({'build': 0, 'repair': 0, 'upgrade': 0}, Memory.stats.rooms[name].expenses)
                 else:
-                    for rtype in Object.keys(store.store):
-                        if not Object.keys(resources).includes(rtype):
-                            resources[rtype] = store.store[rtype]
+                    expenses = {'build': 0, 'repair': 0, 'upgrade': 0}
+                income = {'local_harvest': 0, 'remote_harvest': 0}
+                events = room.getEventLog()
+                for event in events:
+                    if event.event == EVENT_BUILD:
+                        expenses['build'] += event.data.energySpent
+                    elif event.event == EVENT_REPAIR:
+                        expenses['repair'] += event.data.energySpent
+                    elif event.event == EVENT_UPGRADE_CONTROLLER:
+                        expenses['upgrade'] += event.data.energySpent
+                    elif event.event == EVENT_HARVEST:
+                        if room.is_city():
+                            income['local_harvest'] += event.data.amount
                         else:
-                            resources[rtype] += store.store[rtype]
+                            income['remote_harvest'] += event.data.amount
 
-            stats.stored = resources
+                stats.expenses = expenses
+                stats.income = income
 
-            total_spawns = len(room.spawns)
-            num_working = 0
-            for spawn in room.spawns:
-                if not _.isNull(spawn.spawning):
-                    num_working += 1
+            if room.is_city():
+                stats.rcl = {
+                    'level': room.controller.level,
+                    'progress': room.controller.progress,
+                    'progressTotal': room.controller.progressTotal
+                }
 
-            stats.spawning = {
-                'totalSpawns': total_spawns,
-                'numWorking': num_working,
-                'percBusy': num_working / total_spawns,
-                'isFull': 1 if room.is_full() else 0,
-                'energyPerc': room.energyAvailable / room.energyCapacityAvailable,
-                'waiting': 1 if room.is_full() and num_working < total_spawns else 0
-            }
+                resources = {'energy': 0}
+                stores = _.filter(room.find(FIND_STRUCTURES),
+                                  lambda s: s.structureType == STRUCTURE_CONTAINER or
+                                            s.structureType == STRUCTURE_LINK or
+                                            s.structureType == STRUCTURE_STORAGE)  # noqa
 
-            energy = 0
-            for tower in room.towers:
-                energy += tower.energy
+                for store in stores:
+                    if _.isUndefined(store.store):
+                        resources[RESOURCE_ENERGY] += store.energy
+                    else:
+                        for rtype in Object.keys(store.store):
+                            if not Object.keys(resources).includes(rtype):
+                                resources[rtype] = store.store[rtype]
+                            else:
+                                resources[rtype] += store.store[rtype]
 
-            stats.towers = {
-                'energy': energy,
-                'attack': room.memory.towers.attack,
-                'heal': room.memory.towers.heal,
-                'repair': room.memory.towers.repair
-            }
+                stats.stored = resources
 
-            stats.additionalWorkers = room.get_additional_workers()  # Room rcl 1 9528657
+                total_spawns = len(room.spawns)
+                num_working = 0
+                for spawn in room.spawns:
+                    if not _.isNull(spawn.spawning):
+                        num_working += 1
 
-            # room.memory.towers.attack = 0
-            # room.memory.towers.heal = 0
-            # room.memory.towers.repair = 0
+                stats.spawning = {
+                    'totalSpawns': total_spawns,
+                    'numWorking': num_working,
+                    'percBusy': num_working / total_spawns,
+                    'isFull': 1 if room.is_full() else 0,
+                    'energyPerc': room.energyAvailable / room.energyCapacityAvailable,
+                    'waiting': 1 if room.is_full() and num_working < total_spawns else 0
+                }
+
+                energy = 0
+                for tower in room.towers:
+                    energy += tower.energy
+
+                stats.towers = {
+                    'energy': energy,
+                    'attack': room.memory.towers.attack,
+                    'heal': room.memory.towers.heal,
+                    'repair': room.memory.towers.repair
+                }
+
+                stats.additionalWorkers = room.get_additional_workers()  # Room rcl 1 9528657
+
+                # room.memory.towers.attack = 0
+                # room.memory.towers.heal = 0
+                # room.memory.towers.repair = 0
 
             Memory.stats.rooms[name] = stats
 
@@ -215,15 +234,42 @@ class Kernel():
 
     def log_resources(self):
         resources = {}
+        expenditure = Memory.stats.expenditure or {}
+        gincome = Memory.stats.income or {}
         for name in Object.keys(Memory.stats.rooms):
-            stored = Memory.stats.rooms[name].stored
-            for resource in Object.keys(stored):
-                if resource in resources:
-                    resources[resource] += stored[resource]
-                else:
-                    resources[resource] = stored[resource]
+            if _.isUndefined(Game.rooms[name]):
+                continue
+
+            if Game.rooms[name].is_city():
+                stored = Memory.stats.rooms[name].stored
+                for resource in Object.keys(stored):
+                    if resource in resources:
+                        resources[resource] += stored[resource]
+                    else:
+                        resources[resource] = stored[resource]
+
+            if Game.rooms[name].is_city() or Game.rooms[name].is_remote():
+                expenses = Memory.stats.rooms[name].expenses
+                for expense in Object.keys(expenses):
+                    if expense in expenditure:
+                        expenditure[expense] += expenses[expense]
+                    else:
+                        expenditure[expense] = expenses[expense]
+
+                    Memory.stats.rooms[name].expenses[expense] = 0
+
+                lincome = Memory.stats.rooms[name].income
+                for income in Object.keys(lincome):
+                    if income in gincome:
+                        gincome[income] += lincome[income]
+                    else:
+                        gincome[income] = lincome[income]
+
+                    Memory.stats.rooms[name].income[income] = 0
 
         Memory.stats.resources = resources
+        Memory.stats.expenditure = expenditure
+        Memory.stats.income = gincome
 
     def unassign_creeps(self):
         pids = self.scheduler.list_pids()
