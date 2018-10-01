@@ -73,7 +73,7 @@ class Remote(Process):
                                                                  'haul_room': room,
                                                                  'source_id': sid})
 
-        if self._data.room_name == 'W59N2' and Game.time > 9853294 + 5000:
+        if self._data.room_name == 'W59N2':
             to_claim = ['W57N6']
         else:
             to_claim = []

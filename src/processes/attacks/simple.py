@@ -31,6 +31,11 @@ class SimpleAttack(CreepProcess):
         elif creep.hits < creep.hitsMax * 0.7:
             creep.memory.attacking = False
 
+        if creep.ticksToLive > 800:
+            self._data.target_room = 'W60N10'
+        else:
+            self._data.target_room = 'W57N9'
+
         if creep.memory.attacking:
             if (_.isUndefined(self.target_room) or creep.room != self.target_room) and \
                     (len(creep.room.hostile_military) < 1 or
@@ -77,7 +82,7 @@ class SimpleAttack(CreepProcess):
                                 target.getActiveBodyparts(ATTACK) == 0:
                             creep.moveTo(target, {'visualizePathStyle': {}})
                     else:
-                        creep.moveTo(target)
+                        creep.moveTo(target, {'visualizePathStyle': {}})
 
                     if creep.pos.isNearTo(target):
                         if creep.getActiveBodyparts(ATTACK) > 0:
@@ -119,7 +124,7 @@ class SimpleAttack(CreepProcess):
         creep.run_current_task()
 
     def needs_creeps(self):
-        return len(self._data.creep_names) < 2
+        return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(ATTACK) > 1 and creep.getActiveBodyparts(HEAL) == 1

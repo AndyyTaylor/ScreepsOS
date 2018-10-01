@@ -80,7 +80,7 @@ class MineSite(CreepProcess):
         mod = [WORK, WORK, MOVE]
 
         if self.get_ideal_deposit() == STRUCTURE_LINK:
-            body = [CARRY, CARRY, MOVE]
+            body = [WORK, CARRY, MOVE]
             total_work = 0
         else:
             body = [WORK, WORK, MOVE]
