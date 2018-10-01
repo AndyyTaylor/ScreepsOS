@@ -26,10 +26,7 @@ class UpgradeSite(CreepProcess):
         if creep.room != self.room:
             creep.moveTo(self.room.controller)
         else:
-            sign = self.room.controller.sign
-            if _.isUndefined(sign) or sign.text != js_global.CONTROLLER_SIGN:
-                creep.set_task('sign')
-            elif creep.is_empty():
+            if creep.is_empty():
                 link = Game.getObjectById(self._data.link_id)
                 if not _.isNull(link) and link.energy > 0:
                     creep.set_task('withdraw', {'target_id': self._data.link_id})
@@ -42,6 +39,12 @@ class UpgradeSite(CreepProcess):
                     creep.set_task('gather')
             elif creep.is_full() or creep.is_idle():
                 creep.set_task('upgrade')
+
+            sign = self.room.controller.sign
+            if (_.isUndefined(sign) or sign.text != js_global.CONTROLLER_SIGN) and creep.ticksToLive > 1200:
+                creep.moveTo(self.room.controller)
+                if creep.pos.isNearTo(creep.room.controller):
+                    creep.set_task('sign')
 
             creep.run_current_task()
 

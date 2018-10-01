@@ -4,7 +4,7 @@ from defs import *
 # 102k into rcl 5 i'm at 388k into rcl 4
 js_global.USERNAME = 'Lisp'
 
-js_global.VERSION = 1278
+js_global.VERSION = 1281
 js_global.CONTROLLER_SIGN = 'Territory of Lisp [' + str(js_global.VERSION) + ']'
 
 js_global.CREEP_SAY = False
