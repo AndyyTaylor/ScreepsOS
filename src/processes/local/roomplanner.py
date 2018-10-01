@@ -115,9 +115,6 @@ class RoomPlanner(Process):
 
                     res = OK
 
-            if res == OK:
-                if room_name == 'W51N5':
-                    print(x, y, type)
             return res == OK
 
     def draw_visual(self, x, y, type):
