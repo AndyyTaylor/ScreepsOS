@@ -108,8 +108,16 @@ class RoomPlanner(Process):
             if res == ERR_INVALID_TARGET:
                 creeps = Game.rooms[room_name].lookForAt(LOOK_CREEPS, x, y)
                 if len(creeps) > 0:
+                    structs = Game.rooms[room_name].lookForAt(LOOK_STRUCTURES, x, y)
+                    for struct in structs:
+                        if struct.structureType == type:
+                            return False
+
                     res = OK
 
+            if res == OK:
+                if room_name == 'W51N5':
+                    print(x, y, type)
             return res == OK
 
     def draw_visual(self, x, y, type):

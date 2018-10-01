@@ -31,7 +31,6 @@ class Feed(Task):
                 Memory.stats.rooms[creep.room.name].expenses.feed = 0
 
             Memory.stats.rooms[creep.room.name].expenses.feed += target.energyCapacity
-            print(creep.room.name, Memory.stats.rooms[creep.room.name].expenses.feed)
 
             target = self.select_target(creep, creep.room)
 

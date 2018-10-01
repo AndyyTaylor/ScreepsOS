@@ -107,9 +107,12 @@ class RemoteHaul(CreepProcess):
 
         self._data.path_length = len(result.path) + 1
 
-        result = PathFinder.search(source.pos, {'pos': start, 'range': 7})
+        result = PathFinder.search(source.pos, {'pos': start, 'range': 7, 'maxOps': 20000})
         if not result.incomplete:
             for tile in result.path:
+                if tile.roomName == 'W51N5' or tile.roomName == 'W51N6':
+                    print(tile.roomName, tile.x, tile.y)
+
                 if tile.x == 0 or tile.x == 49 or tile.y == 0 or tile.y == 49:
                     continue
 
