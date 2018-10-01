@@ -41,9 +41,10 @@ class UpgradeSite(CreepProcess):
                 creep.set_task('upgrade')
 
             sign = self.room.controller.sign
-            if (_.isUndefined(sign) or sign.text != js_global.CONTROLLER_SIGN) and creep.ticksToLive > 1200:
-                creep.moveTo(self.room.controller)
-                if creep.pos.isNearTo(creep.room.controller):
+            if (_.isUndefined(sign) or sign.text != js_global.CONTROLLER_SIGN) and _.isUndefined(self._data.no_sign):
+                if creep.moveTo(self.room.controller) == ERR_NO_PATH:
+                    self._data.no_sign = True
+                else:
                     creep.set_task('sign')
 
             creep.run_current_task()
