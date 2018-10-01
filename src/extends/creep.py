@@ -12,7 +12,8 @@ classes_by_name = {
     'build': Build,
     'repair': Repair,
     'withdraw': Withdraw,
-    'deposit': Deposit
+    'deposit': Deposit,
+    'sign': Sign
 }
 
 Object.defineProperties(Creep.prototype, {
