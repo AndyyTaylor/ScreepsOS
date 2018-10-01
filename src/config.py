@@ -5,7 +5,7 @@ from defs import *
 js_global.USERNAME = 'Lisp'
 js_global.VERSION = 1329
 
-js_global.CONTROLLER_SIGN = 'Placeholder till I think of something cool'
+js_global.CONTROLLER_SIGN = 'Territory of Lisp [' + str(js_global.VERSION) + ']'
 
 js_global.CREEP_SAY = False
 

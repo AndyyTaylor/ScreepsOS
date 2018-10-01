@@ -40,6 +40,12 @@ class UpgradeSite(CreepProcess):
             elif creep.is_full() or creep.is_idle():
                 creep.set_task('upgrade')
 
+            sign = self.room.controller.sign
+            if (_.isUndefined(sign) or sign.text != js_global.CONTROLLER_SIGN) and creep.ticksToLive > 1200:
+                creep.moveTo(self.room.controller)
+                if creep.pos.isNearTo(creep.room.controller):
+                    creep.set_task('sign')
+
             creep.run_current_task()
 
     def needs_creeps(self):

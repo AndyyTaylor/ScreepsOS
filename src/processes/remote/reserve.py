@@ -40,7 +40,11 @@ class Reserve(CreepProcess):
         if creep.room.name != self._data.target_room:
             creep.moveTo(__new__(RoomPosition(25, 25, self._data.target_room)))
         elif creep.pos.isNearTo(self.target_room.controller):
-            creep.reserveController(self.target_room.controller)
+            sign = self.target_room.controller.sign
+            if _.isUndefined(sign) or sign.text != js_global.CONTROLLER_SIGN:
+                creep.signController(self.target_room.controller, js_global.CONTROLLER_SIGN)
+            else:
+                creep.reserveController(self.target_room.controller)
         else:
             creep.moveTo(creep.room.controller)
 
