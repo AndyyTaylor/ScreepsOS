@@ -55,11 +55,11 @@ class RemoteHaul(CreepProcess):
 
         creep.run_current_task()
 
-    def needs_creeps(self):
+    def _needs_creeps(self, creep_names):
         max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
         total_carry = 0
 
-        for name in self._data.creep_names:
+        for name in creep_names:
             creep = Game.creeps[name]
 
             if _.isUndefined(creep):
@@ -76,7 +76,7 @@ class RemoteHaul(CreepProcess):
         return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) == 1 and \
             not _.isUndefined(creep.memory.remote)
 
-    def gen_body(self, energyAvailable):
+    def _gen_body(self, energyAvailable, creep_names):
         if _.isUndefined(self._data.has_init):
             self.init()
 
@@ -86,7 +86,7 @@ class RemoteHaul(CreepProcess):
 
         max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
 
-        for name in self._data.creep_names:
+        for name in creep_names:
             creep = Game.creeps[name]
             if _.isUndefined(creep):
                 continue

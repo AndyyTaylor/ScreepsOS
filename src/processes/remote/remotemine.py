@@ -27,7 +27,7 @@ class RemoteMine(CreepProcess):
     def run_creep(self, creep):
         self.source = Game.getObjectById(self._data.source_id)
 
-        if self._data.creep_names.indexOf(creep.js_name) == 0 and self.source.energy > 0:
+        if self._data.creep_names.indexOf(creep.js_name) == 0 and (not _.isNull(self.source) and self.source.energy > 0):  # noqa
             self.move_to_drop(creep)
 
         if _.isNull(self.source):

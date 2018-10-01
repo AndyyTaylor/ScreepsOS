@@ -53,9 +53,9 @@ class MineSite(CreepProcess):
             creep.set_task('travel', {'dest_x': self._data.drop_x, 'dest_y': self._data.drop_y,
                                       'dest_room_name': self._data.room_name})
 
-    def needs_creeps(self):
+    def _needs_creeps(self, creep_names):
         total = 0
-        for name in self._data.creep_names:
+        for name in creep_names:
             creep = Game.creeps[name]
             if creep:
                 total += creep.getActiveBodyparts(WORK)
@@ -77,7 +77,7 @@ class MineSite(CreepProcess):
             return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) == 0 and \
                 creep.getActiveBodyparts(WORK) < 10 and _.isUndefined(creep.memory.remote)
 
-    def gen_body(self, energyAvailable):
+    def _gen_body(self, energyAvailable, creep_names):
         mod = [WORK, WORK, MOVE]
 
         if self.get_ideal_deposit() == STRUCTURE_LINK:
