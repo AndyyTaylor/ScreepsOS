@@ -3,7 +3,8 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 # noinspection PyProtectedMember
 from .memory import _Memory
 from .misc_obj import RoomObject
-from .structures import StructureController, StructureStorage, StructureTerminal
+from .structures import StructureController, StructureStorage, StructureTerminal, StructureSpawn, StructureTower
+from ..transcrypt import Uint8Array
 
 _HasPosition = Union['RoomPosition', 'RoomObject']
 _FindParameter = Union[int, List[_HasPosition]]
@@ -69,6 +70,23 @@ class RoomPosition:
 RoomPosition.prototype = RoomPosition
 
 
+# noinspection PyPep8Naming
+class _Event:
+    """
+    :type event: int
+    :type objectId: str
+    :type data: Dict[str, Any]
+    """
+
+    def __init__(self, event: int, objectId: str, data: Dict[str, Any]) -> None:
+        """
+        WARNING: This constructor is purely for type completion, and does not exist in the game.
+        """
+        self.event = event  # type: int
+        self.objectId = objectId  # type: str
+        self.data = data  # type: Dict[str, Any]
+
+
 class _Owner:
     """
     :type username: str
@@ -101,22 +119,6 @@ class _PathPos:
         self.direction = direction
 
 
-class _Event:
-    """
-    :type event: int
-    :type objectId: str
-    :type data: Dict[str, Any]
-    """
-
-    def __init__(self, event: int, objectId: str, data: Dict[str, Any]) -> None:
-        """
-        WARNING: This constructor is purely for type completion, and does not exist in the game.
-        """
-        self.event = event  # type: int
-        self.objectId = objectId  # type: str
-        self.data = data  # type: Dict[str, Any]
-
-
 # noinspection PyPep8Naming
 class Room:
     """
@@ -131,7 +133,26 @@ class Room:
     :type visual: Any
     """
 
-    prototype = None  # type: Type[Room]
+    spawns: List[StructureSpawn] = None
+    towers: List[StructureTower] = None
+
+    # noinspection PyPep8Naming
+    class Terrain:
+        """
+        :type roomName: str
+        """
+
+        def __init__(self, roomName: str) -> None:
+            """
+            WARNING: This constructor is purely for type completion, and does not exist in the game.
+            """
+            self.roomName = roomName
+
+        def get(self, x: int, y: int) -> int:
+            pass
+
+        def getRawBuffer(self, destinationArray: Optional[Uint8Array]) -> None:
+            pass
 
     def __init__(self, controller: Optional[StructureController], storage: Optional[StructureStorage],
                  terminal: Optional[StructureTerminal], energyAvailable: int, energyCapacityAvailable: int,
@@ -177,10 +198,25 @@ class Room:
             -> List[Union[_PathPos, Dict[str, Any]]]:
         pass
 
+    def get_additional_workers(self) -> int:
+        pass
+
     def getEventLog(self, raw: bool = False) -> List[_Event]:
         pass
 
     def getPositionAt(self, x: int, y: int) -> RoomPosition:
+        pass
+
+    def getTerrain(self) -> 'Room.Terrain':
+        pass
+
+    def is_city(self) -> bool:
+        pass
+
+    def is_full(self) -> bool:
+        pass
+
+    def is_remote(self) -> bool:
         pass
 
     def lookAt(self, x: Union[int, RoomPosition, RoomObject], y: int = None) -> List[Dict[str, Any]]:

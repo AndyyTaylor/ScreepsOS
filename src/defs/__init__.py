@@ -29,6 +29,7 @@ from .constants import *
 from .classes import *
 from .transcrypt import *
 
+
 # Generated manually using regexes on the sub files
 __all__ = [
     # constants
@@ -419,6 +420,7 @@ __all__ = [
     "js_isNaN",
     'js_global',
     "__except0__",
+    "Uint8Array",
 ]
 
 __pragma__('noskip')

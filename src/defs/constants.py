@@ -877,12 +877,14 @@ POWER_BANK_RESPAWN_TIME = 50000
 # Invader enery goal
 INVADERS_ENERGY_GOAL = 100000
 
+# Sign constants
 SYSTEM_USERNAME = 'Screeps'
 
 SIGN_NOVICE_AREA = 'A new Novice or Respawn Area is being planned somewhere in this sector. Please make sure all important rooms are reserved.'
 SIGN_RESPAWN_AREA = 'A new Novice or Respawn Area is being planned somewhere in this sector. Please make sure all important rooms are reserved.'
 SIGN_PLANNED_AREA = 'A new Novice or Respawn Area is being planned somewhere in this sector. Please make sure all important rooms are reserved.'
 
+# Room Event constants
 EVENT_ATTACK = 1
 EVENT_OBJECT_DESTROYED = 2
 EVENT_ATTACK_CONTROLLER = 3

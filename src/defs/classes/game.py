@@ -1,7 +1,7 @@
-from typing import Any, Callable, Dict, List, Optional, Union, Generic
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from .creep import Creep
-from .misc_obj import Flag, RoomObject, Mineral
+from .misc_obj import Flag, RoomObject
 # noinspection PyProtectedMember
 from .room import Room, RoomPosition, _Owner
 from .structures import ConstructionSite, OwnedStructure, Structure, StructureSpawn
@@ -77,6 +77,9 @@ class _GameMap:
         pass
 
     def getRoomLinearDistance(self, roomName1: str, roomName2: str, terminalDistance: bool = False) -> int:
+        pass
+
+    def getRoomTerrain(self, roomName: str) -> Room.Terrain:
         pass
 
     def getTerrainAt(self, x: Union[int, RoomPosition], y: int = None, roomName: str = None) -> str:
@@ -257,7 +260,7 @@ class Game:
     time = 0  # type: int
 
     @classmethod
-    def getObjectById(cls, _id: str) -> Union[Mineral, Structure]:
+    def getObjectById(cls, _id: str) -> Optional[RoomObject]:
         pass
 
     @classmethod

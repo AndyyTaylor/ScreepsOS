@@ -43,6 +43,8 @@ class Creep(RoomObject):
 
     prototype = None  # type: ClassVar[Any]
 
+    assigned: Optional[int] = None
+
     def __init__(self, pos: RoomPosition, room: Room, body: List[_CreepPart], carry: Dict[str, int],
                  carryCapacity: int, fatigue: int, hits: int, hitsMax: int, _id: str, memory: _Memory,
                  my: bool, name: str, owner: _Owner, saying: Optional[str], spawning: bool, ticksToLive: int) -> None:
@@ -138,6 +140,9 @@ class Creep(RoomObject):
         pass
 
     def transfer(self, target: Union['Creep', Structure], resourceType: str, amount: int = None) -> int:
+        pass
+
+    def unassign(self) -> None:
         pass
 
     def upgradeController(self, target: StructureController) -> int:

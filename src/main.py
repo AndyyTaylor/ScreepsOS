@@ -19,11 +19,9 @@ js_global.kernel = kernel
 
 
 def main():
-    if _.isUndefined(kernel):  # noqa
-        print("Can't find kernel")
-
     kernel.start()
     kernel.run()
     kernel.shutdown()
+
 
 module.exports.loop = main

@@ -3,7 +3,7 @@ from defs import *
 # he's at 465k into rcl5 i'm at 161k into rcl 4
 # 102k into rcl 5 i'm at 388k into rcl 4
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 1277
+js_global.VERSION = 1283
 js_global.CONTROLLER_SIGN = 'Placeholder till I think of something cool'
 
 js_global.CREEP_SAY = False
@@ -27,3 +27,5 @@ js_global.MIN_RESERVE_TICKS = 2500
 js_global.TOWER_MIN = 0.8
 
 js_global.BODY_ORDER = [TOUGH, ATTACK, RANGED_ATTACK, WORK, CARRY, MOVE, HEAL]
+
+js_global.MEMORY_MAX = 1000000
