@@ -19,9 +19,6 @@ transcrypt_arguments = ['-n', '-p', '.none']
 transcrypt_dirty_args = transcrypt_arguments + []
 transcrypt_clean_args = transcrypt_arguments + ['-b']
 
-TESTING = False
-
-# function cast(A, B) { return B; }
 new_file = ''
 with open('src/config.py', 'r') as f:
     for line in f:
@@ -80,7 +77,7 @@ class Configuration:
     :type ptr: bool
     """
 
-    def __init__(self, base_dir, config_json, clean_build=True, flatten=False):
+    def __init__(self, base_dir, config_json, clean_build=True, flatten=False, debug=False):
         """
         :type base_dir: str
         :type config_json: dict[str, str | bool]
@@ -89,7 +86,10 @@ class Configuration:
         self.username = config_json.get('username') or config_json.get('email')
         self.password = config_json['password']
         self.branch = config_json.get('branch', 'default')
-        self.url = config_json.get('url', 'https://screeps.com')
+        if debug:
+            self.url = config_json.get('debug_url', 'https://screeps.com')
+        else:
+            self.url = config_json.get('url', 'https://screeps.com')
         self.ptr = config_json.get('ptr', False)
         self.enter_env = config_json.get('enter-env', True)
 
@@ -143,6 +143,7 @@ def load_config(base_dir):
                         help="""Alternative to Transcrypt's -xpath option for \
                         finding nested modules.  Use this option if Transcrypt \
                         is unable to import nested .py files""")
+    parser.add_argument("-z", "--debug", action='store_true')
     args = parser.parse_args()
 
     config_file = os.path.join(base_dir, 'config.json')
@@ -150,7 +151,8 @@ def load_config(base_dir):
     with open(os.path.join(base_dir, config_file)) as f:
         config_json = json.load(f)
 
-    return Configuration(base_dir, config_json, clean_build=not args.dirty_build, flatten=args.expand_files)
+    return Configuration(base_dir, config_json, clean_build=not args.dirty_build,
+                         flatten=args.expand_files, debug=args.debug)
 
 
 def run_transcrypt(config):
@@ -356,12 +358,7 @@ def main():
         expander_control.expand_files()
 
     build(config)
-    if not TESTING:
-        upload(config)
-    else:
-        print("Copying main.js to local folder")
-        os.system('rm "/Users/andytaylor/Library/Application Support/Screeps/scripts/127_0_0_1___21025/hybrid/main.js"')
-        os.system('cp "/Users/andytaylor/Google_Drive/PythonScreeps/dist/main.js" "/Users/andytaylor/Library/Application Support/Screeps/scripts/127_0_0_1___21025/hybrid"')
+    upload(config)
 
 
 if __name__ == "__main__":
