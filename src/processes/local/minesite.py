@@ -34,7 +34,9 @@ class MineSite(CreepProcess):
             link = Game.getObjectById(self._data.deposit_id)
             if link.energy > 400 and link.cooldown == 0:
                 link.transferEnergy(self.room.cent_link)
-                Memory.stats.rooms[self._data.room_name].lharvest.transfer += link.energy * 0.97
+                Memory.stats.rooms[self._data.room_name].lharvest.transfer += min(link.energy * 0.97,
+                                                                                  self.room.cent_link.energyCapacity -
+                                                                                  self.room.cent_link.energy)
 
             if _.sum(creep.carry) + 12 >= creep.carryCapacity:  # Don't drop any resources
                 if not creep.pos.isNearTo(link):

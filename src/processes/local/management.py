@@ -137,7 +137,11 @@ class Management(CreepProcess):
         mod = [CARRY, CARRY, MOVE]
         carry_count = 2
 
-        max_carry = 500
+        if self.room.rcl < 7:
+            max_carry = 400
+        else:
+            max_carry = 800
+
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
             carry_count += 2

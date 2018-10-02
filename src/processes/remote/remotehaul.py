@@ -40,7 +40,7 @@ class RemoteHaul(CreepProcess):
             else:
                 creep.set_task("gather")
 
-        if creep.memory.task_name == 'deposit':
+        if creep.carry.energy > 0:
             structs = creep.room.find(FIND_STRUCTURES)
             need_repair = _.filter(structs, lambda s: s.hits < s.hitsMax and
                                                       s.structureType != STRUCTURE_WALL and
@@ -73,8 +73,7 @@ class RemoteHaul(CreepProcess):
         return total_carry < max_carry
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) == 1 and \
-            not _.isUndefined(creep.memory.remote)
+        return creep.memory.role == 'rhauler'
 
     def _gen_body(self, energyAvailable, creep_names):
         if _.isUndefined(self._data.has_init):
@@ -84,7 +83,8 @@ class RemoteHaul(CreepProcess):
         mod = [CARRY, CARRY, MOVE]
         total_carry = 1
 
-        max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
+        max_carry = 10 * self._data.path_length * 2 * 1.2 / 50
+        current_carry = []
 
         for name in creep_names:
             creep = Game.creeps[name]
@@ -92,6 +92,15 @@ class RemoteHaul(CreepProcess):
                 continue
 
             max_carry -= creep.getActiveBodyparts(CARRY)
+            current_carry.append(creep.getActiveBodyparts(CARRY))
+
+        if self._data.room_name == 'W51S1':
+            print(sum(current_carry), max_carry)
+
+        while len(current_carry) > 0 and max_carry + min(current_carry) < 50:
+            max_carry += min(current_carry)
+            print("absorbing", min(current_carry), 'carry creep', self._data.room_name, max_carry)
+            current_carry.remove(min(current_carry))
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable \
                 and total_carry < max_carry and len(body.concat(mod)) <= 50:

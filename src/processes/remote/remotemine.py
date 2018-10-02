@@ -35,7 +35,8 @@ class RemoteMine(CreepProcess):
         else:
             if creep.pos.isNearTo(self.source) or creep.pos.getRangeTo(self.source) < self.source.ticksToRegeneration:
                 if self.source.energy > 0:
-                    Memory.stats.rooms[self._data.room_name].rharvest.harvest += min(self.source.energy, 12)
+                    Memory.stats.rooms[self._data.room_name].rharvest.harvest += min(self.source.energy,
+                                                                                     creep.getActiveBodyparts(WORK) * 2)
                     creep.harvest(self.source)
                 elif creep.carry.energy > 0:
                     site = creep.pos.findClosestByRange(creep.room.construction_sites)
@@ -60,6 +61,8 @@ class RemoteMine(CreepProcess):
                         cont = Game.getObjectById(self._data.deposit_id)
                         if not _.isNull(cont):
                             creep.set_task('withdraw', {'target_id': cont.id})
+                        else:
+                            creep.moveTo(self.source)
             else:
                 creep.moveTo(self.source)
 
@@ -78,16 +81,15 @@ class RemoteMine(CreepProcess):
         return len(creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3 and \
-            not _.isUndefined(creep.memory.remote)
+        return creep.memory.role == 'rminer'
 
     def gen_body(self, energyAvailable):
-        body = [WORK, WORK, CARRY, MOVE, MOVE]
-        mod = [WORK, MOVE]
+        body = [WORK, CARRY, MOVE]
+        mod = [WORK, WORK, MOVE]
         total_work = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 6:
-            total_work += 1
+        while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 8:
+            total_work += 2
             body = body.concat(mod)
 
         Memory.stats.rooms[self._data.room_name].rharvest.spawn += self.get_body_cost(body)
