@@ -173,8 +173,7 @@ class Kernel:
         for name in Object.keys(Memory.creeps):
             creep = Game.creeps[name]
             cmem = Memory.creeps[name]
-            if not creep and (not cmem['created'] or
-                              _.isUndefined(cmem['spawnTime']) or
+            if not creep and (not cmem['created'] or not cmem['spawnTime'] or
                               cmem['created'] < Game.time - cmem['spawnTime']):
                 del Memory.creeps[name]
 
