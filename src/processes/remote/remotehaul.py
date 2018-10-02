@@ -56,7 +56,7 @@ class RemoteHaul(CreepProcess):
         creep.run_current_task()
 
     def _needs_creeps(self, creep_names):
-        max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
+        max_carry = 10 * self._data.path_length * 2 * 1.2 / 50
         total_carry = 0
 
         for name in creep_names:

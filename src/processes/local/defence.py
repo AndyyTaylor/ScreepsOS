@@ -22,7 +22,10 @@ class Defence(Process):
         hostile_creeps = self.room.find(FIND_HOSTILE_CREEPS)
         injured = _.filter(self.room.find(FIND_MY_CREEPS), lambda c: c.hits < c.hitsMax)
         repairs = _.filter(self.room.find(FIND_STRUCTURES),
-                           lambda s: s.hits < s.hitsMax * js_global.TOWER_REPAIR)
+                           lambda s:
+                           (s.hits < s.hitsMax * js_global.TOWER_REPAIR and
+                           s.structureType != STRUCTURE_RAMPART and s.structureType != STRUCTURE_WALL) or
+                           (s.structureType == STRUCTURE_RAMPART and s.hits < self.room.memory.walls.hits / 2))
 
         for tower in self.room.towers:
             if len(hostile_creeps) > 0:
@@ -33,7 +36,7 @@ class Defence(Process):
                 target = tower.pos.findClosestByRange(injured)
                 tower.heal(target)
                 self.room.memory.towers.heal += 10
-            elif len(repairs) > 0:
+            elif len(repairs) > 0 and tower.energy > 500:
                 tower.repair(repairs[0])
                 self.room.memory.towers.repair += 10
 

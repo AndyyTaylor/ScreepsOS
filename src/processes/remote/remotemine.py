@@ -74,8 +74,8 @@ class RemoteMine(CreepProcess):
             creep.set_task('travel', {'dest_x': self._data.drop_x, 'dest_y': self._data.drop_y,
                                       'dest_room_name': self._data.mine_room})
 
-    def needs_creeps(self):
-        return len(self._data.creep_names) < 1
+    def _needs_creeps(self, creep_names):
+        return len(creep_names) < 1
 
     def is_valid_creep(self, creep):
         return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) < 3 and \

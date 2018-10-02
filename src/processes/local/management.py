@@ -31,7 +31,7 @@ class Management(CreepProcess):
                 creep.clear_task()
 
             tasks = [self.fill_up_cont, self.clear_cent_link, self.fill_terminal,
-                     self.empty_creep, self.gather]
+                     self.empty_creep]
 
             for task in tasks:
                 if task(creep):

@@ -194,6 +194,17 @@ class Kernel():
                     'repair': room.memory.towers.repair
                 }
 
+                total = 0
+                count = max(len(room.walls), 1)
+                for wall in room.walls:
+                    total += wall.hits
+                avg = total / count
+                stats.walls = {
+                    'total': total,
+                    'avg': avg,
+                    'count': count
+                }
+
                 stats.additionalWorkers = room.get_additional_workers()  # Room rcl 1 9528657
 
                 # room.memory.towers.attack = 0

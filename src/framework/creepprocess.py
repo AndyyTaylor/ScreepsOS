@@ -136,7 +136,8 @@ class CreepProcess(Process):
                 continue
 
             if creep.ticksToLive < len(creep.body) * CREEP_SPAWN_TIME:
-                print("Not including", name)
+                # print("Not including", name)
+                pass
             else:
                 new_names.append(name)
 

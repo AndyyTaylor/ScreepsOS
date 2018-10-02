@@ -50,6 +50,8 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: this.find(FIND_STRUCTURES)
     }, 'walls': {
         'get': lambda: this._get_walls()
+    }, 'damaged_walls': {
+        'get': lambda: this._get_damaged_walls()
     }
 })
 
@@ -95,6 +97,14 @@ def _get_walls():
                                          s.structureType == STRUCTURE_RAMPART)  # noqa
 
     return this._walls
+
+
+def _get_damaged_walls():
+    if _.isUndefined(this._damaged_walls):
+        ideal_hits = this.memory.walls.hits
+        this._damaged_walls = _.filter(this.walls, lambda w: w.hits < ideal_hits - js_global.MAX_WALL_DECAY)
+
+    return this._damaged_walls
 
 
 def _get_creeps():
@@ -230,6 +240,22 @@ def _basic_matrix(ignore_creeps=False):  # Should pass in actual room name
     return costs
 
 
+def _can_place_wall():
+    freq = this.memory.walls.last_placed + js_global.WALL_PLACEMENT_FREQUENCY < Game.time
+    hits = True
+    for wall in this.walls:
+        if wall.hits < this.memory.walls.hits - js_global.MAX_WALL_DECAY:
+            hits = False
+            break
+
+    if not _.isUndefined(this.storage) and this.storage.store[RESOURCE_ENERGY] > js_global.STORAGE_MIN[this.rcl]:
+        storage = True
+    else:
+        storage = False
+
+    return freq and hits and storage
+
+
 Room.prototype.get_sources = _get_sources
 Room.prototype.is_city = _is_city
 Room.prototype.is_remote = _is_remote
@@ -244,3 +270,5 @@ Room.prototype.basic_matrix = _basic_matrix
 Room.prototype._get_creeps = _get_creeps
 Room.prototype._get_center = _get_center
 Room.prototype._get_cent_link = _get_cent_link
+Room.prototype.can_place_wall = _can_place_wall
+Room.prototype._get_damaged_walls = _get_damaged_walls
