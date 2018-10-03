@@ -45,15 +45,20 @@ class CreepProcess(Process):
             if not _.isUndefined(creep.room.memory) and not \
                     _.isUndefined(creep.room.memory.threats):
                 if creep.room.memory.threats.safe_tick > Game.time and not self._data.military:
-                    creep.memory.keep_safe = creep.room.memory.threats.safe_tick  # Change to link to room name
+                    creep.memory.keep_safe = creep.room.name
 
-            if not _.isUndefined(creep.memory.keep_safe) and creep.memory.keep_safe > Game.time \
-                    and _.isUndefined(self._data.military):
-                if creep.pos.x > 47 or creep.pos.x < 3 or creep.pos.y > 47 or creep.pos.y < 3 or \
-                        (not _.isUndefined(creep.room.memory) and not _.isUndefined(creep.room.memory.threats) and
+            if not _.isUndefined(creep.memory.keep_safe) and _.isUndefined(self._data.military):
+                room_mem = Memory.rooms[creep.memory.keep_safe]
+                if not _.isUndefined(room_mem.threats.safe_tick) and room_mem.threats.safe_tick > Game.time:
+                    if creep.pos.x > 47 or creep.pos.x < 3 or creep.pos.y > 47 or creep.pos.y < 3 or \
+                            (not _.isUndefined(creep.room.memory) and not _.isUndefined(creep.room.memory.threats) and
                             creep.room.memory.threats.safe_tick > Game.time):
-                    creep.moveTo(self.room.controller)
-            else:
+                        creep.moveTo(self.room.controller)
+                else:
+                    print(creep.memory.keep_safe, 'is now safe!')
+                    del creep.memory.keep_safe
+
+            if _.isUndefined(creep.memory.keep_safe):
                 self.run_creep(creep)
 
         for name in expired_creeps:

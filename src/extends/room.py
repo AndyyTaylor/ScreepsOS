@@ -73,7 +73,8 @@ def _get_hostile_military():
                                           lambda c:
                                           c.getActiveBodyparts(ATTACK) +
                                           c.getActiveBodyparts(RANGED_ATTACK) +
-                                          c.getActiveBodyparts(HEAL) > 0)
+                                          c.getActiveBodyparts(HEAL) +
+                                          c.getActiveBodyparts(WORK) > 0)
 
     return this._hostile_military
 

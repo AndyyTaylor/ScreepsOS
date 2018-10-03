@@ -49,20 +49,29 @@ class Defence(Process):
             if _.isUndefined(room):
                 continue
 
-            if len(room.find(FIND_HOSTILE_CREEPS)) > 0:
-                if _.isUndefined(room.memory):
-                    room.memory = {}
+            if _.isUndefined(room.memory):
+                room.memory = {}
 
-                if _.isUndefined(room.memory.threats):
-                    room.memory.threats = {}
+            if _.isUndefined(room.memory.threats):
+                room.memory.threats = {}
 
-                room.memory.threats.count = len(room.find(FIND_HOSTILE_CREEPS))
+            room.memory.threats.count = len(room.hostile_military)
 
-                max_ticks = 0
-                for creep in room.find(FIND_HOSTILE_CREEPS):
-                    max_ticks = max(creep.ticksToLive, max_ticks)
+            max_ticks = 0
+            for creep in room.hostile_military:
+                max_ticks = max(creep.ticksToLive, max_ticks)
 
-                room.memory.threats.safe_tick = Game.time + max_ticks
+            room.memory.threats.safe_tick = Game.time + max_ticks
+
+        for name in self._data.remotes:
+            if _.isUndefined(Memory.rooms[name]) or _.isUndefined(Memory.rooms[name].threats):
+                continue
+
+            if Memory.rooms[name].threats.safe_tick > Game.time:
+                print(name, 'is being attacked by', Memory.rooms[name].threats.count, 'attackers!')
+                if self.scheduler.count_by_name('remoteinvaderdefence', self._pid) < 1:
+                    self.launch_child_process('remoteinvaderdefence', {'room_name': self._data.room_name,
+                                                                       'target_room': name})
 
     def validate_memory(self):
         if _.isUndefined(self.room.memory):

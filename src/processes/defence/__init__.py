@@ -1,0 +1,1 @@
+from processes.defence.remoteinvaders import RemoteInvaderDefence
