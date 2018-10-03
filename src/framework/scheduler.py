@@ -1,12 +1,13 @@
 
 from defs import *  # noqa
-from typing import List, Optional
+from typing import List, Optional, Dict
 from processes import *  # noqa
 from framework.process import Process
 
 __pragma__('noalias', 'undefined')
 __pragma__('noalias', 'keys')
 __pragma__('noalias', 'values')
+
 
 process_classes = {
     'city': City,
@@ -39,6 +40,12 @@ class Scheduler:
 
         self.current_priority: int = 0
         self.current_index: int = 0
+        self.processes: Dict[str, Process] = None
+        self.queue: Dict[str, List[int]] = None
+
+    def load_processes(self):
+        self.processes = Object.assign({}, self.memory.processes)
+        self.queue = Object.assign({}, self.memory.queue)
 
     def get_next_process(self) -> Optional[Process]:
         # Object keys should always be strings for consistency
@@ -148,10 +155,6 @@ class Scheduler:
     def save_processes(self):
         self.memory.processes = self.processes
         self.memory.queue = self.queue
-
-    def load_processes(self):
-        self.processes = Object.assign({}, self.memory.processes)
-        self.queue = Object.assign({}, self.memory.queue)
 
     def kill_all_processes(self):
         self.memory.processes = {}
