@@ -50,7 +50,7 @@ class CreepProcess(Process):
             if not _.isUndefined(creep.memory.keep_safe) and creep.memory.keep_safe > Game.time \
                     and _.isUndefined(self._data.military):
                 if creep.pos.x > 47 or creep.pos.x < 3 or creep.pos.y > 47 or creep.pos.y < 3 or \
-                        (not _.isUndefined(creep.room.memory) and not _.isUndefined(creep.room.memory.threats) and \
+                        (not _.isUndefined(creep.room.memory) and not _.isUndefined(creep.room.memory.threats) and
                             creep.room.memory.threats.safe_tick > Game.time):
                     creep.moveTo(self.room.controller)
             else:
@@ -117,16 +117,34 @@ class CreepProcess(Process):
         return total
 
     def gen_body(self, energyAvailable):
+        return self._gen_body(energyAvailable, self.filter_creep_names())
+
+    def _gen_body(self, energyAvailable, creep_names):
         return [WORK, CARRY, MOVE]
 
     def is_valid_creep(self, creep):
         return True
 
     def needs_creeps(self):
-        return False
+        return self._needs_creeps(self.filter_creep_names())
 
-    def value_creep(self, creep):
-        return 0
+    def filter_creep_names(self):
+        new_names = []
+        for name in self._data.creep_names:
+            creep = Game.creeps[name]
+            if not creep:
+                continue
+
+            if creep.ticksToLive < len(creep.body) * CREEP_SPAWN_TIME:
+                # print("Not including", name)
+                pass
+            else:
+                new_names.append(name)
+
+        return new_names
 
     def run_creep(self, creep):
         return
+
+    def _needs_creeps(self, names):
+        return False

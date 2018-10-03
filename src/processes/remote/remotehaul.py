@@ -25,10 +25,14 @@ class RemoteHaul(CreepProcess):
 
     def run_creep(self, creep):
         source = Game.getObjectById(self._data.source_id)
-        if creep.is_full():
+        if _.sum(creep.carry) >= creep.carryCapacity - 2:  # for repair
             creep.set_task("deposit", {'target_id': self.room.storage.id})
         elif creep.is_empty() or creep.is_idle():
-            if creep.room.name != self._data.haul_room:
+            cont = Game.getObjectById(self._data.deposit_id)
+            creep.say(cont)
+            if not _.isNull(cont):
+                creep.set_task('withdraw', {'target_id': cont.id})
+            elif creep.room.name != self._data.haul_room:
                 if not _.isNull(source):
                     creep.moveTo(source)
                 else:
@@ -36,7 +40,7 @@ class RemoteHaul(CreepProcess):
             else:
                 creep.set_task("gather")
 
-        if creep.memory.task_name == 'deposit':
+        if creep.carry.energy > 0:
             structs = creep.room.find(FIND_STRUCTURES)
             need_repair = _.filter(structs, lambda s: s.hits < s.hitsMax and
                                                       s.structureType != STRUCTURE_WALL and
@@ -51,11 +55,11 @@ class RemoteHaul(CreepProcess):
 
         creep.run_current_task()
 
-    def needs_creeps(self):
-        max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
+    def _needs_creeps(self, creep_names):
+        max_carry = 10 * self._data.path_length * 2 * 1.2 / 50
         total_carry = 0
 
-        for name in self._data.creep_names:
+        for name in creep_names:
             creep = Game.creeps[name]
 
             if _.isUndefined(creep):
@@ -69,10 +73,9 @@ class RemoteHaul(CreepProcess):
         return total_carry < max_carry
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(CARRY) > 0 and creep.getActiveBodyparts(WORK) == 1 and \
-            not _.isUndefined(creep.memory.remote)
+        return creep.memory.role == 'rhauler'
 
-    def gen_body(self, energyAvailable):
+    def _gen_body(self, energyAvailable, creep_names):
         if _.isUndefined(self._data.has_init):
             self.init()
 
@@ -80,19 +83,31 @@ class RemoteHaul(CreepProcess):
         mod = [CARRY, CARRY, MOVE]
         total_carry = 1
 
-        max_carry = 10 * self._data.path_length * 2 * 1.1 / 50
+        max_carry = 10 * self._data.path_length * 2 * 1.2 / 50
+        current_carry = []
 
-        for name in self._data.creep_names:
+        for name in creep_names:
             creep = Game.creeps[name]
             if _.isUndefined(creep):
                 continue
 
             max_carry -= creep.getActiveBodyparts(CARRY)
+            current_carry.append(creep.getActiveBodyparts(CARRY))
+
+        if self._data.room_name == 'W51S1':
+            print(sum(current_carry), max_carry)
+
+        while len(current_carry) > 0 and max_carry + min(current_carry) < 50:
+            max_carry += min(current_carry)
+            print("absorbing", min(current_carry), 'carry creep', self._data.room_name, max_carry)
+            current_carry.remove(min(current_carry))
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable \
                 and total_carry < max_carry and len(body.concat(mod)) <= 50:
             total_carry += 2
             body = body.concat(mod)
+
+        Memory.stats.rooms[self._data.room_name].rharvest.spawn += self.get_body_cost(body)
 
         return body, {'remote': True, 'role': 'rhauler'}
 
@@ -107,6 +122,8 @@ class RemoteHaul(CreepProcess):
 
         self._data.path_length = len(result.path) + 1
 
+        self._data.deposit_id = self.load_deposit(source)
+
         result = PathFinder.search(source.pos, {'pos': start, 'range': 7, 'maxOps': 20000})
         if not result.incomplete:
             for tile in result.path:
@@ -120,3 +137,14 @@ class RemoteHaul(CreepProcess):
                                                               })
 
         self._data.has_init = True
+
+    def load_deposit(self, source):
+        deposit_id = None
+        x, y = source.pos.x, source.pos.y
+        nearby_structs = self.haul_room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
+        for struct in nearby_structs:
+            if struct.structure.structureType == STRUCTURE_CONTAINER:
+                deposit_id = struct.structure.id
+                break
+
+        return deposit_id

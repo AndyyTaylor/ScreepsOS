@@ -26,23 +26,28 @@ class UpgradeSite(CreepProcess):
         if creep.room != self.room:
             creep.moveTo(self.room.controller)
         else:
-            if creep.is_empty():
+            if creep.carry.energy < creep.carryCapacity / 2:
                 link = Game.getObjectById(self._data.link_id)
                 if not _.isNull(link) and link.energy > 0:
                     creep.set_task('withdraw', {'target_id': self._data.link_id})
                 elif not _.isUndefined(self.room.storage) and \
                         self.room.storage.store[RESOURCE_ENERGY] > \
-                        js_global.STORAGE_MIN[self.room.rcl]:
+                        js_global.STORAGE_MIN[self.room.rcl] and \
+                        creep.is_empty():
                     creep.set_task('withdraw', {'target_id': self.room.storage.id,
                                                 'type': RESOURCE_ENERGY})
-                else:
+                elif creep.is_empty():
                     creep.set_task('gather')
-            elif creep.is_full() or creep.is_idle():
+
+                creep.run_current_task()
+
+            if not creep.is_empty():
                 creep.set_task('upgrade')
 
             sign = self.room.controller.sign
             if (_.isUndefined(sign) or sign.text != js_global.CONTROLLER_SIGN) and _.isUndefined(self._data.no_sign):
-                if creep.moveTo(self.room.controller) == ERR_NO_PATH:
+                res = creep.moveTo(self.room.controller)
+                if res == ERR_NO_PATH or creep.ticksToLive < 1400:
                     self._data.no_sign = True
                 else:
                     creep.set_task('sign')
@@ -60,12 +65,18 @@ class UpgradeSite(CreepProcess):
 
     def gen_body(self, energy):
         body = [WORK, CARRY, MOVE]
-        mod = [WORK, CARRY, MOVE]
         count = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy and count < 10:
+        if self.room.rcl < 5:
+            mod = [WORK, CARRY, MOVE]
+            add_mod = 1
+        else:
+            mod = [WORK, WORK, MOVE]
+            add_mod = 2
+
+        while self.get_body_cost(body.concat(mod)) <= energy and count < 11:
             body = body.concat(mod)
-            count += 1
+            count += add_mod
 
         return body, {'role': 'upgrader'}
 

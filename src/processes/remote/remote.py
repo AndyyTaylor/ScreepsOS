@@ -75,8 +75,8 @@ class Remote(Process):
                                                                  'haul_room': room,
                                                                  'source_id': sid})
 
-        if self._data.room_name == 'W59N2':
-            to_claim = ['W57N6']
+        if self._data.room_name == 'W53N7':
+            to_claim = ['W57N11']
         else:
             to_claim = []
 
@@ -99,7 +99,7 @@ class Remote(Process):
                 to_work.append(name)
 
         works = self.scheduler.proc_by_name('remotework', self._pid)
-        if len(works) < len(to_work) and self._data.room_name == 'W59N2':
+        if len(works) < len(to_work) and self._data.room_name == 'W53N7':
             taken = [m['data'].target_room for m in works]
 
             for target_room in to_work:

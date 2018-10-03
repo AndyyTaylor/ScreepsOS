@@ -113,7 +113,7 @@ class Kernel():
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
 
-            stats = {}
+            stats = Memory.stats.rooms[name] or {}
 
             if room.is_city() or room.is_remote():
                 if not _.isUndefined(Memory.stats.rooms[name]) and not _.isUndefined(Memory.stats.rooms[name].expenses):
@@ -131,6 +131,8 @@ class Kernel():
                         expenses['upgrade'] += event.data.energySpent
                     elif event.event == EVENT_HARVEST:
                         if room.is_city():
+                            if not _.isUndefined(Memory.stats.rooms[name].lharvest):
+                                Memory.stats.rooms[name].lharvest.harvest += event.data.amount
                             income['local_harvest'] += event.data.amount
                         else:
                             income['remote_harvest'] += event.data.amount
@@ -190,6 +192,17 @@ class Kernel():
                     'attack': room.memory.towers.attack,
                     'heal': room.memory.towers.heal,
                     'repair': room.memory.towers.repair
+                }
+
+                total = 0
+                count = max(len(room.walls), 1)
+                for wall in room.walls:
+                    total += wall.hits
+                avg = total / count
+                stats.walls = {
+                    'total': total,
+                    'avg': avg,
+                    'count': count
                 }
 
                 stats.additionalWorkers = room.get_additional_workers()  # Room rcl 1 9528657

@@ -34,6 +34,9 @@ class MineSite(CreepProcess):
             link = Game.getObjectById(self._data.deposit_id)
             if link.energy > 400 and link.cooldown == 0:
                 link.transferEnergy(self.room.cent_link)
+                Memory.stats.rooms[self._data.room_name].lharvest.transfer += min(link.energy * 0.97,
+                                                                                  self.room.cent_link.energyCapacity -
+                                                                                  self.room.cent_link.energy)
 
             if _.sum(creep.carry) + 12 >= creep.carryCapacity:  # Don't drop any resources
                 if not creep.pos.isNearTo(link):
@@ -52,9 +55,9 @@ class MineSite(CreepProcess):
             creep.set_task('travel', {'dest_x': self._data.drop_x, 'dest_y': self._data.drop_y,
                                       'dest_room_name': self._data.room_name})
 
-    def needs_creeps(self):
+    def _needs_creeps(self, creep_names):
         total = 0
-        for name in self._data.creep_names:
+        for name in creep_names:
             creep = Game.creeps[name]
             if creep:
                 total += creep.getActiveBodyparts(WORK)
@@ -76,7 +79,7 @@ class MineSite(CreepProcess):
             return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) == 0 and \
                 creep.getActiveBodyparts(WORK) < 10 and _.isUndefined(creep.memory.remote)
 
-    def gen_body(self, energyAvailable):
+    def _gen_body(self, energyAvailable, creep_names):
         mod = [WORK, WORK, MOVE]
 
         if self.get_ideal_deposit() == STRUCTURE_LINK:
@@ -90,10 +93,24 @@ class MineSite(CreepProcess):
             total_work += 2
             body = body.concat(mod)
 
+        Memory.stats.rooms[self._data.room_name].lharvest.spawn += self.get_body_cost(body)
+
         return body, {'role': 'miner'}
 
     def init(self):
         self._data.has_init = True
+
+        if _.isUndefined(Memory.stats.rooms[self._data.room_name].lharvest):
+            Memory.stats.rooms[self._data.room_name].lharvest = {}
+
+        if _.isUndefined(Memory.stats.rooms[self._data.room_name].lharvest.harvest):
+            Memory.stats.rooms[self._data.room_name].lharvest.harvest = 0
+
+        if _.isUndefined(Memory.stats.rooms[self._data.room_name].lharvest.spawn):
+            Memory.stats.rooms[self._data.room_name].lharvest.spawn = 0
+
+        if _.isUndefined(Memory.stats.rooms[self._data.room_name].lharvest.transfer):
+            Memory.stats.rooms[self._data.room_name].lharvest.transfer = 0
 
         drop_pos, drop_type = self.load_terrain()
         drop_pos, drop_type, deposit_id = self.load_deposit(drop_pos, drop_type)

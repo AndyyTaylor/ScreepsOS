@@ -76,4 +76,6 @@ class Reserve(CreepProcess):
             total_claim += 1
             body = body.concat(mod)
 
+        Memory.stats.rooms[self._data.room_name].rharvest.spawn += self.get_body_cost(body)
+
         return body, None

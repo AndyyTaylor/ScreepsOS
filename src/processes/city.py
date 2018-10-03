@@ -16,6 +16,24 @@ class City(Process):
     def _run(self):
         room = Game.rooms[self._data.main_room]
 
+        if _.isUndefined(room.memory.towers):
+            room.memory.towers = {'attack': 0, 'heal': 0, 'repair': 0}
+
+        if _.isUndefined(room.memory.walls):
+            room.memory.walls = {'last_updated': 0, 'hits': js_global.MIN_WALL_HITS}
+
+        if _.isUndefined(room.memory.walls.hits) or room.memory.walls.hits < js_global.MIN_WALL_HITS:
+            room.memory.walls.hits = js_global.MIN_WALL_HITS
+
+        if _.isUndefined(Memory.stats.rooms[self._data.main_room]):
+            Memory.stats.rooms[self._data.main_room] = {}
+
+        if _.isUndefined(Memory.stats.rooms[self._data.main_room].lharvest):
+            Memory.stats.rooms[self._data.main_room].lharvest = {'spawn': 0, 'harvest': 0, 'transfer': 0}
+
+        if _.isUndefined(Memory.stats.rooms[self._data.main_room].rharvest):
+            Memory.stats.rooms[self._data.main_room].rharvest = {'spawn': 0, 'harvest': 0, 'transfer': 0}
+
         sources = room.get_sources()
 
         # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
@@ -50,6 +68,9 @@ class City(Process):
 
         if room.rcl >= 5:
             one_of.append('management')
+
+        if len(room.damaged_walls) > 0:
+            one_of.append('wallrepair')
 
         for name in one_of:
             if self.scheduler.count_by_name(name, self._pid) < 1:

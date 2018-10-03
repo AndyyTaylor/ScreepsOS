@@ -31,7 +31,7 @@ class Management(CreepProcess):
                 creep.clear_task()
 
             tasks = [self.fill_up_cont, self.clear_cent_link, self.fill_terminal,
-                     self.empty_creep, self.gather]
+                     self.empty_creep]
 
             for task in tasks:
                 if task(creep):
@@ -137,7 +137,11 @@ class Management(CreepProcess):
         mod = [CARRY, CARRY, MOVE]
         carry_count = 2
 
-        max_carry = 500
+        if self.room.rcl < 7:
+            max_carry = 400
+        else:
+            max_carry = 800
+
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
             carry_count += 2
