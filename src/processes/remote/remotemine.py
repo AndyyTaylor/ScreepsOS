@@ -55,10 +55,12 @@ class RemoteMine(CreepProcess):
                                 creep.moveTo(struct)
                 if creep.carry.energy < creep.carryCapacity:
                     resource = creep.pos.findClosestByRange(creep.room.find(FIND_DROPPED_RESOURCES))
-                    if not _.isNull(resource):
+                    if not _.isNull(resource) and creep.pos.isNearTo(resource):
                         creep.pickup(resource)
+                        creep.say('resource')
                     else:
                         cont = Game.getObjectById(self._data.deposit_id)
+                        creep.say(cont)
                         if not _.isNull(cont):
                             creep.set_task('withdraw', {'target_id': cont.id})
                         else:
@@ -162,8 +164,8 @@ class RemoteMine(CreepProcess):
         x, y = self.source.pos.x, self.source.pos.y
         nearby_structs = self.room.lookForAtArea(LOOK_STRUCTURES, y - 1, x - 1, y + 1, x + 1, True)
         for struct in nearby_structs:
-            if struct.structure.structureType == STRUCTURE_CONTAINER:
-                deposit_id = struct.structure.id
+            if struct.structureType == STRUCTURE_CONTAINER:
+                deposit_id = struct.id
                 break
 
         if deposit_id is not None:

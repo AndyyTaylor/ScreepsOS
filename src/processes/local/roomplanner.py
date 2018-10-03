@@ -43,13 +43,12 @@ class RoomPlanner(Process):
         # #     print(int(ticket['data']['x']), int(ticket['data']['y']))
         self.vis_enabled = False
 
-        if self._data.room_name == 'W48N1' or self._data.room_name == 'W51S1' or True:
-            if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
-                self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+        if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+            self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
 
-            if not _.isUndefined(self.room.storage):
-                if self.room.can_place_wall() and self.room.storage.store.energy > js_global.STORAGE_MAX[self.room.rcl]:
-                    self.room.memory.walls.hits += js_global.MAX_WALL_DECAY
+        if not _.isUndefined(self.room.storage):
+            if self.room.can_place_wall() and self.room.storage.store.energy > js_global.STORAGE_MAX[self.room.rcl]:
+                self.room.memory.walls.hits += js_global.WALL_REINFORCEMENT
 
         has_laid = False
         if len(self.room.construction_sites) < 1:
