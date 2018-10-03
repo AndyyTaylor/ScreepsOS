@@ -25,7 +25,7 @@ class RemoteHaul(CreepProcess):
 
     def run_creep(self, creep):
         source = Game.getObjectById(self._data.source_id)
-        if creep.is_full():
+        if _.sum(creep.carry) >= creep.carryCapacity - 2:  # for repair
             creep.set_task("deposit", {'target_id': self.room.storage.id})
         elif creep.is_empty() or creep.is_idle():
             cont = Game.getObjectById(self._data.deposit_id)
