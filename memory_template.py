@@ -2,7 +2,13 @@ root = {
     'Memory': {
         'os': {
             'VERSION': -1,
-            'kernel': {}
+            'kernel': {
+                'finished': False
+            }
+        }, 'cities': {
+            '$city': {
+
+            }
         }, 'stats': {
             'cpu': {
                 'bucket': 0,
@@ -13,7 +19,7 @@ root = {
                 }
             }, 'tickets': {
 
-            }, 'rooms': {
+            }, 'cities': {
                 '$city': {
 
                 }

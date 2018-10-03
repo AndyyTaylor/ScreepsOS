@@ -1,6 +1,8 @@
 
 from defs import *  # noqa
+from typing import List, Optional
 from processes import *  # noqa
+from framework.process import Process
 
 __pragma__('noalias', 'undefined')
 __pragma__('noalias', 'keys')
@@ -30,24 +32,27 @@ process_classes = {
 }
 
 
-class Scheduler():
+class Scheduler:
 
     def __init__(self):
         self.validate_memory()
 
-        self.completed = []
+        self.current_priority: int = 0
+        self.current_index: int = 0
 
-    def get_next_process(self):
-        while not Object.keys(self.queue).includes(str(self.current_priority)) \
-                and self.current_priority < 10:
+    def get_next_process(self) -> Optional[Process]:
+        # Object keys should always be strings for consistency
+        priorities: List[str] = Object.keys(self.queue)
+
+        while not priorities.includes(str(self.current_priority)) and self.current_priority < 10:
             self.current_priority += 1
             self.current_index = 0
 
         if self.current_priority >= 10:
             return None
 
-        pids = list(self.queue[self.current_priority])
-        pid = pids[self.current_index]
+        pids: List[int] = list(self.queue[self.current_priority])
+        pid: int = pids[self.current_index]
 
         self.current_index += 1
         if self.current_index >= len(pids):
@@ -55,7 +60,6 @@ class Scheduler():
             self.current_index = 0
 
         if _.isUndefined(self.processes[str(pid)]):
-            # print(pid, 'is fucked')
             self.delete_process(pid)
             return self.get_next_process()
 
