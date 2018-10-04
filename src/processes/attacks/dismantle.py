@@ -37,40 +37,105 @@ class Dismantle(CreepProcess):
         self.run_creeps()  # Updates expired creeps etc
         self.load_creeps()
 
-        # print(self._data.should_respawn)
         if self.dismantler is None and self.healer is None:
             self._data.should_respawn = True
         elif self.dismantler is not None and self.healer is not None:
             self._data.should_respawn = False
 
         if self.dismantler is None or _.isNull(self.dismantler) or self.healer is None or _.isNull(self.healer):
-            # print("Not enough creeps :(")
             return
 
         MAX_DAMAGE = 0.8
-        # self.dismantler.say(str(self._data.attacking))
-
+        self.dismantler.say(self._data.attacking)
         if self.dismantler.hits < self.dismantler.hitsMax * MAX_DAMAGE or \
                 self.healer.hits < self.healer.hitsMax * MAX_DAMAGE:
             self._data.attacking = False
         elif self.dismantler.hits == self.dismantler.hitsMax and self.healer.hits == self.healer.hitsMax:
             self._data.attacking = True
 
+        if _.isUndefined(Memory.rooms[self._data.target_room].attack.attack_sequence) or not self._data.attacking:
+            self.generic_run()
+            self.healer.say('generic')
+        else:
+            self.healer.say('sequence')
+            sequence = Memory.rooms[self._data.target_room].attack.attack_sequence
+            path = []
+            for action in sequence:
+                pos = __new__(RoomPosition(action.pos.x, action.pos.y, action.pos.roomName))
+                path.append(pos)
+                for tid in action.targets:
+                    if _.isNull(Game.getObjectById(tid)):
+                        continue
+
+            path_ind = None
+            for i, tile in enumerate(path):
+                if tile.x == self.dismantler.pos.x and tile.y == self.dismantler.pos.y and \
+                        tile.roomName == self.dismantler.pos.roomName:
+                    path_ind = i
+                    break
+
+            has_attacked = False
+            hostiles = self.dismantler.room.find(FIND_HOSTILE_CREEPS)
+            if len(hostiles) > 0:
+                hostile = self.dismantler.pos.findClosestByRange(hostiles)
+                if self.dismantler.pos.isNearTo(hostile):
+                    self.dismantler.rangedMassAttack()
+                    has_attacked = True
+                elif self.dismantler.pos.inRangeTo(hostile, 3):
+                    self.dismantler.rangedAttack(hostile)
+                    has_attacked = True
+
+            if path_ind is None:
+                self.follow_leader(self.dismantler, self.healer, {'pos': path[0]}, True)
+            else:
+                print(path_ind)
+                if path_ind + 1 < len(path):
+                    target = None
+                    next_tile = path[path_ind + 1]
+                    structs = next_tile.lookFor(LOOK_STRUCTURES)
+                    for struct in structs:
+                        if struct.structureType == STRUCTURE_WALL or struct.structureType == STRUCTURE_RAMPART:
+                            target = struct
+                            break
+
+                    if target is None:
+                        for tid in sequence[path_ind].targets:
+                            if not _.isNull(Game.getObjectById(tid)):
+                                target = Game.getObjectById(tid)
+                                break
+
+                    if target is None or target.structureType == STRUCTURE_WALL or \
+                            target.structureType == STRUCTURE_RAMPART:  # Should be able to get off exit
+                        self.follow_leader(self.dismantler, self.healer, {'pos': path[path_ind + 1]})
+
+                    if target is not None:
+                        self.dismantler.dismantle(target)
+                        if not has_attacked:
+                            if target.structureType == STRUCTURE_WALL:
+                                self.dismantler.rangedAttack(target)
+                            else:
+                                self.dismantler.rangedMassAttack()
+
+        if self.healer.hits < self.healer.hitsMax:
+            self.healer.heal(self.healer)
+        elif self.dismantler.hits < self.dismantler.hitsMax:
+            self.healer.heal(self.dismantler)
+        else:
+            self.healer.heal(self.healer)
+
+    def generic_run(self):
         target = Game.getObjectById(self._data.target_id)
         if (self._data.target_id is None or _.isNull(target) or _.isUndefined(target)) and \
                 self.dismantler.room == self.target_room:
             self._data.target_id = self.dismantler.pos.findClosestByRange(self.target_room.find(FIND_STRUCTURES)).id
             print(self._data.target_id, 'chosen')
             target = Game.getObjectById(self._data.target_id)
-            self._data.target_pos = {'x': target.pos.x, 'y': target.pos.y,  'roomName': target.pos.roomName}
+            self._data.target_pos = {'x': target.pos.x, 'y': target.pos.y, 'roomName': target.pos.roomName}
 
         if _.isNull(target) or _.isUndefined(target):
-            target = {'pos': __new__(RoomPosition(self._data.target_pos.x, self._data.target_pos.y, self._data.target_pos.roomName))}
+            target = {'pos': __new__(RoomPosition(self._data.target_pos.x,
+                                                  self._data.target_pos.y, self._data.target_pos.roomName))}
 
-        # self.healer.say(target)
-        # print(JSON.stringify(target))
-
-        # print(self._data.target_pos)
         if not self._data.attacking:
             target = self.room.controller
 
@@ -101,19 +166,11 @@ class Dismantle(CreepProcess):
             elif self.dismantler.pos.inRangeTo(target, 3):
                 self.dismantler.rangedAttack(target)
 
-        if self.healer.hits < self.healer.hitsMax:
-            self.healer.heal(self.healer)
-        elif self.dismantler.hits < self.dismantler.hitsMax:
-            self.healer.heal(self.dismantler)
-        else:
-            # self.healer.heal(random.choice([self.healer, self.dismantler]))
-            self.healer.heal(self.healer)
-
-    def follow_leader(self, leader, follower, target):
+    def follow_leader(self, leader, follower, target, on_top=False):
         at_target = False
         on_exit = self.on_exit(leader)
         if (follower.pos.isNearTo(leader) or on_exit) and follower.fatigue == 0:
-            if not leader.pos.isNearTo(target):
+            if (not on_top and not leader.pos.isNearTo(target)) or (on_top and not leader.pos.inRangeTo(target, 0)):
                 leader.moveTo(target)
             else:
                 at_target = True

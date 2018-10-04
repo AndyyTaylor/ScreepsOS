@@ -64,11 +64,11 @@ class RemoteInvaderDefence(CreepProcess):
         return creep.memory.role == 'invaderdefender'
 
     def gen_body(self, energy):
-        body = [TOUGH, TOUGH, MOVE, MOVE, ATTACK, MOVE]
+        body = [TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, ATTACK, MOVE]
         mod = [ATTACK, MOVE]
         attack_count = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy and len(body.concat(mod)) <= 12:
+        while self.get_body_cost(body.concat(mod)) <= energy and attack_count < 7:
             body = body.concat(mod)
             attack_count += 1
 
