@@ -37,14 +37,14 @@ class Dismantle(CreepProcess):
         self.run_creeps()  # Updates expired creeps etc
         self.load_creeps()
 
-        print(self._data.should_respawn)
+        # print(self._data.should_respawn)
         if self.dismantler is None and self.healer is None:
             self._data.should_respawn = True
         elif self.dismantler is not None and self.healer is not None:
             self._data.should_respawn = False
 
         if self.dismantler is None or _.isNull(self.dismantler) or self.healer is None or _.isNull(self.healer):
-            print("Not enough creeps :(")
+            # print("Not enough creeps :(")
             return
 
         MAX_DAMAGE = 0.8

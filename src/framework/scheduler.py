@@ -29,7 +29,9 @@ process_classes = {
     'mineralsite': MineralSite,
     'wallrepair': WallRepair,
     'remoteinvaderdefence': RemoteInvaderDefence,
-    'dismantle': Dismantle
+    'dismantle': Dismantle,
+    'empire': Empire,
+    'attackplanner': AttackPlanner
 }
 
 
