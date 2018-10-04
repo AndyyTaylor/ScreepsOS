@@ -32,6 +32,9 @@ class Spawning(Process):
                     name = str(random.randint(0, 10000))
                     body = ticket['data']['body']
                     body.sort(lambda p: js_global.BODY_ORDER.indexOf(p))
+                    if body.includes(HEAL):
+                        body.remove(HEAL)
+                        body.append(HEAL)
                     result = spawn.spawnCreep(body, name)
 
                     if result == OK:

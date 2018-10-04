@@ -28,7 +28,8 @@ process_classes = {
     'sappattack': SappAttack,
     'mineralsite': MineralSite,
     'wallrepair': WallRepair,
-    'remoteinvaderdefence': RemoteInvaderDefence
+    'remoteinvaderdefence': RemoteInvaderDefence,
+    'dismantle': Dismantle
 }
 
 

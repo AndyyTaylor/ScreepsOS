@@ -11,7 +11,7 @@ __pragma__('noalias', 'name')
 class SappAttack(CreepProcess):
 
     def __init__(self, pid, data={}):
-        super().__init__('sappattack', pid, 2, data)
+        super().__init__('sappattack', pid, 5, data)
 
         if _.isUndefined(self._data.military):
             self._data.military = True
@@ -48,10 +48,12 @@ class SappAttack(CreepProcess):
     def run_creep(self, creep):
         if _.isUndefined(creep.memory.attacking) or creep.hits == creep.hitsMax:
             creep.memory.attacking = True
-        elif creep.hits < creep.hitsMax * 0.7:
+        elif creep.getActiveBodyparts(TOUGH) == 0:
             creep.memory.attacking = False
 
         if creep.memory.attacking:
+            creep.rangedMassAttack()
+
             if creep.room.name != self._data.target_room or creep.pos.x > 48 or creep.pos.x < 2 or \
                     creep.pos.y > 48 or creep.pos.y < 2:
 
@@ -89,7 +91,7 @@ class SappAttack(CreepProcess):
         #     return False
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(HEAL) > 0 and creep.getActiveBodyparts(RANGED_ATTACK) == 1
+        return creep.memory.role == 'sapper'
 
     def gen_body(self, energy):
         body = [MOVE, RANGED_ATTACK, MOVE, HEAL]
@@ -100,7 +102,7 @@ class SappAttack(CreepProcess):
             body = body.concat(mod)
             tough_count += 1  # will count ranged attack after
 
-            if tough_count >= 5:
+            if tough_count >= 10:
                 mod = [HEAL, MOVE]
 
-        return body, None
+        return body, {'role': 'sapper'}

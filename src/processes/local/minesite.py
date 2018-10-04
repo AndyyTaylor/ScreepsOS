@@ -72,12 +72,9 @@ class MineSite(CreepProcess):
 
     def is_valid_creep(self, creep):
         if self.get_ideal_deposit() == STRUCTURE_LINK:
-            return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) > 0 and \
-                creep.getActiveBodyparts(CARRY) < 5 and creep.getActiveBodyparts(WORK) < 10 and \
-                _.isUndefined(creep.memory.remote)
+            return creep.memory.role == 'lharvester'
         else:
-            return creep.getActiveBodyparts(WORK) > 0 and creep.getActiveBodyparts(CARRY) == 0 and \
-                creep.getActiveBodyparts(WORK) < 10 and _.isUndefined(creep.memory.remote)
+            return creep.memory.role == 'harvester'
 
     def _gen_body(self, energyAvailable, creep_names):
         mod = [WORK, WORK, MOVE]
@@ -85,9 +82,11 @@ class MineSite(CreepProcess):
         if self.get_ideal_deposit() == STRUCTURE_LINK:
             body = [WORK, CARRY, MOVE]
             total_work = 0
+            role = 'lharvester'
         else:
             body = [WORK, WORK, MOVE]
             total_work = 2
+            role = 'harvester'
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 6:
             total_work += 2
@@ -95,7 +94,7 @@ class MineSite(CreepProcess):
 
         Memory.stats.rooms[self._data.room_name].lharvest.spawn += self.get_body_cost(body)
 
-        return body, {'role': 'miner'}
+        return body, {'role': role}
 
     def init(self):
         self._data.has_init = True

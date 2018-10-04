@@ -43,18 +43,20 @@ class RoomPlanner(Process):
         # #     print(int(ticket['data']['x']), int(ticket['data']['y']))
         self.vis_enabled = False
 
-        if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
-            self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
-
-        if not _.isUndefined(self.room.storage):
-            if self.room.can_place_wall() and self.room.storage.store.energy > js_global.STORAGE_MAX[self.room.rcl]:
-                self.room.memory.walls.hits += js_global.WALL_REINFORCEMENT
-
         has_laid = False
         if len(self.room.construction_sites) < 1:
             for type in js_global.BUILD_ORDER:
                 if type == STRUCTURE_ROAD and self.room.rcl < js_global.ROAD_RCL:
                     continue
+
+                if type == STRUCTURE_RAMPART:
+                    if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+                        self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+
+                        if not _.isUndefined(self.room.storage):
+                            if self.room.can_place_wall() and self.room.storage.store.energy > js_global.STORAGE_MAX[
+                                    self.room.rcl]:
+                                self.room.memory.walls.hits += js_global.WALL_REINFORCEMENT
 
                 if self.lay_structures(type):
                     has_laid = True

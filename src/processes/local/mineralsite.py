@@ -51,8 +51,7 @@ class MineralSite(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 10 and creep.getActiveBodyparts(CARRY) < 1 and \
-            _.isUndefined(creep.memory.remote)
+        return creep.memory.role == 'mineralharvester'
 
     def gen_body(self, energyAvailable):
         body = [WORK, WORK, MOVE]
@@ -63,7 +62,7 @@ class MineralSite(CreepProcess):
             total_work += 2
             body = body.concat(mod)
 
-        return body, None
+        return body, {'role': 'mineralharvester'}
 
     def init(self):  # This should request certain buildings. container / link etc
         self._data.has_init = True

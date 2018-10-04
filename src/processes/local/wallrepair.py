@@ -65,7 +65,7 @@ class WallRepair(CreepProcess):
         mod = [WORK, CARRY, MOVE]
         total_work = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy and total_work < 6:
+        while self.get_body_cost(body.concat(mod)) <= energy and total_work < 8:
             body = body.concat(mod)
             total_work += 1
 

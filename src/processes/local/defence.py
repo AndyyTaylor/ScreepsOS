@@ -68,8 +68,8 @@ class Defence(Process):
                 continue
 
             if Memory.rooms[name].threats.safe_tick > Game.time:
-                print(name, 'is being attacked by', Memory.rooms[name].threats.count, 'attackers!')
-                if self.scheduler.count_by_name('remoteinvaderdefence', self._pid) < 1:
+                if self.scheduler.count_by_name('remoteinvaderdefence', self._pid) < 1 and \
+                        Memory.rooms[name].threats.count < 2:
                     self.launch_child_process('remoteinvaderdefence', {'room_name': self._data.room_name,
                                                                        'target_room': name})
 

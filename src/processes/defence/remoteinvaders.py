@@ -38,7 +38,8 @@ class RemoteInvaderDefence(CreepProcess):
                 return
 
             target = creep.pos.findClosestByRange(target_creeps)
-            if creep.pos.getRangeTo(target) > 3:
+            if creep.pos.getRangeTo(target) > 3 or \
+                    creep.getActiveBodyparts(RANGED_ATTACK) < target.getActiveBodyparts(RANGED_ATTACK):
                 creep.moveTo(target)
 
             if creep.pos.inRangeTo(target, 3):
