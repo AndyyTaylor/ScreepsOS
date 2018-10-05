@@ -98,7 +98,7 @@ class SappAttack(CreepProcess):
         mod = [TOUGH, MOVE]
         tough_count = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy:
+        while self.get_body_cost(body.concat(mod)) <= energy and len(body.concat(mod)) <= 50:
             body = body.concat(mod)
             tough_count += 1  # will count ranged attack after
 

@@ -26,6 +26,9 @@ class Dismantle(CreepProcess):
         if _.isUndefined(self._data.should_respawn):
             self._data.should_respawn = True
 
+        if _.isUndefined(self._data.path_ind):
+            self._data.path_ind = 0
+
         if _.isUndefined(self._data.target_pos):
             self._data.target_pos = {'x': 6, 'y': 44, 'roomName': self._data.target_room}
 
@@ -55,6 +58,7 @@ class Dismantle(CreepProcess):
 
         if _.isUndefined(Memory.rooms[self._data.target_room].attack.attack_sequence) or not self._data.attacking:
             self.generic_run()
+            self._data.path_ind = 0
             self.healer.say('generic')
         else:
             self.healer.say('sequence')
@@ -69,6 +73,9 @@ class Dismantle(CreepProcess):
 
             path_ind = None
             for i, tile in enumerate(path):
+                if i < self._data.path_ind:
+                    continue
+
                 if tile.x == self.dismantler.pos.x and tile.y == self.dismantler.pos.y and \
                         tile.roomName == self.dismantler.pos.roomName:
                     path_ind = i
@@ -89,6 +96,7 @@ class Dismantle(CreepProcess):
                 self.follow_leader(self.dismantler, self.healer, {'pos': path[0]}, True)
             else:
                 print(path_ind)
+                self._data.path_ind = path_ind
                 if path_ind + 1 < len(path):
                     target = None
                     next_tile = path[path_ind + 1]
@@ -104,9 +112,11 @@ class Dismantle(CreepProcess):
                                 target = Game.getObjectById(tid)
                                 break
 
+                    print(JSON.stringify(target))
                     if target is None or target.structureType == STRUCTURE_WALL or \
                             target.structureType == STRUCTURE_RAMPART:  # Should be able to get off exit
-                        self.follow_leader(self.dismantler, self.healer, {'pos': path[path_ind + 1]})
+                        print("Move to:", JSON.stringify(path[path_ind + 1]))
+                        self.follow_leader(self.dismantler, self.healer, {'pos': path[path_ind + 1]}, True)
 
                     if target is not None:
                         self.dismantler.dismantle(target)
