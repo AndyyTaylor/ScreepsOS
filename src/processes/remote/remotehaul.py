@@ -94,12 +94,8 @@ class RemoteHaul(CreepProcess):
             max_carry -= creep.getActiveBodyparts(CARRY)
             current_carry.append(creep.getActiveBodyparts(CARRY))
 
-        if self._data.room_name == 'W51S1':
-            print(sum(current_carry), max_carry)
-
         while len(current_carry) > 0 and max_carry + min(current_carry) < 50:
             max_carry += min(current_carry)
-            print("absorbing", min(current_carry), 'carry creep', self._data.room_name, max_carry)
             current_carry.remove(min(current_carry))
 
         while self.get_body_cost(body.concat(mod)) <= energyAvailable \

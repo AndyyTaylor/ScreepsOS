@@ -48,9 +48,9 @@ class City(Process):
         #     self.launch_child_process('sappattack', {'room_name': self._data.main_room,
         #                                              'target_room': 'W51N1'})
 
-        if self.scheduler.count_by_name('sappattack', self._pid) < 1 and self._data.main_room == 'W51S1':
-            self.launch_child_process('sappattack', {'room_name': self._data.main_room,
-                                                     'target_room': 'W55S2'})
+        # if self.scheduler.count_by_name('sappattack', self._pid) < 1 and self._data.main_room == 'W51S1':
+        #     self.launch_child_process('sappattack', {'room_name': self._data.main_room,
+        #                                              'target_room': 'W55S2'})
 
         if self._data.main_room == 'W59S2':
             remotes = ['W58S2', 'W59S1', 'W58S1']

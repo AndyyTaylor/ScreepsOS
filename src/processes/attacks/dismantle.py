@@ -29,6 +29,9 @@ class Dismantle(CreepProcess):
         if _.isUndefined(self._data.path_ind):
             self._data.path_ind = 0
 
+        if _.isUndefined(self._data.mock):
+            self._data.mock = False
+
         if _.isUndefined(self._data.target_pos):
             self._data.target_pos = {'x': 6, 'y': 44, 'roomName': self._data.target_room}
 
@@ -49,7 +52,6 @@ class Dismantle(CreepProcess):
             return
 
         MAX_DAMAGE = 0.8
-        self.dismantler.say(self._data.attacking)
         if self.dismantler.hits < self.dismantler.hitsMax * MAX_DAMAGE or \
                 self.healer.hits < self.healer.hitsMax * MAX_DAMAGE:
             self._data.attacking = False
@@ -59,9 +61,7 @@ class Dismantle(CreepProcess):
         if _.isUndefined(Memory.rooms[self._data.target_room].attack.attack_sequence) or not self._data.attacking:
             self.generic_run()
             self._data.path_ind = 0
-            self.healer.say('generic')
         else:
-            self.healer.say('sequence')
             sequence = Memory.rooms[self._data.target_room].attack.attack_sequence
             path = []
             for action in sequence:
@@ -95,7 +95,6 @@ class Dismantle(CreepProcess):
             if path_ind is None:
                 self.follow_leader(self.dismantler, self.healer, {'pos': path[0]}, True)
             else:
-                print(path_ind)
                 self._data.path_ind = path_ind
                 if path_ind + 1 < len(path):
                     target = None
@@ -106,17 +105,16 @@ class Dismantle(CreepProcess):
                             target = struct
                             break
 
-                    if target is None:
+                    if target is None and not self._data.mock:
                         for tid in sequence[path_ind].targets:
                             if not _.isNull(Game.getObjectById(tid)):
                                 target = Game.getObjectById(tid)
                                 break
 
-                    print(JSON.stringify(target))
                     if target is None or target.structureType == STRUCTURE_WALL or \
                             target.structureType == STRUCTURE_RAMPART:  # Should be able to get off exit
-                        print("Move to:", JSON.stringify(path[path_ind + 1]))
-                        self.follow_leader(self.dismantler, self.healer, {'pos': path[path_ind + 1]}, True)
+                        self.dismantler.say('move')
+                        self.follow_leader(self.dismantler, self.healer, {'pos': path[path_ind + 1]}, False)
 
                     if target is not None:
                         self.dismantler.dismantle(target)
@@ -138,7 +136,6 @@ class Dismantle(CreepProcess):
         if (self._data.target_id is None or _.isNull(target) or _.isUndefined(target)) and \
                 self.dismantler.room == self.target_room:
             self._data.target_id = self.dismantler.pos.findClosestByRange(self.target_room.find(FIND_STRUCTURES)).id
-            print(self._data.target_id, 'chosen')
             target = Game.getObjectById(self._data.target_id)
             self._data.target_pos = {'x': target.pos.x, 'y': target.pos.y, 'roomName': target.pos.roomName}
 
@@ -162,6 +159,18 @@ class Dismantle(CreepProcess):
             attacked = False
             if not _.isUndefined(self.target_room):
                 hostile = self.dismantler.pos.findClosestByRange(self.target_room.find(FIND_HOSTILE_CREEPS))
+                under_rampart = False
+
+                if not _.isNull(hostile):
+                    for struct in hostile.pos.lookFor(LOOK_STRUCTURES):
+                        if struct.structureType == STRUCTURE_RAMPART:
+                            under_rampart = True
+                            break
+
+                    if under_rampart:
+                        print("Bitch hiding")
+                        hostile = None
+
                 if not _.isNull(hostile) and hostile and self.dismantler.pos.isNearTo(hostile):
                     self.dismantler.rangedMassAttack()
                     attacked = True
@@ -198,6 +207,8 @@ class Dismantle(CreepProcess):
                     follower.move(TOP_RIGHT)
                 elif direction == TOP_RIGHT or direction == TOP_LEFT:
                     follower.move(TOP)
+                elif direction == LEFT:
+                    follower.move(BOTTOM_LEFT)
 
     def load_creeps(self):
         self.dismantler = None

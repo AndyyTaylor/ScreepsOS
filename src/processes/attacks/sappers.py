@@ -18,10 +18,9 @@ class SappAttack(CreepProcess):
 
         if self._pid != -1:
             self.room = Game.rooms[self._data.room_name]
+            self.target_room = Game.rooms[self._data.target_room]
 
     def _run(self):
-        self.target_room = Game.rooms[self._data.target_room]
-
         self.run_creeps()
 
     def roomCallback(self, name):
@@ -46,49 +45,90 @@ class SappAttack(CreepProcess):
         return costs
 
     def run_creep(self, creep):
+        creep.say(self.tower_damage_on_tile(creep.room, creep.pos))
         if _.isUndefined(creep.memory.attacking) or creep.hits == creep.hitsMax:
             creep.memory.attacking = True
-        elif creep.getActiveBodyparts(TOUGH) == 0:
+        elif creep.getActiveBodyparts(TOUGH) * 100 <= self.tower_damage_on_tile(creep.room, creep.pos):
             creep.memory.attacking = False
 
         if creep.memory.attacking:
-            creep.rangedMassAttack()
+            sapper_spots = Memory.rooms[self._data.target_room].attack.sapper_spots
+            sap_spot = sapper_spots[self._data.sap_ind]
 
-            if creep.room.name != self._data.target_room or creep.pos.x > 48 or creep.pos.x < 2 or \
-                    creep.pos.y > 48 or creep.pos.y < 2:
+            sap_spot = __new__(RoomPosition(sap_spot.x, sap_spot.y, sap_spot.roomName))
 
-                if _.isUndefined(self._data.path) or Game.time % 20 == 0:
-                    start = __new__(RoomPosition(25, 25, self._data.target_room))
-                    result = PathFinder.search(creep.pos, {'pos': start, 'range': 23},
-                                               {'maxOps': 5000,
-                                                'roomCallback': lambda r: self.roomCallback(r)})
+            if not creep.pos.isNearTo(sap_spot) or not self._data.on_sap:
+                creep.moveTo(sap_spot, {'maxOps': 5000})
 
-                    self._data.path = result.path
+                if creep.pos.getRangeTo(sap_spot) == 0:
+                    self._data.on_sap = True
 
-                result = creep.moveByPath(self._data.path)
+                creep.rangedMassAttack()
+            else:
+                hostile = creep.pos.findClosestByRange(self.target_room.hostile_military)
 
-                if result == ERR_NOT_FOUND:
-                    start = __new__(RoomPosition(25, 25, self._data.target_room))
-                    result = PathFinder.search(creep.pos, {'pos': start, 'range': 23},
-                                               {'maxOps': 5000,
-                                                'roomCallback': lambda r: self.roomCallback(r)})
+                if _.isNull(hostile) or creep.pos.getRangeTo(hostile) > 3:
+                    if creep.pos.x == 49:
+                        creep.move(LEFT)
+                    elif creep.pos.x == 0:
+                        creep.move(RIGHT)
+                    elif creep.pos.y == 49:
+                        creep.move(TOP)
+                    elif creep.pos.y == 0:
+                        creep.move(BOTTOM)
 
-                    self._data.path = result.path
-
-                # creep.moveTo(__new__(RoomPosition(25, 25, self._data.target_room)))
-
+                    creep.rangedMassAttack()
+                else:
+                    creep.moveTo(sap_spot, {'maxOps': 5000})
+                    creep.rangedAttack(hostile)
         else:
-            if creep.room.name == self._data.target_room or creep.pos.x > 47 or creep.pos.x < 3 or \
-                    creep.pos.y > 47 or creep.pos.y < 3:
-                creep.moveTo(self.room.controller)
+            self._data.on_sap = False
+            if creep.room.name == self._data.target_room:
+                if creep.pos.x > 47:
+                    creep.move(RIGHT)
+                elif creep.pos.x < 2:
+                    creep.move(LEFT)
+                elif creep.pos.y > 47:
+                    creep.move(BOTTOM)
+                elif creep.pos.y < 2:
+                    creep.move(TOP)
+                else:
+                    creep.moveTo(self.room.controller)
+            elif creep.pos.x > 48 or creep.pos.x < 1 or \
+                    creep.pos.y > 48 or creep.pos.y < 1:
+                if creep.pos.x > 47:
+                    creep.move(LEFT)
+                elif creep.pos.x < 2:
+                    creep.move(RIGHT)
+                elif creep.pos.y > 47:
+                    creep.move(TOP)
+                elif creep.pos.y < 2:
+                    creep.move(BOTTOM)
+                else:
+                    creep.moveTo(self.room.controller)
 
         creep.heal(creep)
 
-    def needs_creeps(self):
-        # if Game.time < 9418045 + 1000:
-        return len(self._data.creep_names) < 1
-        # else:
-        #     return False
+    def tower_damage_on_tile(self, room, tile):
+        total_damage = 0
+        for tower in room.towers:
+            if tower.energy == 0:
+                continue
+
+            dist = tower.pos.getRangeTo(tile)
+            if dist <= TOWER_OPTIMAL_RANGE:
+                total_damage += TOWER_POWER_ATTACK
+            elif dist <= TOWER_FALLOFF_RANGE:
+                ddist = dist - TOWER_OPTIMAL_RANGE
+                fall_off = TOWER_POWER_ATTACK * TOWER_FALLOFF * (ddist / (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE))
+                total_damage += TOWER_POWER_ATTACK - fall_off
+            else:
+                total_damage += TOWER_POWER_ATTACK * (1 - TOWER_FALLOFF)
+
+        return total_damage
+
+    def _needs_creeps(self, creep_names):
+        return creep_names < 1
 
     def is_valid_creep(self, creep):
         return creep.memory.role == 'sapper'
