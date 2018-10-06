@@ -150,7 +150,9 @@ class Dismantle(CreepProcess):
             if self._data.attacking:
                 self.follow_leader(self.dismantler, self.healer, target)
             elif self.dismantler.room == self.target_room or self.healer.room == self.target_room or \
-                    self.on_exit(self.dismantler) or self.on_exit(self.healer):
+                    self.dismantler.pos.x < 3 or self.healer.pos.x < 3 or not self.dismantler.pos.isNearTo(self.healer):
+
+                    # self.on_exit(self.dismantler) or self.on_exit(self.healer):
                 self.follow_leader(self.healer, self.dismantler, target)
 
             if self.dismantler.pos.isNearTo(target):
@@ -253,7 +255,8 @@ class Dismantle(CreepProcess):
 
             return body, {'role': 'dismantler'}
         else:
-            body = [TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, HEAL, MOVE]
+            body = [TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, TOUGH, TOUGH, TOUGH,
+                    MOVE, MOVE, MOVE, HEAL, MOVE]
             mod = [HEAL, MOVE]
 
             while self.get_body_cost(body.concat(mod)) <= energy and len(body.concat(mod)) <= 50:

@@ -31,11 +31,6 @@ class SimpleAttack(CreepProcess):
         elif creep.hits < creep.hitsMax * 0.7:
             creep.memory.attacking = False
 
-        if creep.ticksToLive > 800:
-            self._data.target_room = 'W60N10'
-        else:
-            self._data.target_room = 'W57N9'
-
         if creep.memory.attacking:
             if (_.isUndefined(self.target_room) or creep.room != self.target_room) and \
                     (len(creep.room.hostile_military) < 1 or
@@ -127,7 +122,7 @@ class SimpleAttack(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(ATTACK) > 1 and creep.getActiveBodyparts(HEAL) == 1
+        return creep.memory.role == 'simpleattacker'
 
     def gen_body(self, energy):
         body = [ATTACK, MOVE, MOVE, HEAL]
@@ -140,5 +135,5 @@ class SimpleAttack(CreepProcess):
 
             if attack_count >= 8:
                 mod = [RANGED_ATTACK, MOVE]
-
-        return body, None
+        print("Simple is creating creep")
+        return body, {'role': 'simpleattacker'}

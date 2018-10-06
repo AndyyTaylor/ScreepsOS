@@ -49,26 +49,23 @@ class AttackPlanner(Process):
 
     def launch_attack(self, max_saps):
         sapper_cities = []
-        closest_rcl7_city = None
-        closest_dist = 0
+        dismantle_cities = []
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
 
             if room.is_city():
                 dist = Game.map.getRoomLinearDistance(name, self._data.target_room)
-                if room.rcl >= 7 and (closest_rcl7_city is None or dist < closest_dist):
-                    closest_rcl7_city = name
-                    closest_dist = dist
+                if room.rcl >= 7:
+                    dismantle_cities.append(name)
 
-                if dist < 10 and room.rcl >= 6:
+                elif dist < 10 and room.rcl >= 6:
                     sapper_cities.append(name)
-
-        if sapper_cities.includes(closest_rcl7_city):
-            sapper_cities.remove(closest_rcl7_city)
 
         taken_saps = []
         for proc in self.scheduler.proc_by_name('sappattack', self._pid):
             taken_saps.append(proc['data'].room_name)
+
+        sapper_cities = dismantle_cities.concat(sapper_cities)
 
         for i, city in enumerate(sapper_cities):
             if i * 2 + 1 > max_saps:
@@ -81,10 +78,15 @@ class AttackPlanner(Process):
                 self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
                                                          'mock': True, 'sap_ind': i * 2 + 1})
 
-        if self.scheduler.count_by_name('dismantle', self._pid) < 1:
-            print("Launching dismantle for", closest_rcl7_city, '!')
-            self.launch_child_process('dismantle', {'room_name': closest_rcl7_city,
-                                                    'target_room': self._data.target_room, 'mock': True})
+        # taken_dismantles = []
+        # for proc in self.scheduler.proc_by_name('dismantle', self._pid):
+        #     taken_dismantles.append(proc['data'].room_name)
+        #
+        # for city in dismantle_cities:
+        #     if not taken_dismantles.includes(city):
+        #         print("Launching dismantle for", city, '!')
+        #         self.launch_child_process('dismantle', {'room_name': city,
+        #                                                 'target_room': self._data.target_room, 'mock': True})
 
     def load_attack_sequence(self, mem, regen=False):
         if _.isUndefined(mem.attack_sequence) or regen:

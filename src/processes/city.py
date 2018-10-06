@@ -36,10 +36,11 @@ class City(Process):
 
         sources = room.get_sources()
 
-        # if self.scheduler.count_by_name('dismantle', self._pid) < 1 and \
-        #         (self._data.main_room == 'W59S2' or self._data.main_room == 'W51S1'):
-        #     self.launch_child_process('dismantle', {'room_name': self._data.main_room,
-        #                                             'target_room': 'W51N1'})
+        if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
+                (self._data.main_room == 'W51S1'):
+            print("Launching simpleattack")
+            self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
+                                                       'target_room': 'W43S1'})
         #
         # if self.scheduler.count_by_name('sappattack', self._pid) < 1 and \
         #         (self._data.main_room == 'W48N1' or self._data.main_room == 'W56N1'

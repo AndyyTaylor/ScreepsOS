@@ -45,11 +45,15 @@ class SappAttack(CreepProcess):
         return costs
 
     def run_creep(self, creep):
-        creep.say(self.tower_damage_on_tile(creep.room, creep.pos))
         if _.isUndefined(creep.memory.attacking) or creep.hits == creep.hitsMax:
             creep.memory.attacking = True
-        elif creep.getActiveBodyparts(TOUGH) * 100 <= self.tower_damage_on_tile(creep.room, creep.pos):
-            creep.memory.attacking = False
+        else:
+            if self.room.rcl < 7 and \
+                    creep.getActiveBodyparts(TOUGH) * 100 <= self.tower_damage_on_tile(creep.room, creep.pos):
+                creep.memory.attacking = False
+            elif self.room.rcl >= 7 and \
+                    creep.getActiveBodyparts(RANGED_ATTACK) * 100 <= self.tower_damage_on_tile(creep.room, creep.pos):
+                creep.memory.attacking = False
 
         if creep.memory.attacking:
             sapper_spots = Memory.rooms[self._data.target_room].attack.sapper_spots
@@ -107,7 +111,20 @@ class SappAttack(CreepProcess):
                 else:
                     creep.moveTo(self.room.controller)
 
-        creep.heal(creep)
+        my_creeps = _.filter(creep.room.find(FIND_MY_CREEPS), lambda c: c.hits < c.hitsMax
+                             and c.pos.getRangeTo(creep) <= 3)
+        target = creep.pos.findClosestByRange(my_creeps)
+
+        if creep.hits < creep.hitsMax:
+            creep.heal(creep)
+        elif not _.isNull(target):
+            print(creep, 'healing', target)
+            if creep.pos.isNearTo(target):
+                creep.heal(target)
+            elif self.room.rcl < 7:
+                creep.rangedHeal(target)
+        else:
+            creep.heal(creep)
 
     def tower_damage_on_tile(self, room, tile):
         total_damage = 0
@@ -134,15 +151,27 @@ class SappAttack(CreepProcess):
         return creep.memory.role == 'sapper'
 
     def gen_body(self, energy):
-        body = [MOVE, RANGED_ATTACK, MOVE, HEAL]
-        mod = [TOUGH, MOVE]
-        tough_count = 1
+        if self.room.rcl < 7:
+            body = [MOVE, RANGED_ATTACK, MOVE, HEAL]
+            mod = [TOUGH, MOVE]
+            tough_count = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy and len(body.concat(mod)) <= 50:
-            body = body.concat(mod)
-            tough_count += 1  # will count ranged attack after
+            while self.get_body_cost(body.concat(mod)) <= energy and len(body.concat(mod)) <= 50:
+                body = body.concat(mod)
+                tough_count += 1  # will count ranged attack after
 
-            if tough_count >= 10:
-                mod = [HEAL, MOVE]
+                if tough_count >= 10:
+                    mod = [HEAL, MOVE]
+        else:
+            body = [HEAL, MOVE]
+            mod = [HEAL, MOVE]
+            heaL_count = 1
+
+            while self.get_body_cost(body.concat(mod)) <= energy and len(body.concat(mod)) <= 50:
+                body = body.concat(mod)
+                heaL_count += 1  # will count ranged attack after
+
+                if heaL_count >= 9:
+                    mod = [RANGED_ATTACK, MOVE]
 
         return body, {'role': 'sapper'}
