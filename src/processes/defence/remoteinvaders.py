@@ -38,7 +38,8 @@ class RemoteInvaderDefence(CreepProcess):
                 return
 
             target = creep.pos.findClosestByRange(target_creeps)
-            if creep.pos.getRangeTo(target) > 3:
+            if creep.pos.getRangeTo(target) > 3 or \
+                    creep.getActiveBodyparts(RANGED_ATTACK) < target.getActiveBodyparts(RANGED_ATTACK):
                 creep.moveTo(target)
 
             if creep.pos.inRangeTo(target, 3):
@@ -63,11 +64,11 @@ class RemoteInvaderDefence(CreepProcess):
         return creep.memory.role == 'invaderdefender'
 
     def gen_body(self, energy):
-        body = [TOUGH, TOUGH, MOVE, MOVE, ATTACK, MOVE]
+        body = [TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, ATTACK, MOVE]
         mod = [ATTACK, MOVE]
         attack_count = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energy and len(body.concat(mod)) <= 12:
+        while self.get_body_cost(body.concat(mod)) <= energy and attack_count < 7:
             body = body.concat(mod)
             attack_count += 1
 

@@ -55,7 +55,6 @@ class CreepProcess(Process):
                             creep.room.memory.threats.safe_tick > Game.time):
                         creep.moveTo(self.room.controller)
                 else:
-                    print(creep.memory.keep_safe, 'is now safe!')
                     del creep.memory.keep_safe
 
             if _.isUndefined(creep.memory.keep_safe):

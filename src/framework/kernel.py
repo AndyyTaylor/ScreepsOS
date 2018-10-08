@@ -39,7 +39,7 @@ class Kernel():
         self.last_cpu = 0
         self.process_cpu = {}
 
-        self.launch_cities()  # Launch Empire
+        self.launch_empire()  # Launch Empire
 
         self.scheduler.load_processes()
         self.scheduler.queue_processes()
@@ -97,6 +97,17 @@ class Kernel():
         Memory.stats.tickets.count = {
             'spawn': len(self.ticketer.get_tickets_by_type('spawn')),
             'build': len(self.ticketer.get_tickets_by_type('build'))
+        }
+
+        Memory.stats.relations = {}
+        Memory.stats.relations.disliked = {
+            'Joe': {
+                'score': -100,
+                'reason': 'attacked me'
+            }, 'Hurimi': {
+                'score': -10,
+                'reason': 'TooAngel user'
+            }
         }
 
         Memory.stats.credits = Game.market.credits
@@ -311,23 +322,9 @@ class Kernel():
             if not pids.includes(str(creep.assigned)):
                 creep.unassign()
 
-    def launch_cities(self):
-        cities = []
-
-        for room_name in Object.keys(Game.rooms):
-            room = Game.rooms[room_name]
-
-            if room.is_city():
-                cities.append(room_name)
-
-        if self.scheduler.count_by_name('city') < len(cities):
-            taken_cities = []
-            for proc in self.scheduler.proc_by_name('city'):
-                taken_cities.append(proc['data'].main_room)
-
-            for city in cities:
-                if not taken_cities.includes(city):
-                    self.scheduler.launch_process('city', {'main_room': city})
+    def launch_empire(self):
+        if self.scheduler.count_by_name('empire') < 1:
+            self.scheduler.launch_process('empire')
 
     def check_version(self):
         if Memory.os.VERSION != js_global.VERSION or not Memory.os.kernel.finished:

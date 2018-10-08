@@ -141,7 +141,8 @@ class Management(CreepProcess):
 
                     return_value = True
 
-                if terminal.cooldown == 0 and terminal.store[rtype] > js_global.RESOURCE_MIN_TERMINAL:
+                if terminal.cooldown == 0 and terminal.store[rtype] > js_global.RESOURCE_MIN_TERMINAL \
+                        and storage.store.energy > js_global.STORAGE_MAX[self.room.rcl]:
                     diff = terminal.store[rtype] - js_global.RESOURCE_MIN_TERMINAL
                     orders = Game.market.getAllOrders({'resourceType': rtype, 'type': ORDER_BUY})
                     if len(orders) > 0:
