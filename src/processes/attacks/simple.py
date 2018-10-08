@@ -135,5 +135,5 @@ class SimpleAttack(CreepProcess):
 
             if attack_count >= 8:
                 mod = [RANGED_ATTACK, MOVE]
-        print("Simple is creating creep")
+
         return body, {'role': 'simpleattacker'}

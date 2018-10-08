@@ -43,8 +43,7 @@ class RemoteWork(CreepProcess):
         return len(self._data.creep_names) < 1
 
     def is_valid_creep(self, creep):
-        return creep.getActiveBodyparts(WORK) > 1 and creep.getActiveBodyparts(CARRY) > 0 and \
-            not _.isUndefined(creep.memory.remote)
+        return creep.memory.role == 'remoteworker'
 
     def gen_body(self, energyAvailable):
         body = [WORK, CARRY, MOVE]
@@ -55,7 +54,7 @@ class RemoteWork(CreepProcess):
             total_work += 1
             body = body.concat(mod)
 
-        return body, {'remote': True}
+        return body, {'remote': True, 'role': 'remoteworker'}
 
     def is_completed(self):
         target_room = Game.rooms[self._data.target_room]

@@ -36,11 +36,10 @@ class City(Process):
 
         sources = room.get_sources()
 
-        if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
+        if self.scheduler.count_by_name('dismantle', self._pid) < 1 and \
                 (self._data.main_room == 'W51S1'):
-            print("Launching simpleattack")
-            self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
-                                                       'target_room': 'W43S1'})
+            self.launch_child_process('dismantle', {'room_name': self._data.main_room,
+                                                       'target_room': 'W51N2'})
         #
         # if self.scheduler.count_by_name('sappattack', self._pid) < 1 and \
         #         (self._data.main_room == 'W48N1' or self._data.main_room == 'W56N1'
@@ -49,16 +48,16 @@ class City(Process):
         #     self.launch_child_process('sappattack', {'room_name': self._data.main_room,
         #                                              'target_room': 'W51N1'})
 
-        # if self.scheduler.count_by_name('sappattack', self._pid) < 1 and self._data.main_room == 'W51S1':
-        #     self.launch_child_process('sappattack', {'room_name': self._data.main_room,
-        #                                              'target_room': 'W55S2'})
+        if self.scheduler.count_by_name('sappattack', self._pid) < 1 and self._data.main_room == 'W54N2':
+            self.launch_child_process('sappattack', {'room_name': self._data.main_room,
+                                                     'target_room': 'W51N2'})
 
         if self._data.main_room == 'W59S2':
             remotes = ['W58S2', 'W59S1', 'W58S1']
         elif self._data.main_room == 'W51S1':
             remotes = ['W51S2', 'W52S1']
         elif self._data.main_room == 'W59N2':
-            remotes = ['W59N1']
+            remotes = ['W59N1', 'W58N2', 'W59N3']
         elif self._data.main_room == 'W53N5':
             remotes = ['W53N4']
         elif self._data.main_room == 'W54N2':
@@ -71,6 +70,8 @@ class City(Process):
             remotes = ['W48N2']
         elif self._data.main_room == 'W57N6':
             remotes = ['W58N6']
+        elif self._data.main_room == 'W57N11':
+            remotes = ['W57N12']
         else:
             remotes = []
 

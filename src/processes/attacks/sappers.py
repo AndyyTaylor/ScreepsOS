@@ -16,6 +16,9 @@ class SappAttack(CreepProcess):
         if _.isUndefined(self._data.military):
             self._data.military = True
 
+        if _.isUndefined(self._data.sap_ind):
+            self._data.sap_ind = 0
+
         if self._pid != -1:
             self.room = Game.rooms[self._data.room_name]
             self.target_room = Game.rooms[self._data.target_room]
@@ -89,14 +92,15 @@ class SappAttack(CreepProcess):
             self._data.on_sap = False
             if creep.room.name == self._data.target_room:
                 if creep.pos.x > 47:
-                    creep.move(RIGHT)
+                    res = creep.move(RIGHT)
                 elif creep.pos.x < 2:
-                    creep.move(LEFT)
+                    res = creep.move(LEFT)
                 elif creep.pos.y > 47:
-                    creep.move(BOTTOM)
+                    res = creep.move(BOTTOM)
                 elif creep.pos.y < 2:
-                    creep.move(TOP)
-                else:
+                    res = creep.move(TOP)
+
+                if res != OK:
                     creep.moveTo(self.room.controller)
             elif creep.pos.x > 48 or creep.pos.x < 1 or \
                     creep.pos.y > 48 or creep.pos.y < 1:

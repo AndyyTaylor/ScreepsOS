@@ -111,9 +111,9 @@ class Dismantle(CreepProcess):
                                 target = Game.getObjectById(tid)
                                 break
 
-                    if target is None or target.structureType == STRUCTURE_WALL or \
-                            target.structureType == STRUCTURE_RAMPART:  # Should be able to get off exit
-                        self.dismantler.say('move')
+                    if target is None:  # Should be able to get off exit
+                        self.follow_leader(self.dismantler, self.healer, {'pos': path[path_ind + 1]}, True)
+                    elif target.structureType == STRUCTURE_WALL or target.structureType == STRUCTURE_RAMPART:
                         self.follow_leader(self.dismantler, self.healer, {'pos': path[path_ind + 1]}, False)
 
                     if target is not None:

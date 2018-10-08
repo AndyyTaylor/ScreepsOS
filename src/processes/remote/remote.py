@@ -20,7 +20,7 @@ class Remote(Process):
         elif self._data.room_name == 'W51S1':
             should_mine = ['W51S2', 'W52S1']
         elif self._data.room_name == 'W59N2':
-            should_mine = ['W59N1']
+            should_mine = ['W59N1', 'W58N2', 'W59N3']
         elif self._data.room_name == 'W53N5':
             should_mine = ['W53N4']
         elif self._data.room_name == 'W54N2':
@@ -33,6 +33,8 @@ class Remote(Process):
             should_mine = ['W48N2']
         elif self._data.room_name == 'W57N6':
             should_mine = ['W58N6']
+        elif self._data.room_name == 'W57N11':
+            should_mine = ['W57N12']
         else:
             should_mine = []
 
@@ -77,8 +79,8 @@ class Remote(Process):
                                                                  'haul_room': room,
                                                                  'source_id': sid})
 
-        if self._data.room_name == 'W53N7':
-            to_claim = ['W57N11']
+        if self._data.room_name == 'W48N1':
+            to_claim = ['W42N1']
         else:
             to_claim = []
 
@@ -101,7 +103,7 @@ class Remote(Process):
                 to_work.append(name)
 
         works = self.scheduler.proc_by_name('remotework', self._pid)
-        if len(works) < len(to_work) and self._data.room_name == 'W53N7':
+        if len(works) < len(to_work) and self._data.room_name == 'W48N1':
             taken = [m['data'].target_room for m in works]
 
             for target_room in to_work:

@@ -1,4 +1,5 @@
 
+import random
 from defs import *  # noqa
 from typing import List, Union, Any
 
@@ -35,7 +36,7 @@ class AttackPlanner(Process):
         self.vis = self.target_room.visual
 
         hard_regen = False
-        if Game.time % 500 == 0:
+        if Game.time % (500 + random.randint(0, 100)) == 0:
             hard_regen = True
             print("Regenerating everything")
 
@@ -65,28 +66,28 @@ class AttackPlanner(Process):
         for proc in self.scheduler.proc_by_name('sappattack', self._pid):
             taken_saps.append(proc['data'].room_name)
 
-        sapper_cities = dismantle_cities.concat(sapper_cities)
+        # sapper_cities = dismantle_cities.concat(sapper_cities)
 
         for i, city in enumerate(sapper_cities):
             if i * 2 + 1 > max_saps:
                 break
 
-            if not taken_saps.includes(city):
-                print("Launching sap for", city, "!", '({}, {})'.format(i * 2, i * 2 + 1))
-                self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
-                                                         'mock': True, 'sap_ind': i * 2})
-                self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
-                                                         'mock': True, 'sap_ind': i * 2 + 1})
+            # if not taken_saps.includes(city):
+            #     print("Launching sap for", city, "!", '({}, {})'.format(i * 2, i * 2 + 1))
+            #     self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
+            #                                              'mock': True, 'sap_ind': i * 2})
+            #     self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
+            #                                              'mock': True, 'sap_ind': i * 2 + 1})
 
-        # taken_dismantles = []
-        # for proc in self.scheduler.proc_by_name('dismantle', self._pid):
-        #     taken_dismantles.append(proc['data'].room_name)
-        #
-        # for city in dismantle_cities:
-        #     if not taken_dismantles.includes(city):
-        #         print("Launching dismantle for", city, '!')
-        #         self.launch_child_process('dismantle', {'room_name': city,
-        #                                                 'target_room': self._data.target_room, 'mock': True})
+        taken_dismantles = []
+        for proc in self.scheduler.proc_by_name('dismantle', self._pid):
+            taken_dismantles.append(proc['data'].room_name)
+
+        for city in dismantle_cities:
+            if not taken_dismantles.includes(city):
+                print("Launching dismantle for", city, '!')
+                self.launch_child_process('dismantle', {'room_name': city,
+                                                        'target_room': self._data.target_room, 'mock': True})
 
     def load_attack_sequence(self, mem, regen=False):
         if _.isUndefined(mem.attack_sequence) or regen:
@@ -223,7 +224,7 @@ class AttackPlanner(Process):
 
     def get_path_to(self, start: RoomPosition, target: RoomObject) -> \
             (List[RoomPosition], List[Union[StructureWall, StructureRampart]], int):
-        callbacks = [self.basic_callback,  # , self.very_lonely_wall_callback, self.lonely_wall_callback
+        callbacks = [self.basic_callback, self.very_lonely_wall_callback, self.lonely_wall_callback,
                      self.edge_rampart_callback, self.kamikaze_callback]
         index = 0
         for callback in callbacks:

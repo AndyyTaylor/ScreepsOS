@@ -17,7 +17,7 @@ class Empire(Process):
         self.launch_cities()
 
         # if self.scheduler.count_by_name('attackplanner') < 1:
-        #     self.scheduler.launch_process('attackplanner', {'target_room': 'W55S2'})
+        #     self.scheduler.launch_process('attackplanner', {'target_room': 'W51N2'})
 
     def launch_cities(self):
         cities = []

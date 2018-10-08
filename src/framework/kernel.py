@@ -99,6 +99,17 @@ class Kernel():
             'build': len(self.ticketer.get_tickets_by_type('build'))
         }
 
+        Memory.stats.relations = {}
+        Memory.stats.relations.disliked = {
+            'Joe': {
+                'score': -100,
+                'reason': 'attacked me'
+            }, 'Hurimi': {
+                'score': -10,
+                'reason': 'TooAngel user'
+            }
+        }
+
         Memory.stats.credits = Game.market.credits
         Memory.stats.cpu.shutdown = self.get_cpu_diff()
         Memory.stats.cpu.bucket = Game.cpu.bucket
