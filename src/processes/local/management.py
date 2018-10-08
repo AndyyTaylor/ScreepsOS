@@ -24,21 +24,23 @@ class Management(CreepProcess):
         self.run_creeps()
 
     def run_creep(self, creep):
-        if creep.is_idle():
-            sit_pos = __new__(RoomPosition(self._data.sit_x,
-                                           self._data.sit_y, self._data.room_name))
-            if creep.pos.inRangeTo(sit_pos, 0):
-                tasks = [self.fill_up_cont, self.clear_cent_link, self.fill_terminal,
-                         self.empty_creep]
+        sit_pos = __new__(RoomPosition(self._data.sit_x,
+                                       self._data.sit_y, self._data.room_name))
+        if creep.pos.inRangeTo(sit_pos, 0) or creep.memory.task_name == 'gather':
+            if creep.memory.task_name == 'gather':
+                creep.clear_task()
 
-                for task in tasks:
-                    if task(creep):
-                        break
-            else:
-                creep.set_task("travel", {"dest_x": self._data.sit_x, "dest_y": self._data.sit_y,
-                                          "dest_room_name": self._data.room_name})
+            tasks = [self.fill_up_cont, self.clear_cent_link, self.fill_terminal,
+                     self.sell_resources, self.empty_creep]
 
-        creep.run_current_task()
+            for task in tasks:
+                if task(creep):
+                    break
+        else:
+            creep.set_task("travel", {"dest_x": self._data.sit_x, "dest_y": self._data.sit_y,
+                                      "dest_room_name": self._data.room_name})
+
+            creep.run_current_task()
 
     def fill_up_cont(self, creep):
         if self.room.storage.store[RESOURCE_ENERGY] < js_global.STORAGE_MIN[self.room.rcl]:
@@ -52,7 +54,7 @@ class Management(CreepProcess):
         if center_link.cooldown != 0 or up_link.energy > 700:
             return False
 
-        if center_link.energy > 0:
+        if center_link.energy >= up_link.energyCapacity - up_link.energy:
             center_link.transferEnergy(up_link)
         elif creep.is_empty():
             creep.withdraw(self.room.storage, RESOURCE_ENERGY)
@@ -85,9 +87,9 @@ class Management(CreepProcess):
             return False
 
         reserves = self.room.storage.store[RESOURCE_ENERGY] < js_global.STORAGE_MIN[self.room.rcl]
-        if terminal.store.energy < 30000 and not reserves:
+        if terminal.store.energy < js_global.ENERGY_MAX_TERMINAL and not reserves:
             if creep.carry[RESOURCE_ENERGY] > 0:
-                amt = min(creep.carry[RESOURCE_ENERGY], 30000 - terminal.store.energy)
+                amt = min(creep.carry[RESOURCE_ENERGY], js_global.ENERGY_MAX_TERMINAL - terminal.store.energy)
                 creep.transfer(terminal, RESOURCE_ENERGY, amt)
             else:
                 creep.withdraw(self.room.storage, RESOURCE_ENERGY)
@@ -96,16 +98,16 @@ class Management(CreepProcess):
 
         storage = self.room.storage
         for rtype in Object.keys(storage.store):
-            if storage.store[rtype] < 5000:
+            if storage.store[rtype] < js_global.RESOURCE_MAX_STORAGE:
                 continue
 
-            if _.isUndefined(terminal.store[rtype]) or terminal.store[rtype] < 5000:
+            if _.isUndefined(terminal.store[rtype]) or terminal.store[rtype] < js_global.RESOURCE_MAX_TERMINAL:
                 if creep.carry[rtype] > 0:
                     if not _.isUndefined(terminal.store[rtype]):
-                        amt = min(creep.carry[rtype], 5000 - terminal.store[rtype])
+                        amt = min(creep.carry[rtype], js_global.RESOURCE_MAX_TERMINAL - terminal.store[rtype])
                     else:
                         amt = creep.carry[rtype]
-                    amt = min(amt, storage.store[rtype] - 5000)
+                    amt = min(amt, storage.store[rtype] - js_global.RESOURCE_MAX_TERMINAL)
                     creep.transfer(terminal, rtype, amt)
                 elif creep.is_full():
                     creep.transfer(storage, Object.keys(creep.carry).pop())
@@ -115,6 +117,46 @@ class Management(CreepProcess):
                 return True
 
         return False
+
+    def sell_resources(self, creep):
+        storage = self.room.storage
+        terminal = self.room.terminal
+        if _.isUndefined(storage) or _.isUndefined(terminal):
+            return False
+
+        rtypes = Object.keys(storage.store)
+        rtypes.remove('energy')
+
+        return_value = False
+        for rtype in rtypes:
+            amount = storage.store[rtype]
+            camount = creep.carry[rtype] or 0
+            if amount > js_global.RESOURCE_MAX_STORAGE:
+                if _.isUndefined(terminal.store[rtype]) or terminal.store[rtype] < js_global.RESOURCE_MAX_TERMINAL:
+                    if camount > 0:
+                        creep.transfer(terminal, rtype)
+                    else:
+                        t_amount = min(amount - js_global.RESOURCE_MIN_TERMINAL, creep.carryCapacity - _.sum(creep.carry))
+                        creep.withdraw(storage, rtype, t_amount)
+
+                    return_value = True
+
+                if terminal.cooldown == 0 and terminal.store[rtype] > js_global.RESOURCE_MIN_TERMINAL \
+                        and storage.store.energy > js_global.STORAGE_MAX[self.room.rcl]:
+                    diff = terminal.store[rtype] - js_global.RESOURCE_MIN_TERMINAL
+                    orders = Game.market.getAllOrders({'resourceType': rtype, 'type': ORDER_BUY})
+                    if len(orders) > 0:
+                        best_order = None
+                        for order in orders:
+                            if best_order is None or order.price > best_order.price:
+                                best_order = order
+
+                        if best_order.price > 0.05:
+                            Game.market.deal(best_order.id, min(best_order.remainingAmount, diff), self._data.room_name)
+                        else:
+                            print(rtype, 'price too low at', best_order.price)
+
+            return return_value
 
     def empty_creep(self, creep):
         if _.sum(creep.carry) == 0:
@@ -135,12 +177,22 @@ class Management(CreepProcess):
         mod = [CARRY, CARRY, MOVE]
         carry_count = 2
 
-        max_carry = 500
+        if self.room.rcl < 7:
+            max_carry = 400
+        else:
+            max_carry = 800
+
         while self.get_body_cost(body.concat(mod)) <= energy and carry_count < max_carry // 50:
             body = body.concat(mod)
             carry_count += 2
 
         return body, {'role': 'manager'}
+
+    def gather(self, creep):
+        creep.set_task('gather')
+        creep.run_current_task()
+
+        return True
 
     def init(self):
         base_flag = Game.flags[self._data.room_name]

@@ -7,3 +7,4 @@ from tasks.build import Build
 from tasks.repair import Repair
 from tasks.withdraw import Withdraw
 from tasks.deposit import Deposit
+from tasks.sign import Sign

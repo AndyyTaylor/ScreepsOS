@@ -37,6 +37,7 @@ class Logistics(CreepProcess):
         cont = Game.getObjectById(haul.cont_id)
         if creep.is_full():
             creep.set_task('deposit', {'target_id': self.room.storage.id})
+            Memory.stats.rooms[self._data.room_name].lharvest.transfer += creep.carry.energy
         elif creep.is_empty() or creep.is_idle():
             if not _.isNull(cont) and _.sum(cont.store) > 100:
                 creep.set_task('withdraw', {'target_id': haul.cont_id})
@@ -67,7 +68,8 @@ class Logistics(CreepProcess):
         for name in self._data.creep_names:
             creep = Game.creeps[name]
             if creep and not _.isUndefined(creep.memory.haul_ind):
-                indexes.remove(creep.memory.haul_ind)
+                if indexes.includes(creep.memory.haul_ind):
+                    indexes.remove(creep.memory.haul_ind)
 
         haul = self._data.sources[indexes[0]]
 

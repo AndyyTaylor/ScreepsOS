@@ -7,6 +7,7 @@ from base import base
 
 __pragma__('noalias', 'keys')
 __pragma__('noalias', 'values')
+__pragma__('noalias', 'get')
 
 
 class RoomPlanner(Process):
@@ -20,7 +21,7 @@ class RoomPlanner(Process):
 
         self.load_base_pos()
 
-        # self.vis_enabled = True
+        self.vis_enabled = True
         #
         # self.lay_structures(STRUCTURE_EXTENSION)
         # self.lay_structures(STRUCTURE_SPAWN)
@@ -30,21 +31,32 @@ class RoomPlanner(Process):
         # self.lay_structures(STRUCTURE_LAB)
         # self.lay_structures(STRUCTURE_CONTAINER)
         #
-        # if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
-        #     self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+
+        if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+            self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+
         #
         # # tickets = self.ticketer.get_tickets_by_type('build')
         # # for ticket in tickets:
         # #     self.build(ticket['data']['type'], int(ticket['data']['x']),
         # #                int(ticket['data']['y']), False)
         # #     print(int(ticket['data']['x']), int(ticket['data']['y']))
-        # self.vis_enabled = False
+        self.vis_enabled = False
 
         has_laid = False
         if len(self.room.construction_sites) < 1:
             for type in js_global.BUILD_ORDER:
                 if type == STRUCTURE_ROAD and self.room.rcl < js_global.ROAD_RCL:
                     continue
+
+                if type == STRUCTURE_RAMPART:
+                    if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+                        self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+
+                        if not _.isUndefined(self.room.storage):
+                            if self.room.can_place_wall() and self.room.storage.store.energy > js_global.STORAGE_MAX[
+                                    self.room.rcl]:
+                                self.room.memory.walls.hits += js_global.WALL_REINFORCEMENT
 
                 if self.lay_structures(type):
                     has_laid = True
@@ -57,9 +69,11 @@ class RoomPlanner(Process):
 
             if self.lay_structures(STRUCTURE_ROAD, name):
                 has_laid = True
+            elif self.lay_structures(STRUCTURE_CONTAINER, name):
+                has_laid = True
 
         if not has_laid and len(self.room.construction_sites) == 0:
-            self.sleep(500 + random.randint(0, 10))
+            self.sleep(300 + random.randint(0, 10))
         else:
             self.sleep(random.randint(0, 30))
 
@@ -108,12 +122,13 @@ class RoomPlanner(Process):
             if res == ERR_INVALID_TARGET:
                 creeps = Game.rooms[room_name].lookForAt(LOOK_CREEPS, x, y)
                 if len(creeps) > 0:
+                    structs = Game.rooms[room_name].lookForAt(LOOK_STRUCTURES, x, y)
+                    for struct in structs:
+                        if struct.structureType == type:
+                            return False
+
                     res = OK
 
-            if type == STRUCTURE_CONTAINER:
-                print('cont', res, room_name, x, y)
-            elif type == STRUCTURE_LINK:
-                print('link', res, room_name, x, y)
             return res == OK
 
     def draw_visual(self, x, y, type):
@@ -175,13 +190,41 @@ class RoomPlanner(Process):
 
         width -= 1
 
+        room = Game.rooms[self._data.room_name]
+        terrain = room.getTerrain()
+
+        if _.isUndefined(room.memory.walls):
+            room.memory.walls = {}
+
+        if _.isUndefined(room.memory.walls.last_placed):
+            room.memory.walls.last_placed = 0
+
+        if _.isUndefined(room.memory.walls.hits):
+            room.memory.walls.hits = js_global.WALL_HITS
+
         for xx in range(start_x, start_x + base['width'] + 3):
             for yy in range(start_y, start_y + base['height'] + 3):
                 if min(abs(start_x - xx), abs(start_x + base['width'] + 2 - xx)) > width and \
-                        min(abs(start_y - yy), abs(start_y + base['height'] + 2 - yy)) > width:
+                        min(abs(start_y - yy), abs(start_y + base['height'] + 2 - yy)) > width or \
+                        terrain.get(xx, yy) == TERRAIN_MASK_WALL:
                     continue
 
-                self.vis.rect(xx - 0.5, yy - 0.5, 1, 1, {'fill': 'green', 'opacity': 0.3})
+                if self.vis_enabled:
+                    self.vis.rect(xx - 0.5, yy - 0.5, 1, 1, {'fill': 'green', 'opacity': 0.3})
+                else:
+                    if room.can_place_wall():
+                        if room.createConstructionSite(xx, yy, STRUCTURE_RAMPART) == OK:
+                            room.memory.walls.last_placed = Game.time
+                    else:
+                        structs = room.lookForAt(LOOK_STRUCTURES, xx, yy)
+                        placed = False
+                        for struct in structs:
+                            if struct.structureType == STRUCTURE_RAMPART:
+                                placed = True
+                                break
+
+                        if not placed:
+                            self.vis.rect(xx - 0.5, yy - 0.5, 1, 1, {'fill': 'blue', 'opacity': 0.3})
 
     def place_base(self):
         valid = [[True for y in range(50)] for x in range(50)]

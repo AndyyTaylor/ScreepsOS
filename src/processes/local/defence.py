@@ -22,7 +22,10 @@ class Defence(Process):
         hostile_creeps = self.room.find(FIND_HOSTILE_CREEPS)
         injured = _.filter(self.room.find(FIND_MY_CREEPS), lambda c: c.hits < c.hitsMax)
         repairs = _.filter(self.room.find(FIND_STRUCTURES),
-                           lambda s: s.hits < s.hitsMax * js_global.TOWER_REPAIR)
+                           lambda s:
+                           (s.hits < s.hitsMax * js_global.TOWER_REPAIR and
+                           s.structureType != STRUCTURE_RAMPART and s.structureType != STRUCTURE_WALL) or
+                           (s.structureType == STRUCTURE_RAMPART and s.hits < self.room.memory.walls.hits / 2))
 
         for tower in self.room.towers:
             if len(hostile_creeps) > 0:
@@ -33,7 +36,7 @@ class Defence(Process):
                 target = tower.pos.findClosestByRange(injured)
                 tower.heal(target)
                 self.room.memory.towers.heal += 10
-            elif len(repairs) > 0:
+            elif len(repairs) > 0 and tower.energy > 500:
                 tower.repair(repairs[0])
                 self.room.memory.towers.repair += 10
 
@@ -46,20 +49,29 @@ class Defence(Process):
             if _.isUndefined(room):
                 continue
 
-            if len(room.find(FIND_HOSTILE_CREEPS)) > 0:
-                if _.isUndefined(room.memory):
-                    room.memory = {}
+            if _.isUndefined(room.memory):
+                room.memory = {}
 
-                if _.isUndefined(room.memory.threats):
-                    room.memory.threats = {}
+            if _.isUndefined(room.memory.threats):
+                room.memory.threats = {}
 
-                room.memory.threats.count = len(room.find(FIND_HOSTILE_CREEPS))
+            room.memory.threats.count = len(room.hostile_military)
 
-                max_ticks = 0
-                for creep in room.find(FIND_HOSTILE_CREEPS):
-                    max_ticks = max(creep.ticksToLive, max_ticks)
+            max_ticks = 0
+            for creep in room.hostile_military:
+                max_ticks = max(creep.ticksToLive, max_ticks)
 
-                room.memory.threats.safe_tick = Game.time + max_ticks
+            room.memory.threats.safe_tick = Game.time + max_ticks
+
+        for name in self._data.remotes:
+            if _.isUndefined(Memory.rooms[name]) or _.isUndefined(Memory.rooms[name].threats):
+                continue
+
+            if Memory.rooms[name].threats.safe_tick > Game.time:
+                if self.scheduler.count_by_name('remoteinvaderdefence', self._pid) < 1 and \
+                        Memory.rooms[name].threats.count < 2:
+                    self.launch_child_process('remoteinvaderdefence', {'room_name': self._data.room_name,
+                                                                       'target_room': name})
 
     def validate_memory(self):
         if _.isUndefined(self.room.memory):

@@ -1,6 +1,8 @@
 
 from defs import *  # noqa
 from typing import Dict, Any
+from math import ceil
+
 
 from framework.scheduler import Scheduler, process_classes
 from framework.ticketer import Ticketer
@@ -44,11 +46,11 @@ class Kernel:
         self.last_cpu = 0
         self.process_cpu = {}
 
+        self.launch_empire()  # Launch Empire
+
         self.scheduler.load_processes()
         self.scheduler.queue_processes()
         self.ticketer.load_tickets()
-
-        self.launch_cities()  # Launch Empire
 
         if self.new_upload:
             self.ticketer.clear_all_tickets()
@@ -90,13 +92,24 @@ class Kernel:
         self.log_gcl()
         self.log_processes()
         self.log_rcl()
-        self.log_resources()
         self.log_rooms()
+        self.log_resources()
 
         Memory.stats.tickets = {}
         Memory.stats.tickets.count = {
             'spawn': len(self.ticketer.get_tickets_by_type('spawn')),
             'build': len(self.ticketer.get_tickets_by_type('build'))
+        }
+
+        Memory.stats.relations = {}
+        Memory.stats.relations.disliked = {
+            'Joe': {
+                'score': -100,
+                'reason': 'attacked me'
+            }, 'Hurimi': {
+                'score': -10,
+                'reason': 'TooAngel user'
+            }
         }
 
         Memory.stats.credits = Game.market.credits
@@ -105,24 +118,6 @@ class Kernel:
         Memory.stats.memory = {'size': len(RawMemory.get())}
 
         Memory.os.kernel.finished = True
-
-    def launch_cities(self) -> None:
-        cities = []
-
-        for room_name in Object.keys(Game.rooms):
-            room = Game.rooms[room_name]
-
-            if room.is_city():
-                cities.append(room_name)
-
-        if self.scheduler.count_by_name('city') < len(cities):
-            taken_cities = []
-            for proc in self.scheduler.proc_by_name('city'):
-                taken_cities.append(proc['data'].main_room)
-
-            for city in cities:
-                if not taken_cities.includes(city):
-                    self.scheduler.launch_process('city', {'main_room': city})
 
     def unassign_creeps(self):
         pids = self.scheduler.list_pids()
@@ -159,6 +154,110 @@ class Kernel:
         self.last_cpu = Game.cpu.getUsed()
 
         return diff
+
+    def log_rooms(self):
+        if _.isUndefined(Memory.stats.rooms):
+            Memory.stats.rooms = {}
+
+        for name in Object.keys(Game.rooms):
+            room = Game.rooms[name]
+            stats = Memory.stats.rooms[name] or {}
+
+            if room.is_city() or room.is_remote():
+                if not _.isUndefined(Memory.stats.rooms[name]) and not _.isUndefined(Memory.stats.rooms[name].expenses):
+                    expenses = Object.assign({'build': 0, 'repair': 0, 'upgrade': 0, 'decay': 0}, Memory.stats.rooms[name].expenses)
+                else:
+                    expenses = {'build': 0, 'repair': 0, 'upgrade': 0, 'decay': 0}
+                income = {'local_harvest': 0, 'remote_harvest': 0}
+                events = room.getEventLog()
+                for event in events:
+                    if event.event == EVENT_BUILD:
+                        expenses['build'] += event.data.energySpent
+                    elif event.event == EVENT_REPAIR:
+                        expenses['repair'] += event.data.energySpent
+                    elif event.event == EVENT_UPGRADE_CONTROLLER:
+                        expenses['upgrade'] += event.data.energySpent
+                    elif event.event == EVENT_HARVEST:
+                        if room.is_city():
+                            if not _.isUndefined(Memory.stats.rooms[name].lharvest):
+                                Memory.stats.rooms[name].lharvest.harvest += event.data.amount
+                            income['local_harvest'] += event.data.amount
+                        else:
+                            income['remote_harvest'] += event.data.amount
+
+                for resource in room.find(FIND_DROPPED_RESOURCES):
+                    expenses['decay'] += ceil(resource.amount / 1000)
+
+                stats.expenses = expenses
+                stats.income = income
+
+            if room.is_city():
+                stats.rcl = {
+                    'level': room.controller.level,
+                    'progress': room.controller.progress,
+                    'progressTotal': room.controller.progressTotal
+                }
+
+                resources = {'energy': 0}
+                stores = _.filter(room.find(FIND_STRUCTURES),
+                                  lambda s: s.structureType == STRUCTURE_CONTAINER or
+                                            s.structureType == STRUCTURE_LINK or
+                                            s.structureType == STRUCTURE_STORAGE)  # noqa
+
+                for store in stores:
+                    if _.isUndefined(store.store):
+                        resources[RESOURCE_ENERGY] += store.energy
+                    else:
+                        for rtype in Object.keys(store.store):
+                            if not Object.keys(resources).includes(rtype):
+                                resources[rtype] = store.store[rtype]
+                            else:
+                                resources[rtype] += store.store[rtype]
+
+                stats.stored = resources
+
+                total_spawns = len(room.spawns)
+                num_working = 0
+                for spawn in room.spawns:
+                    if not _.isNull(spawn.spawning):
+                        num_working += 1
+
+                stats.spawning = {
+                    'totalSpawns': total_spawns,
+                    'numWorking': num_working,
+                    'percBusy': num_working / total_spawns,
+                    'isFull': 1 if room.is_full() else 0,
+                    'energyPerc': room.energyAvailable / room.energyCapacityAvailable,
+                    'waiting': 1 if room.is_full() and num_working < total_spawns else 0
+                }
+
+                energy = 0
+                for tower in room.towers:
+                    energy += tower.energy
+
+                stats.towers = {
+                    'energy': energy,
+                    'attack': room.memory.towers.attack,
+                    'heal': room.memory.towers.heal,
+                    'repair': room.memory.towers.repair
+                }
+
+                total = 0
+                count = max(len(room.walls), 1)
+                for wall in room.walls:
+                    total += wall.hits
+                avg = total / count
+                stats.walls = {
+                    'total': total,
+                    'avg': avg,
+                    'count': count
+                }
+
+                stats.additionalWorkers = room.get_additional_workers()  # Room rcl 1 9528657
+
+                # room.memory.towers.attack = 0
+                # room.memory.towers.heal = 0
+                # room.memory.towers.repair = 0
 
     @staticmethod
     def check_version():
@@ -216,81 +315,47 @@ class Kernel:
     @staticmethod
     def log_resources():
         resources = {}
+        expenditure = Memory.stats.expenditure or {}
+        gincome = Memory.stats.income or {}
+
         for name in Object.keys(Memory.stats.rooms):
-            stored = Memory.stats.rooms[name].stored
-            for resource in Object.keys(stored):
-                if resource in resources:
-                    resources[resource] += stored[resource]
-                else:
-                    resources[resource] = stored[resource]
-
-        Memory.stats.resources = resources
-
-    @staticmethod
-    def log_rooms():
-        Memory.stats.rooms = {}
-
-        for name in Object.keys(Game.rooms):
-            room = Game.rooms[name]
-
-            if not room.is_city():
+            if _.isUndefined(Game.rooms[name]):
                 continue
 
-            stats = {}
+            if Game.rooms[name].is_city():
+                stored = Memory.stats.rooms[name].stored
+                for resource in Object.keys(stored):
+                    if resource in resources:
+                        resources[resource] += stored[resource]
+                    else:
+                        resources[resource] = stored[resource]
 
-            stats.rcl = {
-                'level': room.controller.level,
-                'progress': room.controller.progress,
-                'progressTotal': room.controller.progressTotal
-            }
+            if Game.rooms[name].is_city() or Game.rooms[name].is_remote():
+                expenses = Memory.stats.rooms[name].expenses
+                for expense in Object.keys(expenses):
+                    if expense in expenditure:
+                        expenditure[expense] += expenses[expense]
+                    else:
+                        expenditure[expense] = expenses[expense]
 
-            resources = {'energy': 0}
-            stores = _.filter(room.find(FIND_STRUCTURES),
-                              lambda s: s.structureType == STRUCTURE_CONTAINER or
-                                        s.structureType == STRUCTURE_LINK or
-                                        s.structureType == STRUCTURE_STORAGE)  # noqa
+                    Memory.stats.rooms[name].expenses[expense] = 0
 
-            for store in stores:
-                if isinstance(store, StructureLink):
-                    resources[RESOURCE_ENERGY] += store.energy
-                elif isinstance(store, StructureContainer) or isinstance(store, StructureStorage):
-                    for rtype in Object.keys(store.store):
-                        if not Object.keys(resources).includes(rtype):
-                            resources[rtype] = store.store[rtype]
-                        else:
-                            resources[rtype] += store.store[rtype]
+                lincome = Memory.stats.rooms[name].income
+                for income in Object.keys(lincome):
+                    if income in gincome:
+                        gincome[income] += lincome[income]
+                    else:
+                        gincome[income] = lincome[income]
 
-            stats.stored = resources
+                    Memory.stats.rooms[name].income[income] = 0
 
-            total_spawns = len(room.spawns)
-            num_working = 0
-            for spawn in room.spawns:
-                if not _.isNull(spawn.spawning):
-                    num_working += 1
+        Memory.stats.resources = resources
+        Memory.stats.expenditure = expenditure
+        Memory.stats.income = gincome
 
-            stats.spawning = {
-                'totalSpawns': total_spawns,
-                'numWorking': num_working,
-                'percBusy': num_working / total_spawns,
-                'isFull': 1 if room.is_full() else 0,
-                'energyPerc': room.energyAvailable / room.energyCapacityAvailable,
-                'waiting': 1 if room.is_full() and num_working < total_spawns else 0
-            }
-
-            energy = 0
-            for tower in room.towers:
-                energy += tower.energy
-
-            stats.towers = {
-                'energy': energy,
-                'attack': room.memory.towers.attack,
-                'heal': room.memory.towers.heal,
-                'repair': room.memory.towers.repair
-            }
-
-            stats.additionalWorkers = room.get_additional_workers()
-
-            Memory.stats.rooms[name] = stats
+    def launch_empire(self):
+        if self.scheduler.count_by_name('empire') < 1:
+            self.scheduler.launch_process('empire')
 
     @staticmethod
     def validate_memory():
