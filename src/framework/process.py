@@ -2,9 +2,12 @@
 from defs import *  # noqa
 
 
-class Process():
+class Process:
 
-    def __init__(self, name, pid, priority, data={}):
+    def __init__(self, name, pid, priority, data=None):
+        if data is None:
+            data = {}
+
         self.name = name
         self._pid = pid
         self._data = data
