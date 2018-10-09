@@ -22,7 +22,6 @@ jobs:
           name: Install dependencies
           command: |
             sudo pip install pytest
-            pytest
 
       - run:
           name: run tests
