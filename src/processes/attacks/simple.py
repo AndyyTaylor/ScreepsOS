@@ -42,9 +42,11 @@ class SimpleAttack(CreepProcess):
                     has_attacked = self.attack_creep(creep, creep.pos.findClosestByRange(hostile_military))
             else:
                 if len(hostile_military) > 0 and creep.distToClosest(hostile_military) <= 3:
+                    print("Attacking at range", creep.distToClosest(hostile_military))
                     has_attacked = self.attack_creep(creep, creep.pos.findClosestByRange(hostile_military))
                 else:
                     target_struct = self.find_target_struct()
+                    print("Should kill", target_struct)
                     if target_struct is not None:
                         has_attacked = self.attack_structure(creep, target_struct)  # TODO: These should be in Creep
         else:
@@ -81,10 +83,14 @@ class SimpleAttack(CreepProcess):
             end = Game.cpu.getUsed()
             total += end - start
             struct_priority = destroy_order.index(struct.structureType)
+            if struct_priority == -1:
+                continue
+
             if best_target is None or struct_priority < best_priority:
                 best_target = struct
                 best_priority = struct_priority
         # print(total)  TODO: Work out the best way to cast a variable for minimal cpu
+
         return best_target
 
     @staticmethod
@@ -115,7 +121,7 @@ class SimpleAttack(CreepProcess):
         if creep.pos.inRangeTo(target, 3):
             creep.rangedAttack(target)
 
-        creep.moveTo(target)
+        creep.moveTo(target, {'maxRooms': 1})
         return False
 
     @staticmethod

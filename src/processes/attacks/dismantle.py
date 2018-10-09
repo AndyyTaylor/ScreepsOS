@@ -96,6 +96,7 @@ class Dismantle(CreepProcess):
                 self.follow_leader(self.dismantler, self.healer, {'pos': path[0]}, True)
             else:
                 self._data.path_ind = path_ind
+                self.dismantler.say(path_ind)
                 if path_ind + 1 < len(path):
                     target = None
                     next_tile = path[path_ind + 1]
