@@ -39,7 +39,7 @@ def _unassign():
     this.clear_task()
 
 
-def _set_task(name, data={}):
+def _set_task(name, data=None):
     this.memory.task_name = name
     this.memory.task_data = data
 
@@ -55,7 +55,7 @@ def _is_idle():
     return is_idle
 
 
-def _get_task_instance(name, data={}):
+def _get_task_instance(name, data=None):
     TaskClass = classes_by_name[name]
 
     return TaskClass(data)

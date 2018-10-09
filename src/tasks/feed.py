@@ -8,7 +8,7 @@ __pragma__('noalias', 'name')
 
 class Feed(Task):
 
-    def __init__(self, data={}):
+    def __init__(self, data=None):
         super().__init__('feed', data)
 
     def _run(self, creep):

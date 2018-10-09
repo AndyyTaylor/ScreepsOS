@@ -4,7 +4,7 @@ from defs import *  # noqa
 
 class Task():
 
-    def __init__(self, name, data={}):
+    def __init__(self, name, data=None):
         self.name = name
         self._data = data
 

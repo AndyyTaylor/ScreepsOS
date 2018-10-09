@@ -6,7 +6,7 @@ from framework.task import Task
 
 class Build(Task):
 
-    def __init__(self, data={}):
+    def __init__(self, data=None):
         super().__init__('build', data)
 
     def _run(self, creep):

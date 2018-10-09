@@ -9,7 +9,7 @@ __pragma__('noalias', 'name')
 
 class CreepProcess(Process):
 
-    def __init__(self, name, pid, priority, data={}):
+    def __init__(self, name, pid, priority, data=None):
         super().__init__(name, pid, priority, data)
 
         if _.isUndefined(self._data.creep_names):

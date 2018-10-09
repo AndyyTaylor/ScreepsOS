@@ -13,7 +13,7 @@ __pragma__('noalias', 'set')
 
 class AttackPlanner(Process):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('attackplanner', pid, 3, data)
 
         if pid != -1:

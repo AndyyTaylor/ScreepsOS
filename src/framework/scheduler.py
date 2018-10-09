@@ -81,7 +81,7 @@ class Scheduler:
         self.current_priority = 0  # shift_processes instead?
         self.current_index = 0
 
-    def launch_process(self, name, data={}):
+    def launch_process(self, name, data=None):
         pid = self.gen_pid()
         priority = process_classes[name](-1).priority
 

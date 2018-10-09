@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 
 class Management(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('management', pid, 2, data)
 
         if self._pid != -1:

@@ -10,7 +10,7 @@ __pragma__('noalias', 'name')
 
 class SimpleAttack(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('simpleattack', pid, 2, data)
 
         if _.isUndefined(self._data.military):

@@ -6,7 +6,7 @@ from framework.task import Task
 
 class Sign(Task):
 
-    def __init__(self, data={}):
+    def __init__(self, data=None):
         super().__init__('sign', data)
 
     def _run(self, creep):

@@ -14,7 +14,7 @@ class Ticketer():
 
         self.validate_memory()
 
-    def add_ticket(self, type, requester, data={}):
+    def add_ticket(self, type, requester, data=None):
         tid = self.gen_tid()
 
         ticket = {

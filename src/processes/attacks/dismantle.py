@@ -11,7 +11,7 @@ __pragma__('noalias', 'name')
 
 class Dismantle(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('dismantle', pid, 5, data)
 
         if _.isUndefined(self._data.military):

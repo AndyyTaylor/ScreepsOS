@@ -10,7 +10,7 @@ __pragma__('noalias', 'keys')
 
 class Empire(Process):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__("empire", pid, 1, data)
 
     def _run(self):

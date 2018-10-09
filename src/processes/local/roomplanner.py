@@ -12,7 +12,7 @@ __pragma__('noalias', 'get')
 
 class RoomPlanner(Process):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('roomplanner', pid, 3, data)
 
     def _run(self):

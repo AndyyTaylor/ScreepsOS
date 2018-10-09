@@ -9,7 +9,7 @@ __pragma__('noalias', 'values')
 
 class Deposit(Task):
 
-    def __init__(self, data={}):
+    def __init__(self, data=None):
         super().__init__('deposit', data)
 
     def _run(self, creep):

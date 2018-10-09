@@ -9,7 +9,7 @@ __pragma__('noalias', 'values')
 
 class Withdraw(Task):
 
-    def __init__(self, data={}):
+    def __init__(self, data=None):
         super().__init__('withdraw', data)
 
     def _run(self, creep):

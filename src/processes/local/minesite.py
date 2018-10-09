@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 
 class MineSite(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('minesite', pid, 2, data)
 
         if pid != -1:

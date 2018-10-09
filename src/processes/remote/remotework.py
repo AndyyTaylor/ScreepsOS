@@ -10,7 +10,7 @@ __pragma__('noalias', 'name')
 
 class RemoteWork(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('remotework', pid, 4, data)
 
     def _run(self):

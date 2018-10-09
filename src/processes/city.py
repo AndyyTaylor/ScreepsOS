@@ -10,7 +10,7 @@ __pragma__('noalias', 'keys')
 
 class City(Process):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__("city", pid, 1, data)
 
     def _run(self):
@@ -36,10 +36,10 @@ class City(Process):
 
         sources = room.get_sources()
 
-        if self.scheduler.count_by_name('dismantle', self._pid) < 1 and \
-                (self._data.main_room == 'W51S1'):
-            self.launch_child_process('dismantle', {'room_name': self._data.main_room,
-                                                    'target_room': 'W52S3'})
+        # if self.scheduler.count_by_name('dismantle', self._pid) < 1 and \
+        #         (self._data.main_room == 'W51S1'):
+        #     self.launch_child_process('dismantle', {'room_name': self._data.main_room,
+        #                                             'target_room': 'W52S3'})
         #
         # if self.scheduler.count_by_name('sappattack', self._pid) < 1 and \
         #         (self._data.main_room == 'W48N1' or self._data.main_room == 'W56N1'
@@ -48,9 +48,9 @@ class City(Process):
         #     self.launch_child_process('sappattack', {'room_name': self._data.main_room,
         #                                              'target_room': 'W51N1'})
 
-        if self.scheduler.count_by_name('sappattack', self._pid) < 1 and self._data.main_room == 'W48N1':
-            self.launch_child_process('sappattack', {'room_name': self._data.main_room,
-                                                     'target_room': 'W52S3'})
+        # if self.scheduler.count_by_name('sappattack', self._pid) < 1 and self._data.main_room == 'W48N1':
+        #     self.launch_child_process('sappattack', {'room_name': self._data.main_room,
+        #                                              'target_room': 'W52S3'})
 
         if self._data.main_room == 'W59S2':
             remotes = ['W58S2', 'W59S1', 'W58S1']

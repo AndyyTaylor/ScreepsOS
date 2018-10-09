@@ -6,7 +6,7 @@ from framework.task import Task
 
 class Travel(Task):
 
-    def __init__(self, data={}):
+    def __init__(self, data=None):
         super().__init__('travel', data)
 
         if _.isUndefined(self._data.distance):

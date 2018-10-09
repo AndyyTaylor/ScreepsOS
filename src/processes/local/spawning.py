@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 
 class Spawning(Process):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('spawning', pid, 0, data)
 
     def _run(self):

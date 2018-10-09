@@ -4,7 +4,7 @@ from defs import *  # noqa
 
 class Process():
 
-    def __init__(self, name, pid, priority, data={}):
+    def __init__(self, name, pid, priority, data=None):
         self.name = name
         self._pid = pid
         self._data = data
@@ -22,7 +22,7 @@ class Process():
         if _.isUndefined(self._data.sleep) or Game.time > self._data.sleep:
             self._run()
 
-    def launch_child_process(self, name, data={}):
+    def launch_child_process(self, name, data=None):
         data['parent'] = self._pid
 
         self.scheduler.launch_process(name, data)

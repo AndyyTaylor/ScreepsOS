@@ -9,7 +9,7 @@ __pragma__('noalias', 'values')
 
 class BuildSite(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('buildsite', pid, 4, data)
 
         if pid != -1:

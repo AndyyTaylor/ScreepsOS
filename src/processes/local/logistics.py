@@ -9,7 +9,7 @@ __pragma__('noalias', 'values')
 
 class Logistics(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('logistics', pid, 2, data)
 
         if _.isUndefined(self._data.sources):

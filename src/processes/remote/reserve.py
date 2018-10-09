@@ -10,7 +10,7 @@ __pragma__('noalias', 'name')
 
 class Reserve(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('reserve', pid, 5, data)
 
     def _run(self):

@@ -9,7 +9,7 @@ __pragma__('noalias', 'values')
 
 class RepairSite(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('repairsite', pid, 3, data)
 
     def _run(self):

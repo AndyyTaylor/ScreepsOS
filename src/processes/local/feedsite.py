@@ -11,7 +11,7 @@ __pragma__('noalias', 'name')
 
 class FeedSite(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('feedsite', pid, 1, data)
 
         if self._pid != -1:

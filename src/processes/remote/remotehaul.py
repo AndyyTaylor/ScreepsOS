@@ -10,7 +10,7 @@ __pragma__('noalias', 'name')
 
 class RemoteHaul(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('remotehaul', pid, 5, data)
 
         if pid != -1:

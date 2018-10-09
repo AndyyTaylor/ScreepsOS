@@ -9,7 +9,7 @@ __pragma__('noalias', 'values')
 
 class UpgradeSite(CreepProcess):
 
-    def __init__(self, pid, data={}):
+    def __init__(self, pid, data=None):
         super().__init__('upgradesite', pid, 3, data)
 
         if pid != -1:
