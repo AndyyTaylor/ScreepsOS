@@ -22,11 +22,20 @@ jobs:
           name: Install dependencies
           command: |
             sudo pip install pytest
+            sudo pip install pytest-cov
+            sudo pip install codacy-coverage
+            export CODACY_PROJECT_TOKEN=5a05cd4643ec4e4792cbee4610485cc7
 
       - run:
           name: run tests
           command: |
-            pytest
+            pytest --cov=src/tasks --cov=src/processes --cov=src/framework
+
+      - run:
+          name: update coverage
+          command: |
+            coverage xml
+            python-codacy-coverage -r coverage.xml
 
       - store_test_results:
           path: test-results
