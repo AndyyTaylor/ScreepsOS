@@ -5,6 +5,11 @@
 version: 2
 jobs:
   build:
+    branches:
+      only:
+        - master
+        - refactor
+
     working_directory: ~/working_directory
 
     docker:
