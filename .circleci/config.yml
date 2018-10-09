@@ -21,14 +21,12 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
             pip install pytest
 
       - run:
           name: run tests
           command: |
-            python3 -m pytest
+            pytest
 
       - store_test_results:
           path: test-results
