@@ -19,9 +19,10 @@ jobs:
       - checkout
 
       - run:
-          name: install dependencies
+          name: Install dependencies
           command: |
             sudo pip install pytest
+            pytest
 
       - run:
           name: run tests
