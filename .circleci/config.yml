@@ -1,0 +1,33 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+jobs:
+  build:
+    working_directory: ~/working_directory
+
+    docker:
+      - image: circleci/python:3.6.4
+
+    steps:
+      - checkout
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -U pytest
+
+      - run:
+          name: run tests
+          command: |
+            pytest
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
