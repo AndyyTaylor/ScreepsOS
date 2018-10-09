@@ -24,7 +24,6 @@ jobs:
             sudo pip install pytest
             sudo pip install pytest-cov
             sudo pip install codacy-coverage
-            export CODACY_PROJECT_TOKEN=5a05cd4643ec4e4792cbee4610485cc7
 
       - run:
           name: run tests
@@ -35,6 +34,7 @@ jobs:
           name: update coverage
           command: |
             coverage xml
+            export CODACY_PROJECT_TOKEN=5a05cd4643ec4e4792cbee4610485cc7
             python-codacy-coverage -r coverage.xml
 
       - store_test_results:
