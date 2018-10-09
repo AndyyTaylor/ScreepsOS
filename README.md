@@ -1,5 +1,5 @@
 # ScreepsOS
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c7fe8b576eb5441bad0851c0d86a752f)](https://www.codacy.com?utm_source=git@bitbucket.org&amp;utm_medium=referral&amp;utm_content=AndyTaylr/screepsos&amp;utm_campaign=Badge_Grade) [![CircleCI](https://circleci.com/bb/AndyTaylr/screepsos/tree/master.svg?style=svg&circle-token=2a36e55ea2bd44fc340c5c921424f27ed8718e0f)](https://circleci.com/bb/AndyTaylr/screepsos/tree/master)    
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c7fe8b576eb5441bad0851c0d86a752f)](https://www.codacy.com?utm_source=git@bitbucket.org&amp;utm_medium=referral&amp;utm_content=AndyTaylr/screepsos&amp;utm_campaign=Badge_Grade) [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/c7fe8b576eb5441bad0851c0d86a752f)](https://www.codacy.com?utm_source=git@bitbucket.org&utm_medium=referral&utm_content=AndyTaylr/screepsos&utm_campaign=Badge_Coverage) [![CircleCI](https://circleci.com/bb/AndyTaylr/screepsos/tree/master.svg?style=svg&circle-token=2a36e55ea2bd44fc340c5c921424f27ed8718e0f)](https://circleci.com/bb/AndyTaylr/screepsos/tree/master)    
 
 So, this project is finally getting insane enough that I've decided to create a readme.    
 
