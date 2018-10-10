@@ -2,7 +2,7 @@
 from defs import *  # noqa
 
 
-class Process():
+class Process:
 
     def __init__(self, name, pid, priority, data=None):
         if data is None:

@@ -69,12 +69,12 @@ def _get_center():
 
 def _get_hostile_military():
     if _.isUndefined(this._hostile_military):
-        this._hostile_military = _.filter(this.find(FIND_HOSTILE_CREEPS),
+        this._hostile_military = _.filter(this.find(FIND_CREEPS),
                                           lambda c:
                                           c.getActiveBodyparts(ATTACK) +
                                           c.getActiveBodyparts(RANGED_ATTACK) +
                                           c.getActiveBodyparts(HEAL) +
-                                          c.getActiveBodyparts(WORK) > 0)
+                                          c.getActiveBodyparts(WORK) > 0 and (not c.my or c.memory.red_team))
 
     return this._hostile_military
 

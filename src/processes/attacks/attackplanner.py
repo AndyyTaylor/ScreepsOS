@@ -24,8 +24,8 @@ class AttackPlanner(Process):
     def _run(self) -> None:
         mem = Memory.rooms[self._data.target_room].attack
 
-        if not _.isUndefined(mem.attack_sequence) and not _.isUndefined(mem.sapper_spots):
-            self.launch_attack(len(mem.sapper_spots))
+        # if not _.isUndefined(mem.attack_sequence) and not _.isUndefined(mem.sapper_spots):
+        #     self.launch_attack(len(mem.sapper_spots))
 
         if _.isUndefined(self.target_room):
             if Game.time % 50 == 0:

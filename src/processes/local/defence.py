@@ -19,7 +19,7 @@ class Defence(Process):
             self.validate_memory()
 
     def _run(self):
-        hostile_creeps = self.room.find(FIND_HOSTILE_CREEPS)
+        hostile_creeps = self.room.hostile_military
         injured = _.filter(self.room.find(FIND_MY_CREEPS), lambda c: c.hits < c.hitsMax)
         repairs = _.filter(self.room.find(FIND_STRUCTURES),
                            lambda s:

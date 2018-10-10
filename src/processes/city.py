@@ -40,6 +40,16 @@ class City(Process):
         #         (self._data.main_room == 'W51S1'):
         #     self.launch_child_process('dismantle', {'room_name': self._data.main_room,
         #                                             'target_room': 'W52S3'})
+
+        # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
+        #         (self._data.main_room == 'W57N11'):
+        #     self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
+        #                                                'target_room': 'W57N9'})
+        #
+        # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and self._data.main_room == 'W53N5':
+        #     self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
+        #                                                'target_room': 'W51N5', 'red_team': True})
+
         #
         # if self.scheduler.count_by_name('sappattack', self._pid) < 1 and \
         #         (self._data.main_room == 'W48N1' or self._data.main_room == 'W56N1'
@@ -72,6 +82,8 @@ class City(Process):
             remotes = ['W58N6']
         elif self._data.main_room == 'W57N11':
             remotes = ['W57N12']
+        elif self._data.main_room == 'W42N1':
+            remotes = ['W42N2']
         else:
             remotes = []
 
