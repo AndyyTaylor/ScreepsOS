@@ -5,6 +5,9 @@ from defs import *  # noqa
 class Task():
 
     def __init__(self, name, data=None):
+        if data is None:
+            data = {}
+
         self.name = name
         self._data = data
 

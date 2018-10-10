@@ -5,6 +5,9 @@ from defs import *  # noqa
 class Process():
 
     def __init__(self, name, pid, priority, data=None):
+        if data is None:
+            data = {}
+
         self.name = name
         self._pid = pid
         self._data = data
