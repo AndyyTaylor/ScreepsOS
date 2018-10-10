@@ -80,6 +80,8 @@ class City(Process):
             remotes = ['W58N6']
         elif self._data.main_room == 'W57N11':
             remotes = ['W57N12']
+        elif self._data.main_room == 'W42N1':
+            remotes = ['W42N2']
         else:
             remotes = []
 
