@@ -50,8 +50,8 @@ class Scheduler:
         self.queue: Dict[str, List[int]] = None
 
     def load_processes(self):
-        self.processes = Object.assign({}, self.memory.processes)
-        self.queue = Object.assign({}, self.memory.queue)
+        self.processes = Object.assign({}, self.memory.processes or {})
+        self.queue = Object.assign({}, self.memory.queue or {})
 
     def get_next_process(self) -> Optional[Process]:
         # Object keys should always be strings for consistency

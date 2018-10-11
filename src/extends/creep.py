@@ -31,7 +31,8 @@ def _drive_to(target, opts=None):
         this.memory.drive = {
             'update_at': Game.time,
             'path': None,
-            'target_pos': None
+            'target_pos': None,
+            'maxOps': 2000
         }
 
     if this.memory.drive.update_at <= Game.time:
@@ -42,19 +43,36 @@ def _drive_to(target, opts=None):
         else:
             target_pos = target.pos
 
-        opts['maxOps'] = 5000
+        opts['maxOps'] = this.memory.drive.maxOps
         results = PathFinder.search(this.pos, {'pos': target_pos, 'range': opts['range']}, opts)
 
-        print(results.incomplete, len(results.path))
+        if results.incomplete:
+            this.memory.drive.maxOps = min(js_global.MAX_OPS, this.memory.drive.maxOps + 500)
+        else:
+            this.memory.drive.maxOps = max(js_global.MIN_OPS, this.memory.drive.maxOps - 500)
 
-        this.memory.drive.path = results.path
+        this.memory.drive.path = _store_path(results.path)
         this.memory.drive.target_pos = target_pos
-        this.memory.drive.update_at = Game.time + 10  # TODO Determine path cache invalidity better
-                                                      # (stuck or not full path?)
+        this.memory.drive.update_at = Game.time + 5 * this.memory.drive.maxOps / 1000
+        # TODO Determine path cache invalidity better
 
-    this.moveByPath(this.memory.drive.path)
+    this.say(this.moveByPath(_load_path(this.memory.drive.path)))
 
-    this.say("Driving")
+
+def _store_path(path):
+    new_path = []
+    for tile in path:
+        new_path.append({'x': tile.x, 'y': tile.y, 'roomName': tile.roomName})
+
+    return new_path
+
+
+def _load_path(path):
+    new_path = []
+    for tile in path:
+        new_path.append(__new__(RoomPosition(tile['x'], tile['y'], tile['roomName'])))
+
+    return new_path
 
 
 def _distToClosest(objects):
