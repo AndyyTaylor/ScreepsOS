@@ -17,6 +17,8 @@ __pragma__('noalias', 'update')
 kernel: Kernel = Kernel()
 js_global.kernel = kernel
 
+RawMemory.setActiveForeignSegment('LeagueOfAutomatedNations', 99)
+
 
 def main():
     kernel.start()

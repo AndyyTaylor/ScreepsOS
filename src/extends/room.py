@@ -69,12 +69,17 @@ def _get_center():
 
 def _get_hostile_military():
     if _.isUndefined(this._hostile_military):
+        whitelist = JSON.parse(RawMemory.foreignSegment.data).int_max
+        whitelist.remove('Lisp')
+
         this._hostile_military = _.filter(this.find(FIND_CREEPS),
                                           lambda c:
                                           c.getActiveBodyparts(ATTACK) +
                                           c.getActiveBodyparts(RANGED_ATTACK) +
                                           c.getActiveBodyparts(HEAL) +
-                                          c.getActiveBodyparts(WORK) > 0 and (not c.my or c.memory.red_team))
+                                          c.getActiveBodyparts(WORK) > 0 and
+                                          (not c.my or c.memory.red_team) and
+                                          not whitelist.includes(c.owner.username))
 
     return this._hostile_military
 
