@@ -46,7 +46,13 @@ class SimpleAttack(CreepProcess):
                     has_attacked = self.attack_creep(creep, creep.pos.findClosestByRange(hostile_military))
                 else:
                     target_struct = self.find_target_struct(creep)
+                    if not _.isNull(Game.getObjectById('5b5811737de36c7be2d0d907')):
+                        target_struct = Game.getObjectById('5b5811737de36c7be2d0d907')
+                    elif not _.isNull(Game.getObjectById('5b54f450ee6e062bb75f97ca')):
+                        target_struct = Game.getObjectById('5b54f450ee6e062bb75f97ca')
+
                     print("Should kill", target_struct)
+
                     if target_struct is not None:
                         has_attacked = self.attack_structure(creep, target_struct)  # TODO: These should be in Creep
         else:
