@@ -45,7 +45,7 @@ class SimpleAttack(CreepProcess):
                     print("Attacking at range", creep.distToClosest(hostile_military))
                     has_attacked = self.attack_creep(creep, creep.pos.findClosestByRange(hostile_military))
                 else:
-                    target_struct = self.find_target_struct()
+                    target_struct = self.find_target_struct(creep)
                     print("Should kill", target_struct)
                     if target_struct is not None:
                         has_attacked = self.attack_structure(creep, target_struct)  # TODO: These should be in Creep
@@ -72,26 +72,51 @@ class SimpleAttack(CreepProcess):
 
         creep.run_current_task()
 
-    def find_target_struct(self) -> Optional[Structure]:
-        destroy_order = [STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TERMINAL]
+    def find_target_struct(self, creep: Creep) -> Optional[Structure]:
+        destroy_order = [STRUCTURE_TOWER, STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TERMINAL, STRUCTURE_RAMPART]
         best_target = None
         best_priority = 0
 
         total = 0
         for struct in self.target_room.find(FIND_STRUCTURES):
-            start = Game.cpu.getUsed()
-            end = Game.cpu.getUsed()
-            total += end - start
             struct_priority = destroy_order.index(struct.structureType)
             if struct_priority == -1:
                 continue
 
             if best_target is None or struct_priority < best_priority:
+                # start = Game.cpu.getUsed()
+                results = PathFinder.search(creep.pos,
+                                            {'pos': struct.pos, 'range': 1},
+                                            {'roomCallback': self.basic_callback,
+                                             'maxRooms': 1})
+                # print(Game.cpu.getUsed() - start)
+                if results.incomplete:
+                    continue
+
                 best_target = struct
                 best_priority = struct_priority
         # print(total)  TODO: Work out the best way to cast a variable for minimal cpu
 
         return best_target
+
+    def basic_callback(self, room_name: str):
+        room = Game.rooms[room_name]
+
+        if not room:
+            return
+
+        if _.isUndefined(self._data.cost_matrix) or Game.time % 200 == 0:
+            costs = __new__(PathFinder.CostMatrix)
+
+            for struct in room.find(FIND_STRUCTURES):
+                if struct.structureType != STRUCTURE_CONTAINER and struct.structureType != STRUCTURE_ROAD:
+                    costs.set(struct.pos.x, struct.pos.y, 0xff)
+
+            self._data.cost_matrix = costs
+        # else:
+            # print("Loading matrix from cache")
+
+        return self._data.cost_matrix
 
     @staticmethod
     def attack_creep(creep: Creep, target: Creep) -> bool:

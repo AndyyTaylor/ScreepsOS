@@ -24,12 +24,15 @@ class AttackPlanner(Process):
     def _run(self) -> None:
         mem = Memory.rooms[self._data.target_room].attack
 
-        # if not _.isUndefined(mem.attack_sequence) and not _.isUndefined(mem.sapper_spots):
-        #     self.launch_attack(len(mem.sapper_spots))
+        if not _.isUndefined(mem.attack_sequence) and not _.isUndefined(mem.sapper_spots):
+            self.launch_attack(len(mem.sapper_spots))
 
         if _.isUndefined(self.target_room):
             if Game.time % 50 == 0:
                 print("Attack:", 'no visibility on', self._data.target_room)
+
+                if _.isUndefined(mem.attack_sequence) or _.isUndefined(mem.sapper_spots):
+                    print("Should be trynna get some visibility now!")
 
             return
 
@@ -56,7 +59,7 @@ class AttackPlanner(Process):
 
             if room.is_city():
                 dist = Game.map.getRoomLinearDistance(name, self._data.target_room)
-                if room.rcl >= 7:
+                if room.rcl >= 6:
                     dismantle_cities.append(name)
 
                 elif dist < 10 and room.rcl >= 6:
@@ -87,7 +90,9 @@ class AttackPlanner(Process):
             if not taken_dismantles.includes(city):
                 print("Launching dismantle for", city, '!')
                 self.launch_child_process('dismantle', {'room_name': city,
-                                                        'target_room': self._data.target_room, 'mock': True})
+                                                        'target_room': self._data.target_room})
+
+                return  # FIXME: Only want 1 for now! Also lowered to rcl6!
 
     def load_attack_sequence(self, mem, regen=False):
         if _.isUndefined(mem.attack_sequence) or regen:

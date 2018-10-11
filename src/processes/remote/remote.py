@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from typing import List
 
 from framework.process import Process
 
@@ -15,6 +16,34 @@ class Remote(Process):
     def _run(self):
         self.room = Game.rooms[self._data.room_name]
 
+        should_mine = self.load_should_mine()
+
+        self.launch_reserves(should_mine)
+
+        self.launch_mines(should_mine)
+
+        self.launch_hauls(should_mine)
+
+        if self._data.room_name == 'W42N1':
+            to_claim = ['W35S2']
+        else:
+            to_claim = []
+
+        claims = self.scheduler.proc_by_name('claim', self._pid)
+        if len(claims) < len(to_claim):
+            taken = [m['data'].target_room for m in claims]
+
+            for target_room in to_claim:
+                if not _.isUndefined(Game.rooms[target_room]) and Game.rooms[target_room].is_city():
+                    continue
+
+                if not taken.includes(target_room):
+                    self.launch_child_process('claim', {'room_name': self._data.room_name,
+                                                        'target_room': target_room})
+
+        self.launch_remote_work()
+
+    def load_should_mine(self) -> List[str]:
         if self._data.room_name == 'W59S2':
             should_mine = ['W58S2', 'W59S1', 'W58S1']
         elif self._data.room_name == 'W51S1':
@@ -40,17 +69,21 @@ class Remote(Process):
         else:
             should_mine = []
 
-        if self.scheduler.count_by_name('reserve', self._pid) < len(should_mine):
+        return should_mine
+
+    def launch_reserves(self, should_reserve: List[str]) -> None:
+        if self.scheduler.count_by_name('reserve', self._pid) < len(should_reserve):
             is_reserving = []
 
             for proc in self.scheduler.proc_by_name('reserve', self._pid):
                 is_reserving.append(proc['data'].target_room)
 
-            for mine_room in should_mine:
-                if not is_reserving.includes(mine_room):
+            for reserve_room in should_reserve:
+                if not is_reserving.includes(reserve_room):
                     self.launch_child_process('reserve', {'room_name': self._data.room_name,
-                                                          'target_room': mine_room})
+                                                          'target_room': reserve_room})
 
+    def launch_mines(self, should_mine: List[str]) -> None:
         rmines = self.scheduler.proc_by_name('remotemine', self._pid)
         for room in should_mine:
             if _.isUndefined(Memory.rooms[room]) or _.isUndefined(Memory.rooms[room].num_sources):
@@ -66,8 +99,9 @@ class Remote(Process):
                                                                  'mine_room': room,
                                                                  'source_id': sid})
 
+    def launch_hauls(self, should_haul: List[str]) -> None:
         rhauls = self.scheduler.proc_by_name('remotehaul', self._pid)
-        for room in should_mine:
+        for room in should_haul:
             if _.isUndefined(Memory.rooms[room]) or _.isUndefined(Memory.rooms[room].num_sources):
                 continue
 
@@ -81,31 +115,17 @@ class Remote(Process):
                                                                  'haul_room': room,
                                                                  'source_id': sid})
 
-        if self._data.room_name == 'W42N1':
-            to_claim = ['W35S2']
-        else:
-            to_claim = []
-
-        claims = self.scheduler.proc_by_name('claim', self._pid)
-        if len(claims) < len(to_claim):
-            taken = [m['data'].target_room for m in claims]
-
-            for target_room in to_claim:
-                if not _.isUndefined(Game.rooms[target_room]) and Game.rooms[target_room].is_city():
-                    continue
-
-                if not taken.includes(target_room):
-                    self.launch_child_process('claim', {'room_name': self._data.room_name,
-                                                        'target_room': target_room})
-
+    def launch_remote_work(self) -> None:
         to_work = []
         for name in Object.keys(Game.rooms):
             room = Game.rooms[name]
-            if room.is_city() and (len(room.spawns) < 1 or room.rcl < 2) and self.room.rcl > 4:
+            dist = Game.map.getRoomLinearDistance(self._data.room_name, name)
+            if room.is_city() and (len(room.spawns) < 1 or room.rcl < 2) and self.room.rcl > 4 and \
+                    dist < js_global.REMOTE_WORK_DIST:
                 to_work.append(name)
 
         works = self.scheduler.proc_by_name('remotework', self._pid)
-        if len(works) < len(to_work) and self._data.room_name == 'W48N1':
+        if len(works) < len(to_work):
             taken = [m['data'].target_room for m in works]
 
             for target_room in to_work:

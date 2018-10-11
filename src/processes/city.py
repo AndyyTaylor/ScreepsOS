@@ -41,10 +41,9 @@ class City(Process):
         #     self.launch_child_process('dismantle', {'room_name': self._data.main_room,
         #                                             'target_room': 'W52S3'})
 
-        # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and \
-        #         (self._data.main_room == 'W57N11'):
-        #     self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
-        #                                                'target_room': 'W57N9'})
+        if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and (self._data.main_room == 'W57N11'):
+            self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
+                                                       'target_room': 'W59N9'})
         #
         # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and self._data.main_room == 'W53N5':
         #     self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
