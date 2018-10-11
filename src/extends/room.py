@@ -262,6 +262,34 @@ def _can_place_wall():
     return freq and hits and storage
 
 
+def _basic_callback(name: str):
+    costs = __new__(PathFinder.CostMatrix)
+
+    mem = Memory.rooms[name]
+    if not _.isUndefined(mem):
+        if mem.owner == js_global.INVADER_USERNAME:
+            print("Should not travel in", name)
+            return False
+
+    room = Game.rooms[name]
+    if _.isUndefined(room):
+        return costs
+
+    structures = room.find(FIND_STRUCTURES)
+    for struct in structures:
+        if struct.structureType != STRUCTURE_CONTAINER and \
+                struct.structureType != STRUCTURE_ROAD and \
+                (struct.structureType != STRUCTURE_RAMPART or not struct.my):
+            costs.set(struct.pos.x, struct.pos.y, 0xff)
+        elif struct.structureType == STRUCTURE_ROAD:
+            costs.set(struct.pos.x, struct.pos.y, 1)
+
+    for creep in room.find(FIND_CREEPS):
+        costs.set(creep.pos.x, creep.pos.y, 0xff)
+
+    return costs
+
+
 Room.prototype.get_sources = _get_sources
 Room.prototype.is_city = _is_city
 Room.prototype.is_remote = _is_remote
@@ -278,3 +306,5 @@ Room.prototype._get_center = _get_center
 Room.prototype._get_cent_link = _get_cent_link
 Room.prototype.can_place_wall = _can_place_wall
 Room.prototype._get_damaged_walls = _get_damaged_walls
+
+Room.basic_callback = _basic_callback
