@@ -37,6 +37,7 @@ js_global.TOWER_MIN = 0.8
 
 js_global.MEMORY_MAX = 1000000
 js_global.MAX_OPS = 5000
+js_global.MIN_OPS = 1000
 
 js_global.SCOUT_FREQ = 5
 js_global.INVADER_USERNAME = 'Invader'
