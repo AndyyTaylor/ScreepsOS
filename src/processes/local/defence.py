@@ -1,5 +1,6 @@
 
 from defs import *  # noqa
+from typing import List
 
 from framework.process import Process
 
