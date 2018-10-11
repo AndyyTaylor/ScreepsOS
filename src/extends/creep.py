@@ -23,6 +23,40 @@ Object.defineProperties(Creep.prototype, {
 })
 
 
+def _drive_to(target, opts=None):
+    if opts is None:
+        opts = {}
+
+    if _.isUndefined(this.memory.drive):
+        this.memory.drive = {
+            'update_at': Game.time,
+            'path': None,
+            'target_pos': None
+        }
+
+    if this.memory.drive.update_at <= Game.time:
+        opts['roomCallback'] = Room.basic_callback
+
+        if _.isUndefined(target.pos):
+            target_pos = target
+        else:
+            target_pos = target.pos
+
+        opts['maxOps'] = 5000
+        results = PathFinder.search(this.pos, {'pos': target_pos, 'range': opts['range']}, opts)
+
+        print(results.incomplete, len(results.path))
+
+        this.memory.drive.path = results.path
+        this.memory.drive.target_pos = target_pos
+        this.memory.drive.update_at = Game.time + 10  # TODO Determine path cache invalidity better
+                                                      # (stuck or not full path?)
+
+    this.moveByPath(this.memory.drive.path)
+
+    this.say("Driving")
+
+
 def _distToClosest(objects):
     closest = this.pos.findClosestByRange(objects)
 
@@ -84,3 +118,4 @@ Creep.prototype.is_empty = _is_empty
 Creep.prototype.is_full = _is_full
 Creep.prototype.is_idle = _is_idle
 Creep.prototype.clear_task = _clear_task
+Creep.prototype.drive_to = _drive_to

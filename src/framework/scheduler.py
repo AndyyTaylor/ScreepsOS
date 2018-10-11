@@ -34,7 +34,8 @@ process_classes = {
     'remoteinvaderdefence': RemoteInvaderDefence,
     'dismantle': Dismantle,
     'empire': Empire,
-    'attackplanner': AttackPlanner
+    'attackplanner': AttackPlanner,
+    'scout': Scout
 }
 
 
