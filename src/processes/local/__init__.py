@@ -10,3 +10,4 @@ from processes.local.logistics import Logistics
 from processes.local.management import Management
 from processes.local.mineralsite import MineralSite
 from processes.local.wallrepair import WallRepair
+from processes.local.rnd import RND

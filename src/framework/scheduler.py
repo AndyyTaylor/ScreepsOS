@@ -35,7 +35,8 @@ process_classes = {
     'dismantle': Dismantle,
     'empire': Empire,
     'attackplanner': AttackPlanner,
-    'scout': Scout
+    'scout': Scout,
+    'rnd': RND
 }
 
 

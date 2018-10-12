@@ -3,7 +3,7 @@ from defs import *
 # he's at 465k into rcl5 i'm at 161k into rcl 4
 # 102k into rcl 5 i'm at 388k into rcl 4
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 1887
+js_global.VERSION = 1906
 
 js_global.CONTROLLER_SIGN = 'Territory of Lisp [' + str(js_global.VERSION) + ']'
 
@@ -26,6 +26,7 @@ js_global.MAX_DEATH_TIMER = 500
 
 js_global.STORAGE_MIN = {4: 20000, 5: 50000, 6: 50000, 7: 50000, 8: 50000}
 js_global.STORAGE_MAX = {4: 50000, 5: 200000, 6: 200000, 7: 200000, 8: 200000}
+
 js_global.RESOURCE_MAX_STORAGE = 10000
 js_global.RESOURCE_MIN_TERMINAL = 5000
 js_global.RESOURCE_MAX_TERMINAL = 10000

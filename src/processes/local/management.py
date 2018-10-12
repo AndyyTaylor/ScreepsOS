@@ -31,7 +31,7 @@ class Management(CreepProcess):
                 creep.clear_task()
 
             tasks = [self.fill_up_cont, self.clear_cent_link, self.fill_terminal,
-                     self.sell_resources, self.empty_creep]
+                     self.balance_local_resources, self.empty_creep]
 
             for task in tasks:
                 if task(creep):
@@ -118,7 +118,23 @@ class Management(CreepProcess):
 
         return False
 
-    def sell_resources(self, creep):
+    def balance_network(self):
+        storage = self.room.storage
+        terminal = self.room.terminal
+        if _.isUndefined(storage) or _.isUndefined(terminal):
+            return False
+
+        rtypes = Object.keys(terminal.store)
+        if rtypes.includes('energy'):
+            rtypes.remove('energy')
+
+        for rtype in rtypes:
+            if terminal.store[rtype] > js_global.RESOURCE_MAX_TERMINAL:
+                pass
+
+        return False
+
+    def balance_resources(self, creep):
         storage = self.room.storage
         terminal = self.room.terminal
         if _.isUndefined(storage) or _.isUndefined(terminal):
@@ -127,36 +143,57 @@ class Management(CreepProcess):
         rtypes = Object.keys(storage.store)
         rtypes.remove('energy')
 
-        return_value = False
         for rtype in rtypes:
-            amount = storage.store[rtype]
+            samount = storage.store[rtype]
             camount = creep.carry[rtype] or 0
-            if amount > js_global.RESOURCE_MAX_STORAGE:
-                if _.isUndefined(terminal.store[rtype]) or terminal.store[rtype] < js_global.RESOURCE_MAX_TERMINAL:
-                    if camount > 0:
-                        creep.transfer(terminal, rtype)
-                    else:
-                        t_amount = min(amount - js_global.RESOURCE_MIN_TERMINAL, creep.carryCapacity - _.sum(creep.carry))
-                        creep.withdraw(storage, rtype, t_amount)
+            tamount = terminal.store[rtype] or 0
 
-                    return_value = True
+            if samount < js_global.RESOURCE_MAX_STORAGE:
+                if camount > 0:
+                    creep.transfer(storage, rtype)
+                    return True
+                elif tamount > 0:
+                    amount = min(creep.carryCapacity - _.sum(creep.carry), tamount)
+                    amount = min(amount, js_global.RESOURCE_MAX_STORAGE - samount)
+                    creep.withdraw(terminal, rtype, amount)
+                    return True
+            elif samount > js_global.RESOURCE_MAX_STORAGE:
+                if camount > 0:
+                    creep.transfer(terminal, rtype)
+                else:
+                    amount = min(creep.carryCapacity - _.sum(creep.carry), samount - js_global.RESOURCE_MAX_STORAGE)
+                    creep.withdraw(storage, rtype, amount)
 
-                if terminal.cooldown == 0 and terminal.store[rtype] > js_global.RESOURCE_MIN_TERMINAL \
-                        and storage.store.energy > js_global.STORAGE_MAX[self.room.rcl]:
-                    diff = terminal.store[rtype] - js_global.RESOURCE_MIN_TERMINAL
-                    orders = Game.market.getAllOrders({'resourceType': rtype, 'type': ORDER_BUY})
-                    if len(orders) > 0:
-                        best_order = None
-                        for order in orders:
-                            if best_order is None or order.price > best_order.price:
-                                best_order = order
+                return True
 
-                        if best_order.price > 0.05:
-                            Game.market.deal(best_order.id, min(best_order.remainingAmount, diff), self._data.room_name)
-                        else:
-                            print(rtype, 'price too low at', best_order.price)
+        return False
 
-            return return_value
+            # amount = storage.store[rtype]
+            # camount = creep.carry[rtype] or 0
+            # if amount > js_global.RESOURCE_MAX_STORAGE:
+            #     if _.isUndefined(terminal.store[rtype]) or terminal.store[rtype] < js_global.RESOURCE_MAX_TERMINAL:
+            #         if camount > 0:
+            #             creep.transfer(terminal, rtype)
+            #         else:
+            #             t_amount = min(amount - js_global.RESOURCE_MIN_TERMINAL, creep.carryCapacity - _.sum(creep.carry))
+            #             creep.withdraw(storage, rtype, t_amount)
+            #
+            #         return_value = True
+            #
+            #     if terminal.cooldown == 0 and terminal.store[rtype] > js_global.RESOURCE_MIN_TERMINAL \
+            #             and storage.store.energy > js_global.STORAGE_MAX[self.room.rcl]:
+            #         diff = terminal.store[rtype] - js_global.RESOURCE_MIN_TERMINAL
+            #         orders = Game.market.getAllOrders({'resourceType': rtype, 'type': ORDER_BUY})
+            #         if len(orders) > 0:
+            #             best_order = None
+            #             for order in orders:
+            #                 if best_order is None or order.price > best_order.price:
+            #                     best_order = order
+            #
+            #             if best_order.price > 0.05:
+            #                 Game.market.deal(best_order.id, min(best_order.remainingAmount, diff), self._data.room_name)
+            #             else:
+            #                 print(rtype, 'price too low at', best_order.price)
 
     def empty_creep(self, creep):
         if _.sum(creep.carry) == 0:

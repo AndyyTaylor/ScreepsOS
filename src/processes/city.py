@@ -36,10 +36,10 @@ class City(Process):
 
         sources = room.get_sources()
 
-        if self.scheduler.count_by_name('scout', self._pid) < 1 and \
-                (self._data.main_room == 'W54N2'):
-            self.launch_child_process('scout', {'room_name': self._data.main_room,
-                                                'target_room': 'W57N7'})
+        # if self.scheduler.count_by_name('scout', self._pid) < 1 and \
+        #         (self._data.main_room == 'W54N2'):
+        # self.launch_child_process('scout', {'room_name': self._data.main_room,
+        #                                     'target_room': 'W57N7'})
 
         if self.scheduler.count_by_name('simpleattack', self._pid) < 2 and (self._data.main_room == 'W57N11'):
             self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
@@ -94,6 +94,9 @@ class City(Process):
 
         if room.rcl >= 5:
             one_of.append('management')
+
+        if room.rcl >= 6:
+            one_of.append('rnd')
 
         if len(room.damaged_walls) > 0:
             one_of.append('wallrepair')
