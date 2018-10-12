@@ -23,7 +23,7 @@ class Feed(Task):
             self._data.target_id = target.id
 
         if not creep.pos.isNearTo(target):
-            creep.moveTo(target)
+            creep.moveTo(target, {'maxOps': 500})
         else:
             Memory.stats.rooms[creep.room.name].expenses.feed += min(target.energyCapacity - target.energy,
                                                                      creep.carry.energy)
@@ -40,7 +40,7 @@ class Feed(Task):
                 return
 
             if not creep.pos.isNearTo(target):
-                creep.moveTo(target)
+                creep.moveTo(target, {'maxOps': 500})
 
     def select_target(self, creep, room):
         locations = _.filter(room.feed_locations,

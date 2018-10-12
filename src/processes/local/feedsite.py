@@ -26,9 +26,9 @@ class FeedSite(CreepProcess):
         #     self.room.visual.circle(self._data.hold_x, self._data.hold_y,
         #                             {'fill': 'green', 'radius': 0.4})
 
-        if not _.isUndefined(self._data.positions):
-            for i, pos in enumerate(self._data.positions[:-1]):
-                self.room.visual.line(pos, self._data.positions[i + 1])
+        # if not _.isUndefined(self._data.positions):
+        #     for i, pos in enumerate(self._data.positions[:-1]):
+        #         self.room.visual.line(pos, self._data.positions[i + 1])
 
         self.run_creeps()
 

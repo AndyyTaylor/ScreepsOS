@@ -62,7 +62,7 @@ class Kernel:
     def run(self) -> None:
         process: Process = self.scheduler.get_next_process()
 
-        while process is not None:
+        while process is not None and Game.cpu.getUsed() < Game.cpu.limit:
             if _.isUndefined(self.process_cpu[process.name]):
                 self.process_cpu[process.name] = {'total': 0, 'count': 0, 'max': 0}
 
@@ -71,6 +71,9 @@ class Kernel:
             end = Game.cpu.getUsed()
 
             diff = end - start
+            if process.name == 'feedsite':
+                print(process.name, diff, process._data.room_name)
+
             self.process_cpu[process.name]['total'] += diff
             self.process_cpu[process.name]['count'] += 1
             self.process_cpu[process.name]['max'] = max(diff, self.process_cpu[process.name]['max'])
@@ -261,7 +264,7 @@ class Kernel:
 
     @staticmethod
     def check_version():
-        if Memory.os.VERSION != js_global.VERSION or not Memory.os.kernel.finished:
+        if Memory.os.VERSION != js_global.VERSION or (not Memory.os.kernel.finished and Game.cpu.bucket > 5000):
             Memory.os.VERSION = js_global.VERSION
             return True
 

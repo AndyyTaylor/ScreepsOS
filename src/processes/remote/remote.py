@@ -19,9 +19,7 @@ class Remote(Process):
         should_mine = self.load_should_mine()
 
         self.launch_reserves(should_mine)
-
         self.launch_mines(should_mine)
-
         self.launch_hauls(should_mine)
 
         if self._data.room_name == 'W42N1':
