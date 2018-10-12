@@ -90,7 +90,7 @@ class RemoteMine(CreepProcess):
         mod = [WORK, WORK, MOVE]
         total_work = 1
 
-        while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 8:
+        while self.get_body_cost(body.concat(mod)) <= energyAvailable and total_work < 6:
             total_work += 2
             body = body.concat(mod)
 

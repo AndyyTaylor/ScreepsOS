@@ -52,7 +52,7 @@ class SappAttack(CreepProcess):
             creep.memory.attacking = True
         else:
             if self.room.rcl < 7 and \
-                    creep.getActiveBodyparts(TOUGH) * 100 <= self.tower_damage_on_tile(creep.room, creep.pos):
+                    creep.getActiveBodyparts(TOUGH) * 100 <= self.tower_damage_on_tile(creep.room, creep.pos) * 2:
                 creep.memory.attacking = False
             elif self.room.rcl >= 7 and \
                     creep.getActiveBodyparts(RANGED_ATTACK) * 100 <= self.tower_damage_on_tile(creep.room, creep.pos):
@@ -65,15 +65,23 @@ class SappAttack(CreepProcess):
             sap_spot = __new__(RoomPosition(sap_spot.x, sap_spot.y, sap_spot.roomName))
 
             if not creep.pos.isNearTo(sap_spot) or not self._data.on_sap:
-                creep.moveTo(sap_spot, {'maxOps': 5000})
+                # creep.say(creep.pos.getRangeTo(sap_spot))
+                if creep.getActiveBodyparts(TOUGH) * 100 > self.tower_damage_on_tile(creep.room, creep.pos) * 2:
+                    creep.drive_to(sap_spot)
 
                 if creep.pos.getRangeTo(sap_spot) == 0:
                     self._data.on_sap = True
+                    print("On the sap spot!")
 
-                creep.rangedMassAttack()
+                if creep.room == self.target_room:
+                    hostile = creep.pos.findClosestByRange(self.target_room.find(FIND_HOSTILE_CREEPS))
+                    if not _.isNull(hostile) and creep.pos.inRangeTo(hostile, 3):
+                        creep.rangedAttack(hostile)
+                    # else:
+                    #     creep.rangedMassAttack()
             else:
-                hostile = creep.pos.findClosestByRange(self.target_room.hostile_military)
-
+                hostile = creep.pos.findClosestByRange(self.target_room.find(FIND_HOSTILE_CREEPS))
+                creep.say(hostile)
                 if _.isNull(hostile) or creep.pos.getRangeTo(hostile) > 3:
                     if creep.pos.x == 49:
                         creep.move(LEFT)
@@ -84,9 +92,9 @@ class SappAttack(CreepProcess):
                     elif creep.pos.y == 0:
                         creep.move(BOTTOM)
 
-                    creep.rangedMassAttack()
+                    # creep.rangedMassAttack()
                 else:
-                    creep.moveTo(sap_spot, {'maxOps': 5000})
+                    creep.moveTo(sap_spot, {'maxOps': 500})
                     creep.rangedAttack(hostile)
         else:
             self._data.on_sap = False
@@ -102,6 +110,8 @@ class SappAttack(CreepProcess):
 
                 if res != OK:
                     creep.moveTo(self.room.controller)
+            elif len(creep.room.hostile_military) > 0:
+                creep.drive_to(self.room.controller)
             elif creep.pos.x > 48 or creep.pos.x < 1 or \
                     creep.pos.y > 48 or creep.pos.y < 1:
                 if creep.pos.x > 47:
@@ -122,18 +132,17 @@ class SappAttack(CreepProcess):
         if creep.hits < creep.hitsMax:
             creep.heal(creep)
         elif not _.isNull(target):
-            print(creep, 'healing', target)
             if creep.pos.isNearTo(target):
                 creep.heal(target)
             elif self.room.rcl < 7:
                 creep.rangedHeal(target)
-        else:
+        elif creep.room == self.target_room:
             creep.heal(creep)
 
     def tower_damage_on_tile(self, room, tile):
         total_damage = 0
         for tower in room.towers:
-            if tower.energy == 0:
+            if tower.energy < TOWER_ENERGY_COST:
                 continue
 
             dist = tower.pos.getRangeTo(tile)

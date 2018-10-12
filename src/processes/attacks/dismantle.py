@@ -93,7 +93,28 @@ class Dismantle(CreepProcess):
                     has_attacked = True
 
             if path_ind is None:
-                self.follow_leader(self.dismantler, self.healer, {'pos': path[0]}, True)
+                self._data.path_ind = 0
+                if self.dismantler.room == self.target_room:
+                    tile = __new__(RoomPosition(path[0].x, path[0].y, path[0].roomName))
+                    if len(tile.lookFor(LOOK_CREEPS)) > 0 and tile.lookFor(LOOK_CREEPS)[0] != self.healer:
+                        target = None
+                        next_tile = path[1]  # Most likely spot to wall breach
+                        structs = next_tile.lookFor(LOOK_STRUCTURES)
+                        for struct in structs:
+                            if struct.structureType == STRUCTURE_WALL or struct.structureType == STRUCTURE_RAMPART:
+                                target = struct
+                                break
+
+                        if target is not None:
+                            if self.dismantler.pos.isNearTo(target):
+                                self.dismantler.dismantle(target)
+                                self.dismantler.rangedAttack(target)
+
+                            self.follow_leader(self.dismantler, self.healer, {'pos': target.pos})
+                    else:
+                        self.follow_leader(self.dismantler, self.healer, {'pos': tile}, True)
+                else:
+                    self.follow_leader(self.dismantler, self.healer, {'pos': path[0]}, True)
             else:
                 self._data.path_ind = path_ind
                 self.dismantler.say(path_ind)
@@ -151,10 +172,37 @@ class Dismantle(CreepProcess):
             if self._data.attacking:
                 self.follow_leader(self.dismantler, self.healer, target)
             elif self.dismantler.room == self.target_room or self.healer.room == self.target_room or \
-                    self.dismantler.pos.x < 3 or self.healer.pos.x < 3 or not self.dismantler.pos.isNearTo(self.healer):
+                    not self.dismantler.pos.isNearTo(self.healer) \
+                    or self.on_exit(self.dismantler) or self.on_exit(self.healer):
 
                     # self.on_exit(self.dismantler) or self.on_exit(self.healer):
-                self.follow_leader(self.healer, self.dismantler, target)
+                # self.follow_leader(self.healer, self.dismantler, target)
+                    for creep in [self.dismantler, self.healer]:
+                        if creep.room.name == self._data.target_room:
+                            if creep.pos.x > 47:
+                                res = creep.move(RIGHT)
+                            elif creep.pos.x < 2:
+                                res = creep.move(LEFT)
+                            elif creep.pos.y > 47:
+                                res = creep.move(BOTTOM)
+                            elif creep.pos.y < 2:
+                                res = creep.move(TOP)
+
+                            if res != OK:
+                                creep.moveTo(self.room.controller)
+                        elif creep.pos.x > 47 or creep.pos.x < 2 or \
+                                creep.pos.y > 47 or creep.pos.y < 2:
+                            if creep.pos.x > 47:
+                                res = creep.move(LEFT)
+                            elif creep.pos.x < 2:
+                                res = creep.move(RIGHT)
+                            elif creep.pos.y > 47:
+                                res = creep.move(TOP)
+                            elif creep.pos.y < 2:
+                                res = creep.move(BOTTOM)
+
+                            if res != OK:
+                                creep.drive_to(self.room.controller)
 
             if self.dismantler.pos.isNearTo(target):
                 self.dismantler.dismantle(target)
@@ -193,7 +241,7 @@ class Dismantle(CreepProcess):
         on_exit = self.on_exit(leader)
         if (follower.pos.isNearTo(leader) or on_exit) and follower.fatigue == 0:
             if (not on_top and not leader.pos.isNearTo(target)) or (on_top and not leader.pos.inRangeTo(target, 0)):
-                leader.moveTo(target)
+                leader.drive_to(target)
             else:
                 at_target = True
 
@@ -212,6 +260,8 @@ class Dismantle(CreepProcess):
                     follower.move(TOP)
                 elif direction == LEFT:
                     follower.move(BOTTOM_LEFT)
+                elif direction == BOTTOM_LEFT:
+                    follower.move(LEFT)
 
     def load_creeps(self):
         self.dismantler = None

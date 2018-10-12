@@ -54,8 +54,8 @@ class RoomPlanner(Process):
                         self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
 
                         if not _.isUndefined(self.room.storage):
-                            if self.room.can_place_wall() and self.room.storage.store.energy > js_global.STORAGE_MAX[
-                                    self.room.rcl]:
+                            if self.room.can_place_wall() and \
+                                    self.room.storage.store.energy > js_global.STORAGE_MAX[self.room.rcl] * 0.8:
                                 self.room.memory.walls.hits += js_global.WALL_REINFORCEMENT
 
                 if self.lay_structures(type):

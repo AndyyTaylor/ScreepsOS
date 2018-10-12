@@ -4,6 +4,7 @@ from base import base
 
 __pragma__('noalias', 'keys')
 __pragma__('noalias', 'name')
+__pragma__('noalias', 'get')
 
 
 Object.defineProperties(Room.prototype, {
@@ -265,14 +266,22 @@ def _can_place_wall():
 def _basic_callback(name: str):
     costs = __new__(PathFinder.CostMatrix)
 
+    if _.isUndefined(Memory.rooms[name]):
+        Memory.rooms[name] = {}
+
     mem = Memory.rooms[name]
     if not _.isUndefined(mem):
-        if mem.owner == js_global.INVADER_USERNAME:
-            print("Should not travel in", name)
+        if not _.isUndefined(mem.owner) and mem.owner != js_global.USERNAME \
+                and mem.owner is not None and name != 'W51N9':
+            # print("Should not travel in", name)
             return False
 
     room = Game.rooms[name]
     if _.isUndefined(room):
+        if not _.isUndefined(mem.cost_cache) and mem.cost_invalid > Game.time:
+            print(name)
+            return PathFinder.CostMatrix.deserialize(mem.cost_cache)
+
         return costs
 
     structures = room.find(FIND_STRUCTURES)
@@ -281,11 +290,14 @@ def _basic_callback(name: str):
                 struct.structureType != STRUCTURE_ROAD and \
                 (struct.structureType != STRUCTURE_RAMPART or not struct.my):
             costs.set(struct.pos.x, struct.pos.y, 0xff)
-        elif struct.structureType == STRUCTURE_ROAD:
+        elif struct.structureType == STRUCTURE_ROAD and costs.get(struct.pos.x, struct.pos.y) != 0xff:
             costs.set(struct.pos.x, struct.pos.y, 1)
 
     for creep in room.find(FIND_CREEPS):
         costs.set(creep.pos.x, creep.pos.y, 0xff)
+
+    mem.cost_cache = costs.serialize()
+    mem.cost_invalid = Game.time + js_global.COST_CACHE_INVALIDATE
 
     return costs
 

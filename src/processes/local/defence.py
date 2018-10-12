@@ -42,7 +42,7 @@ class Defence(Process):
                 self.room.memory.towers.repair += 10
 
         for spawn in self.room.spawns:
-            if spawn.hits < spawn.hitsMax * 0.5:
+            if spawn.hits < spawn.hitsMax * 0.8:
                 self.room.controller.activateSafeMode()
 
         for name in self._data.remotes:

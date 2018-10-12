@@ -120,7 +120,8 @@ class RemoteHaul(CreepProcess):
 
         self._data.deposit_id = self.load_deposit(source)
 
-        result = PathFinder.search(source.pos, {'pos': start, 'range': 7, 'maxOps': 20000})
+        result = PathFinder.search(source.pos, {'pos': start, 'range': 7, 'maxOps': 20000,
+                                                'roomCallback': Room.basic_callback})
         if not result.incomplete:
             for tile in result.path:
                 if tile.x == 0 or tile.x == 49 or tile.y == 0 or tile.y == 49:

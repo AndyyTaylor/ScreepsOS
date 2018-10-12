@@ -3,9 +3,9 @@ from defs import *
 # he's at 465k into rcl5 i'm at 161k into rcl 4
 # 102k into rcl 5 i'm at 388k into rcl 4
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 1888
+js_global.VERSION = 1981
 
-js_global.CONTROLLER_SIGN = 'Territory of Lisp [' + str(js_global.VERSION) + ']'
+js_global.CONTROLLER_SIGN = 'Territory of Lisp [INT_MAX]'
 
 js_global.CREEP_SAY = False
 
@@ -36,11 +36,12 @@ js_global.MIN_RESERVE_TICKS = 2500
 js_global.TOWER_MIN = 0.8
 
 js_global.MEMORY_MAX = 1000000
-js_global.MAX_OPS = 5000
+js_global.MAX_OPS = 4000
 js_global.MIN_OPS = 1000
 
-js_global.SCOUT_FREQ = 5
+js_global.SCOUT_FREQ = 500
 js_global.INVADER_USERNAME = 'Invader'
+js_global.COST_CACHE_INVALIDATE = 1000
 
 js_global.BODY_ORDER = [TOUGH, ATTACK, WORK, RANGED_ATTACK, CARRY, HEAL, MOVE]
 

@@ -16,6 +16,9 @@ class AttackPlanner(Process):
     def __init__(self, pid, data=None):
         super().__init__('attackplanner', pid, 3, data)
 
+        if _.isUndefined(self._data.attempted_scout):
+            self._data.attempted_scout = []
+
         if pid != -1:
             self.target_room = Game.rooms[self._data.target_room]
 
@@ -25,7 +28,7 @@ class AttackPlanner(Process):
         mem = Memory.rooms[self._data.target_room].attack
 
         if not _.isUndefined(mem.attack_sequence) and not _.isUndefined(mem.sapper_spots):
-            self.launch_attack(len(mem.sapper_spots))
+            self.launch_attack(5)
 
         if _.isUndefined(self.target_room):
             if Game.time % 50 == 0:
@@ -33,6 +36,22 @@ class AttackPlanner(Process):
 
                 if _.isUndefined(mem.attack_sequence) or _.isUndefined(mem.sapper_spots):
                     print("Should be trynna get some visibility now!")
+                    closest_city = None
+                    closest_dist = 0
+                    for name in Object.keys(Game.rooms):
+                        room = Game.rooms[name]
+                        if room.is_city() and not self._data.attempted_scout.includes(name):
+                            dist = Game.map.getRoomLinearDistance(name, self._data.target_room)
+                            if closest_city is None or dist < closest_dist:
+                                closest_city = name
+                                closest_dist = dist
+
+                    if closest_city is not None:
+                        self._data.attempted_scout.append(closest_city)
+                        print("Launching scout from", closest_city, self._data.attempted_scout)
+                        self.launch_child_process('scout', {'room_name': closest_city,
+                                                            'target_room': self._data.target_room,
+                                                            'once_only': True})
 
             return
 
@@ -59,10 +78,9 @@ class AttackPlanner(Process):
 
             if room.is_city():
                 dist = Game.map.getRoomLinearDistance(name, self._data.target_room)
-                if room.rcl >= 6:
+                if room.rcl >= 7 and dist <= 10:
                     dismantle_cities.append(name)
-
-                elif dist < 10 and room.rcl >= 6:
+                elif dist <= 10 and room.rcl >= 6:
                     sapper_cities.append(name)
 
         taken_saps = []
@@ -70,17 +88,21 @@ class AttackPlanner(Process):
             taken_saps.append(proc['data'].room_name)
 
         # sapper_cities = dismantle_cities.concat(sapper_cities)
+        while len(dismantle_cities) > 2:
+            sapper_cities.append(dismantle_cities.pop())
+
+        sapper_cities.sort(key=lambda c: Game.map.getRoomLinearDistance(c, self._data.target_room))
 
         for i, city in enumerate(sapper_cities):
             if i * 2 + 1 > max_saps:
                 break
 
-            # if not taken_saps.includes(city):
-            #     print("Launching sap for", city, "!", '({}, {})'.format(i * 2, i * 2 + 1))
-            #     self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
-            #                                              'mock': True, 'sap_ind': i * 2})
-            #     self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
-            #                                              'mock': True, 'sap_ind': i * 2 + 1})
+            if not taken_saps.includes(city):
+                print("Launching sap for", city, "!", '({}, {})'.format(i * 2, i * 2 + 1))
+                self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
+                                                         'mock': True, 'sap_ind': i * 2})
+                self.launch_child_process('sappattack', {'room_name': city, 'target_room': self._data.target_room,
+                                                         'mock': True, 'sap_ind': i * 2 + 1})
 
         taken_dismantles = []
         for proc in self.scheduler.proc_by_name('dismantle', self._pid):
@@ -91,8 +113,6 @@ class AttackPlanner(Process):
                 print("Launching dismantle for", city, '!')
                 self.launch_child_process('dismantle', {'room_name': city,
                                                         'target_room': self._data.target_room})
-
-                return  # FIXME: Only want 1 for now! Also lowered to rcl6!
 
     def load_attack_sequence(self, mem, regen=False):
         if _.isUndefined(mem.attack_sequence) or regen:
@@ -150,7 +170,7 @@ class AttackPlanner(Process):
         target_order.append(best_target)
         targets.remove(best_target)
 
-        target_types = [STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_EXTENSION, STRUCTURE_TERMINAL]
+        target_types = [STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_EXTENSION, STRUCTURE_TERMINAL, STRUCTURE_STORAGE]
         targets = _.filter(self.target_room.find(FIND_STRUCTURES), lambda s: target_types.includes(s.structureType))
 
         while len(targets) > 0:

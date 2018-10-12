@@ -46,11 +46,11 @@ class Kernel:
         self.last_cpu = 0
         self.process_cpu = {}
 
-        self.launch_empire()  # Launch Empire
-
         self.scheduler.load_processes()
         self.scheduler.queue_processes()
         self.ticketer.load_tickets()
+
+        self.launch_empire()  # Launch Empire
 
         if self.new_upload:
             self.ticketer.clear_all_tickets()

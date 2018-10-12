@@ -35,13 +35,17 @@ def _drive_to(target, opts=None):
             'maxOps': 2000
         }
 
-    if this.memory.drive.update_at <= Game.time:
-        opts['roomCallback'] = Room.basic_callback
+    if _.isUndefined(target.pos):
+        target_pos = target
+    else:
+        target_pos = target.pos
 
-        if _.isUndefined(target.pos):
-            target_pos = target
-        else:
-            target_pos = target.pos
+    if this.memory.drive.update_at <= Game.time or this.memory.drive.target_pos['x'] != target_pos.x or \
+            this.memory.drive.target_pos['y'] != target_pos.y:
+        opts['roomCallback'] = Room.basic_callback
+        # print("Updating path")
+        if _.isUndefined(opts['range']):
+            opts['range'] = 0
 
         opts['maxOps'] = this.memory.drive.maxOps
         results = PathFinder.search(this.pos, {'pos': target_pos, 'range': opts['range']}, opts)
@@ -53,10 +57,13 @@ def _drive_to(target, opts=None):
 
         this.memory.drive.path = _store_path(results.path)
         this.memory.drive.target_pos = target_pos
-        this.memory.drive.update_at = Game.time + 5 * this.memory.drive.maxOps / 1000
+        this.memory.drive.update_at = Game.time + 10 * this.memory.drive.maxOps / 1000
         # TODO Determine path cache invalidity better
 
-    this.say(this.moveByPath(_load_path(this.memory.drive.path)))
+    # this.say(this.moveByPath(_load_path(this.memory.drive.path)))
+    this.room.visual.poly(_load_path(this.memory.drive.path))
+    if this.moveByPath(_load_path(this.memory.drive.path)) == -5:
+        this.memory.drive.update_at = Game.time
 
 
 def _store_path(path):

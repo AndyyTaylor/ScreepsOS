@@ -24,11 +24,10 @@ class Scout(CreepProcess):
             self._data.once_only = False
 
     def _run(self):
-        print('scouting', self._data.target_room)
-
         self.run_creeps()
 
     def run_creep(self, creep):
+        self._data.had_creep = True
         target_pos = __new__(RoomPosition(25, 25, self._data.target_room))
         creep.drive_to(target_pos, {'range': 24})
 
@@ -50,7 +49,7 @@ class Scout(CreepProcess):
         mem = Memory.rooms[room.name]
         mem.last_updated = Game.time
         mem.owner = self.get_room_owner(room)
-        print(room.name, mem.owner)
+        # print(room.name, mem.owner)
 
     @staticmethod
     def get_room_owner(room: Room) -> Optional[str]:
@@ -75,7 +74,8 @@ class Scout(CreepProcess):
         return body, {'role': 'scout'}
 
     def is_completed(self):
-        if self._data.once_only and not _.isUndefined(self.target_room):
+        if self._data.once_only and (not _.isUndefined(self.target_room) or (self.needs_creeps()
+                                                                             and self._data.had_creep)):
             return True
 
         return False

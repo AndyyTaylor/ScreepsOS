@@ -36,14 +36,13 @@ class City(Process):
 
         sources = room.get_sources()
 
-        if self.scheduler.count_by_name('scout', self._pid) < 1 and \
-                (self._data.main_room == 'W54N2'):
-            self.launch_child_process('scout', {'room_name': self._data.main_room,
-                                                'target_room': 'W57N7'})
+        # if self.scheduler.count_by_name('scout', self._pid) < 1:
+        #     self.launch_child_process('scout', {'room_name': self._data.main_room,
+        #                                         'target_room': 'W56N12'})
 
-        if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and (self._data.main_room == 'W57N11'):
-            self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
-                                                       'target_room': 'W59N9'})
+        # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and (self._data.main_room == 'W57N11'):
+        #     self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
+        #                                                'target_room': 'W59N9'})
         #
         # if self.scheduler.count_by_name('simpleattack', self._pid) < 1 and self._data.main_room == 'W53N5':
         #     self.launch_child_process('simpleattack', {'room_name': self._data.main_room,
@@ -64,13 +63,13 @@ class City(Process):
         if self._data.main_room == 'W59S2':
             remotes = ['W58S2', 'W59S1', 'W58S1']
         elif self._data.main_room == 'W51S1':
-            remotes = ['W51S2', 'W52S1']
+            remotes = ['W51S2', 'W52S1', 'W52S2']
         elif self._data.main_room == 'W59N2':
             remotes = ['W59N1', 'W58N2', 'W59N3']
         elif self._data.main_room == 'W53N5':
-            remotes = ['W53N4']
+            remotes = ['W53N4', 'W52N5']
         elif self._data.main_room == 'W54N2':
-            remotes = ['W55N2']
+            remotes = ['W54N1']
         elif self._data.main_room == 'W51N5':
             remotes = ['W51N6']
         elif self._data.main_room == 'W53N7':
