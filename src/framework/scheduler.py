@@ -2,7 +2,6 @@
 from defs import *  # noqa
 from typing import List, Optional, Dict
 from processes import *  # noqa
-from framework.process import Process
 
 __pragma__('noalias', 'undefined')
 __pragma__('noalias', 'keys')
@@ -42,6 +41,8 @@ process_classes = {
 class Scheduler:
 
     def __init__(self):
+        from framework.process import Process
+
         self.validate_memory()
 
         self.current_priority: int = 0

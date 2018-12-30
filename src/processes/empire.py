@@ -1,6 +1,6 @@
 
 from defs import *  # noqa
-from extends import *  # noqa
+# from extends import *  # noqa
 from base import base
 
 from framework.process import Process

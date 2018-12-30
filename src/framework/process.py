@@ -2,12 +2,12 @@
 from defs import *  # noqa
 from typing import Any, Optional, List
 
-from framework.scheduler import Scheduler
-from framework.ticketer import Ticketer
-
 
 class Process:
     def __init__(self, name: str, pid: int, priority: int, data=None) -> None:
+        from framework.scheduler import Scheduler
+        from framework.ticketer import Ticketer
+
         if data is None:
             data = {}
 

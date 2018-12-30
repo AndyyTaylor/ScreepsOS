@@ -2,7 +2,7 @@
 from defs import *
 
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 1899
+js_global.VERSION = 1922
 
 js_global.CONTROLLER_SIGN = 'Territory of Lisp [' + str(js_global.VERSION) + ']'
 

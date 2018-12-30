@@ -5,7 +5,7 @@ from math import ceil
 
 from framework.scheduler import Scheduler, process_classes
 from framework.ticketer import Ticketer
-from framework.process import Process
+# from framework.process import Process
 
 __pragma__('noalias', 'keys')
 __pragma__('noalias', 'get')
@@ -37,6 +37,8 @@ class Kernel:
             self.unassign_creeps()
 
     def start(self) -> None:
+        self.validate_memory()  # Doing this again means memory can be wiped without heap reset
+
         Memory.os.kernel.finished = False
 
         if self.ticketer is None:
