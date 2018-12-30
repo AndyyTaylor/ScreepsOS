@@ -2,7 +2,7 @@
 from defs import *
 
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 1896
+js_global.VERSION = 1899
 
 js_global.CONTROLLER_SIGN = 'Territory of Lisp [' + str(js_global.VERSION) + ']'
 
@@ -16,7 +16,7 @@ js_global.MIN_WALL_HITS = 50000
 js_global.WALL_PLACEMENT_FREQUENCY = 50
 js_global.MAX_WALL_DECAY = 10000
 js_global.WALL_REINFORCEMENT = 50000
-js_global.ROAD_RCL = 4
+js_global.ROAD_RCL = 3
 
 js_global.MIN_REPAIR = 0.7
 js_global.TOWER_REPAIR = 0.5

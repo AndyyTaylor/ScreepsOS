@@ -21,27 +21,30 @@ class RoomPlanner(Process):
 
         self.load_base_pos()
 
-        self.vis_enabled = True
-        #
-        # self.lay_structures(STRUCTURE_EXTENSION)
-        # self.lay_structures(STRUCTURE_SPAWN)
-        # self.lay_structures(STRUCTURE_TOWER)
-        # self.lay_structures(STRUCTURE_ROAD)
-        # self.lay_structures(STRUCTURE_TERMINAL)
-        # self.lay_structures(STRUCTURE_LAB)
-        # self.lay_structures(STRUCTURE_CONTAINER)
-        #
+        show_vis = True
 
-        if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
-            self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+        if show_vis:
+            self.vis_enabled = True
+            #
+            self.lay_structures(STRUCTURE_EXTENSION)
+            self.lay_structures(STRUCTURE_SPAWN)
+            self.lay_structures(STRUCTURE_TOWER)
+            self.lay_structures(STRUCTURE_ROAD)
+            self.lay_structures(STRUCTURE_TERMINAL)
+            self.lay_structures(STRUCTURE_LAB)
+            self.lay_structures(STRUCTURE_CONTAINER)
+            #
 
-        #
-        # # tickets = self.ticketer.get_tickets_by_type('build')
-        # # for ticket in tickets:
-        # #     self.build(ticket['data']['type'], int(ticket['data']['x']),
-        # #                int(ticket['data']['y']), False)
-        # #     print(int(ticket['data']['x']), int(ticket['data']['y']))
-        self.vis_enabled = False
+            if Object.keys(js_global.WALL_WIDTH).includes(str(self.room.rcl)):
+                self.visualise_walls(js_global.WALL_WIDTH[str(self.room.rcl)])
+
+            #
+            tickets = self.ticketer.get_tickets_by_type('build')
+            for ticket in tickets:
+                self.build(ticket['data']['type'], int(ticket['data']['x']),
+                           int(ticket['data']['y']), False)
+                print(int(ticket['data']['x']), int(ticket['data']['y']))
+            self.vis_enabled = False
 
         has_laid = False
         if len(self.room.construction_sites) < 1:
@@ -72,7 +75,9 @@ class RoomPlanner(Process):
             elif self.lay_structures(STRUCTURE_CONTAINER, name):
                 has_laid = True
 
-        if not has_laid and len(self.room.construction_sites) == 0:
+        if show_vis:
+            pass  # Don't sleep at all
+        elif not has_laid and len(self.room.construction_sites) == 0:
             self.sleep(300 + random.randint(0, 10))
         else:
             self.sleep(random.randint(0, 30))
