@@ -3,7 +3,6 @@ from defs import *  # noqa
 from typing import Dict, Any
 from math import ceil
 
-
 from framework.scheduler import Scheduler, process_classes
 from framework.ticketer import Ticketer
 from framework.process import Process
@@ -17,7 +16,7 @@ class Kernel:
     def __init__(self) -> None:
         self.validate_memory()
 
-        self.last_cpu: float = 0
+        self.last_cpu: float = 0.0
         self.new_upload: bool = self.check_version()
         self.process_cpu: Dict[str, Dict[str, Any]] = {}
         self.scheduler: Scheduler = Scheduler()

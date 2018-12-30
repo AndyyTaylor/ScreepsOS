@@ -52,6 +52,8 @@ Object.defineProperties(Room.prototype, {
         'get': lambda: this._get_walls()
     }, 'damaged_walls': {
         'get': lambda: this._get_damaged_walls()
+    }, 'sources': {
+        'get': lambda: this.find(FIND_SOURCES)
     }
 })
 

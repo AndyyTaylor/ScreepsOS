@@ -10,16 +10,18 @@ __pragma__('noalias', 'keys')
 
 class Empire(Process):
 
-    def __init__(self, pid, data=None):
+    def __init__(self, pid: int, data=None) -> None:
         super().__init__("empire", pid, 1, data)
 
-    def _run(self):
+    def _run(self) -> None:
         self.launch_cities()
 
         # if self.scheduler.count_by_name('attackplanner') < 1:
         #     self.scheduler.launch_process('attackplanner', {'target_room': 'W59N9'})
 
-    def launch_cities(self):
+    def launch_cities(self) -> None:
+        """ Launches a process for each city """
+
         cities = []
 
         for room_name in Object.keys(Game.rooms):

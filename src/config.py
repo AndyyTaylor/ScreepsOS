@@ -1,9 +1,8 @@
 
 from defs import *
-# he's at 465k into rcl5 i'm at 161k into rcl 4
-# 102k into rcl 5 i'm at 388k into rcl 4
+
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 1884
+js_global.VERSION = 1896
 
 js_global.CONTROLLER_SIGN = 'Territory of Lisp [' + str(js_global.VERSION) + ']'
 

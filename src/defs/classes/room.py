@@ -2,8 +2,8 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 # noinspection PyProtectedMember
 from .memory import _Memory
-from .misc_obj import RoomObject
-from .structures import StructureController, StructureStorage, StructureTerminal, StructureSpawn, StructureTower
+from .misc_obj import RoomObject, Source, Mineral
+from .structures import StructureController, StructureStorage, StructureTerminal, StructureSpawn, StructureTower, StructureWall, StructureRampart, ConstructionSite, Structure
 from ..transcrypt import Uint8Array
 
 _HasPosition = Union['RoomPosition', 'RoomObject']
@@ -127,10 +127,13 @@ class Room:
     :type terminal: Optional[StructureTerminal]
     :type energyAvailable: int
     :type energyCapacityAvailable: int
-    :type memory: _Memory
+    :type memory: Any
     :type mode: str
     :type name: str
     :type visual: Any
+    :type rcl: int
+    :type damaged_walls: List[Union[StructureWall, StructureRampart]]
+    :type construction_sites: List[ConstructionSite]
     """
 
     spawns: List[StructureSpawn] = None
@@ -156,7 +159,10 @@ class Room:
 
     def __init__(self, controller: Optional[StructureController], storage: Optional[StructureStorage],
                  terminal: Optional[StructureTerminal], energyAvailable: int, energyCapacityAvailable: int,
-                 memory: _Memory, mode: str, name: str, visual: Any) -> None:
+                 memory: Any, mode: str, name: str, visual: Any, rcl: int, 
+                 damaged_walls: List[Union[StructureWall, StructureRampart]],
+                 construction_sites: List[ConstructionSite], repair_sites: List[Structure],
+                 sources: List[Source], mineral: Mineral) -> None:
         """
         WARNING: This constructor is purely for type completion, and does not exist in the game.
         """
@@ -165,10 +171,16 @@ class Room:
         self.terminal = terminal  # type: Optional[StructureTerminal]
         self.energyAvailable = energyAvailable  # type: int
         self.energyCapacityAvailable = energyCapacityAvailable  # type: int
-        self.memory = memory  # type: _Memory
+        self.memory = memory  # type: Any
         self.mode = mode  # type: str
         self.name = name  # type: str
         self.visual = visual  # type: Any
+        self.rcl = rcl  # type: int
+        self.damaged_walls = damaged_walls  # type: List[Union[StructureWall, StructureRampart]]
+        self.construction_sites = construction_sites  # type: List[ConstructionSite]
+        self.repair_sites = repair_sites  # type: List[Structure]
+        self.sources = sources  # type: List[Source]
+        self.mineral = mineral  # type: Mineral
 
     @classmethod
     def serializePath(cls, path: List[Union[_PathPos, Dict[str, Any], RoomPosition]]) -> str:

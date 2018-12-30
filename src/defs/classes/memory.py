@@ -13,7 +13,7 @@ class _Memory(dict):
         pass
 
 
-Memory = _Memory()
+Memory: Any = _Memory()
 
 
 class _ForeignSegment:
