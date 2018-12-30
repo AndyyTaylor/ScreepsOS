@@ -2,7 +2,7 @@
 from defs import *
 
 js_global.USERNAME = 'Lisp'
-js_global.VERSION = 1922
+js_global.VERSION = 1966
 
 js_global.CONTROLLER_SIGN = 'Territory of Lisp [' + str(js_global.VERSION) + ']'
 
@@ -36,7 +36,11 @@ js_global.TOWER_MIN = 0.8
 
 js_global.MEMORY_MAX = 1000000
 
-js_global.SCOUT_FREQ = 5
+def _scout_freq(dist: int):
+    return (10 * dist) ** 2 * 100
+js_global.SCOUT_FREQ = _scout_freq
+js_global.MAX_SCOUT_RANGE = 5
+
 js_global.INVADER_USERNAME = 'Invader'
 
 js_global.BODY_ORDER = [TOUGH, ATTACK, WORK, RANGED_ATTACK, CARRY, HEAL, MOVE]

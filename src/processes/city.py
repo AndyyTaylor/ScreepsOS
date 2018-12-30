@@ -26,11 +26,10 @@ class City(Process):
 
     def launch_one_of_processes(self) -> None:
         """ Launch one-of processes for the main room """
-        one_of = ['roomplanner', 'spawning', 'defence', 'upgradesite']
+        one_of = ['roomplanner', 'spawning', 'defence', 'upgradesite', 'remote']
 
         if self.room.rcl >= 4 and not _.isUndefined(self.room.storage):
             one_of.append('logistics')
-            one_of.append('remote')
 
         if self.room.rcl >= 5:
             one_of.append('management')
@@ -129,6 +128,9 @@ class City(Process):
         
         if _.isUndefined(self.room.memory.to_claim):
             self.room.memory.to_claim = []
+        
+        if _.isUndefined(self.room.memory.to_scout):
+            self.room.memory.to_scout = []
 
         # Room stats
         if _.isUndefined(Memory.stats.rooms[self._data.main_room]):

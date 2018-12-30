@@ -3,6 +3,7 @@ from defs import *  # noqa
 from typing import Optional
 
 from framework.creepprocess import CreepProcess
+from processes.local.roomplanner import RoomPlanner
 
 __pragma__('noalias', 'keys')
 __pragma__('noalias', 'values')
@@ -21,16 +22,14 @@ class Scout(CreepProcess):
         self.target_room = Game.rooms[self._data.target_room]
 
         if _.isUndefined(self._data.once_only):
-            self._data.once_only = False
+            self._data.once_only = True
 
     def _run(self):
-        print('scouting', self._data.target_room)
-
         self.run_creeps()
 
     def run_creep(self, creep):
         target_pos = __new__(RoomPosition(25, 25, self._data.target_room))
-        creep.drive_to(target_pos, {'range': 24})
+        creep.moveTo(target_pos, {'range': 24})
 
         if self.should_scout_room(creep.room):
             self.scout_room(creep.room)
@@ -48,9 +47,14 @@ class Scout(CreepProcess):
             Memory.rooms[room.name] = {}
 
         mem = Memory.rooms[room.name]
+
+        mem.scout_info = {
+            'owner': self.get_room_owner(room),
+            'num_sources': len(room.sources)
+        }
         mem.last_updated = Game.time
-        mem.owner = self.get_room_owner(room)
-        print(room.name, mem.owner)
+
+        print(room.name, JSON.stringify(mem.scout_info))
 
     @staticmethod
     def get_room_owner(room: Room) -> Optional[str]:

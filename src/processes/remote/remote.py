@@ -16,16 +16,21 @@ class Remote(Process):
     def _run(self) -> None:
         self.room: Room = Game.rooms[self._data.room_name]
 
-        should_mine: List[str] = self.room.memory.remotes
-        self.launch_reserves(should_mine)
-        self.launch_mines(should_mine)
-        self.launch_hauls(should_mine)
+        to_scout: List[str] = self.room.memory.to_scout
+        self.launch_scouts(to_scout)
 
-        to_claim: List[str] = self.room.memory.to_claim
-        self.launch_claims(to_claim)
+        if self.room.rcl >= 3:
+            to_claim: List[str] = self.room.memory.to_claim
+            self.launch_claims(to_claim)
 
-        to_work: List[str] = self.room.memory.to_work
-        self.launch_remote_work(to_work)
+            to_work: List[str] = self.room.memory.to_work
+            self.launch_remote_work(to_work)
+
+        if self.room.rcl >= 4 and not _.isUndefined(self.room.storage):
+            should_mine: List[str] = self.room.memory.remotes
+            self.launch_reserves(should_mine)
+            self.launch_mines(should_mine)
+            self.launch_hauls(should_mine)
 
     def launch_reserves(self, should_reserve: List[str]) -> None:
         if self.scheduler.count_by_name('reserve', self._pid) < len(should_reserve):
@@ -107,3 +112,21 @@ class Remote(Process):
                         'target_room': target_room
                     }
                     self.launch_child_process('remotework', proc_data)
+    
+    def launch_scouts(self, to_scout: List[str]) -> None:
+        scouts = self.scheduler.proc_by_name('scout', self._pid)
+        if len(scouts) < 1:
+            taken = [s['data'].target_room for s in scouts]  # Possibly allow multiple simultaneous later
+
+            for target_room in to_scout:
+                if not taken.includes(target_room):
+                    proc_data = {
+                        'room_name': self._data.room_name,
+                        'target_room': target_room
+                    }
+                    self.launch_child_process('scout', proc_data)
+
+                    # print("Launching for", target_room)
+                    self.room.memory.to_scout = list(self.room.memory.to_scout)[1:]
+                    # print(self.room.memory.to_scout)
+                    return  # only 1 thansk
