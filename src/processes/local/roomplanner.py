@@ -256,19 +256,27 @@ class RoomPlanner(Process):
             if best_pos is None or score > best_score:
                 best_pos = pos
                 best_score = score
+        
+        if best_pos is None:
+            return False
 
         self._data.base_x = best_pos['x']
         self._data.base_y = best_pos['y']
         self.room.createFlag(best_pos['x'], best_pos['y'], self._data.room_name, COLOR_WHITE)
 
-        for x in range(len(valid)):
-            for y in range(len(valid[0])):
-                if x == best_pos['x'] and y == best_pos['y']:
-                    self.vis.rect(x - 0.5, y - 0.5, 1, 1, {'fill': '#00FF00'})
-                elif valid[x][y]:
-                    self.vis.rect(x - 0.5, y - 0.5, 1, 1, {'fill': '#0000FF'})
-                else:
-                    self.vis.rect(x - 0.5, y - 0.5, 1, 1, {'fill': '#FF0000'})
+        # for x in range(len(valid)):
+        #     for y in range(len(valid[0])):
+        #         if x == best_pos['x'] and y == best_pos['y']:
+        #             self.vis.rect(x - 0.5, y - 0.5, 1, 1, {'fill': '#00FF00'})
+        #         elif valid[x][y]:
+        #             self.vis.rect(x - 0.5, y - 0.5, 1, 1, {'fill': '#0000FF'})
+        #         else:
+        #             self.vis.rect(x - 0.5, y - 0.5, 1, 1, {'fill': '#FF0000'})
+
+        if self._data.base_x is not None and self._data.base_y is not None:
+            return True
+        else:
+            return False
 
     def is_wall(self, x, y):
         terrain = self.room.lookForAt(LOOK_TERRAIN, x, y)

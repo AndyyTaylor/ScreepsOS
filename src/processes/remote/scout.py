@@ -48,9 +48,14 @@ class Scout(CreepProcess):
 
         mem = Memory.rooms[room.name]
 
+        rp_process = RoomPlanner(-1, {'room_name': room.name})
+        rp_process.room = room
+
         mem.scout_info = {
             'owner': self.get_room_owner(room),
-            'num_sources': len(room.sources)
+            'claimable': self.get_room_owner(room) is None and not _.isUndefined(room.controller),
+            'num_sources': len(room.sources),
+            'fits_base': rp_process.place_base()
         }
         mem.last_updated = Game.time
 
@@ -58,11 +63,13 @@ class Scout(CreepProcess):
 
     @staticmethod
     def get_room_owner(room: Room) -> Optional[str]:
-        if _.isUndefined(room.controller) or _.isUndefined(room.controller.owner):
+        if _.isUndefined(room.controller):
             for struct in room.find(FIND_STRUCTURES):
                 if struct.structureType == STRUCTURE_KEEPER_LAIR:
                     return js_global.INVADER_USERNAME
 
+            return None  # Highway
+        elif _.isUndefined(room.controller.owner):
             return None
         else:
             return room.controller.owner.username

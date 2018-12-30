@@ -68,7 +68,7 @@ class Empire(Process):
             return False
 
         # ? More complex conditions re players etc?
-        if _.isUndefined(mem) or mem.last_updated + scout_freq < Game.time:
+        if _.isUndefined(mem) or _.isUndefined(mem.last_updated) or mem.last_updated + scout_freq < Game.time:
             return True
         
         return False
