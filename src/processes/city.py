@@ -126,6 +126,9 @@ class City(Process):
 
         if _.isUndefined(self.room.memory.remotes):
             self.room.memory.remotes = []
+        
+        if _.isUndefined(self.room.memory.to_claim):
+            self.room.memory.to_claim = []
 
         # Room stats
         if _.isUndefined(Memory.stats.rooms[self._data.main_room]):
