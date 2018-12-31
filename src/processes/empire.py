@@ -19,7 +19,64 @@ class Empire(Process):
     def _run(self) -> None:
         self.cities: List[str] = self.launch_cities()
 
-        self.create_scout_tasks()
+        if Game.time % 100 == 0:
+            self.create_scout_tasks()
+        
+        if self.should_expand():
+            self.plan_expansion()
+    
+    def should_expand(self) -> bool:
+        if Game.gcl.level <= len(self.cities):
+            return False
+        
+        lowest_rcl = 8
+        for room in self.cities:
+            if Game.rooms[room].rcl < lowest_rcl:
+                lowest_rcl = Game.rooms[room].rcl
+        
+        if lowest_rcl < 3:
+            return False
+        
+        return True
+    
+    def plan_expansion(self) -> None:
+        claimable = _.filter(Object.keys(Memory.rooms), lambda r: Memory.rooms[r].scout_info and 
+                                                                  Memory.rooms[r].scout_info.num_sources == 2 and
+                                                                  Memory.rooms[r].scout_info.claimable and
+                                                                  Memory.rooms[r].scout_info.fits_base)
+        
+        not_too_close = []
+        for room in claimable:
+            too_close = False
+            closest_dist = 99
+            closest_city = None
+            for city in self.cities:
+                dist = Game.map.getRoomLinearDistance(room, city)
+
+                if dist < closest_dist:
+                    closest_dist = dist
+                    closest_city = city
+
+                if dist < 2:
+                    too_close = True
+                    break
+            
+            if not too_close:
+                not_too_close.append((room, closest_dist, closest_city))
+
+        closest = None
+        best_dist = 999
+        closest_city = None
+        for room, dist, city in not_too_close:
+            if dist < best_dist:
+                closest = room
+                best_dist = dist
+                closest_city = city
+
+        if not Memory.rooms[closest_city].to_claim.includes(closest):
+            Memory.rooms[closest_city].to_claim.append(closest)
+        
+        print("Claiming", Memory.rooms[closest_city].to_claim, 'from', closest_city)
     
     def create_scout_tasks(self) -> None:
         cur_dist = 0

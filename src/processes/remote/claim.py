@@ -14,8 +14,8 @@ class Claim(CreepProcess):
         super().__init__('claim', pid, 4, data)
 
     def _run(self):
-        self.room = Game.rooms[self._data.room_name]
-        self.target_room = Game.rooms[self._data.target_room]
+        self.room: Room = Game.rooms[self._data.room_name]
+        self.target_room: Room = Game.rooms[self._data.target_room]
 
         print('claiming', self._data.room_name, len(self._data.creep_names))
 

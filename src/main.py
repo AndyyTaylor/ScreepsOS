@@ -18,7 +18,6 @@ js_global.kernel = kernel
 
 RawMemory.setActiveForeignSegment('LeagueOfAutomatedNations', 99)
 
-
 def main():
     kernel.start()
     kernel.run()
