@@ -164,7 +164,7 @@ class Kernel:
             room = Game.rooms[name]
             stats = Memory.stats.rooms[name] or {}
 
-            if room.is_city() or room.is_remote():
+            if (room.is_city() and room.spawns) or room.is_remote():
                 if not _.isUndefined(Memory.stats.rooms[name]) and not _.isUndefined(Memory.stats.rooms[name].expenses):
                     expenses = Object.assign({'build': 0, 'repair': 0, 'upgrade': 0, 'decay': 0}, Memory.stats.rooms[name].expenses)
                 else:

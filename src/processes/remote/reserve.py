@@ -11,7 +11,7 @@ __pragma__('noalias', 'name')
 class Reserve(CreepProcess):
 
     def __init__(self, pid, data=None):
-        super().__init__('reserve', pid, 5, data)
+        super().__init__('reserve', pid, 6, data)
 
     def _run(self):
         self.room = Game.rooms[self._data.room_name]

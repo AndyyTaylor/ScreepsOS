@@ -207,7 +207,7 @@ def _get_additional_workers():
         else:
             if this.total_dropped_energy() > 1000:
                 this.memory.additional_workers += 1
-            elif this.total_dropped_energy() < 200:
+            elif this.total_dropped_energy() < 400:
                 this.memory.additional_workers -= 1
 
         this.memory.additional_workers = max(0, this.memory.additional_workers)

@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 class BuildSite(CreepProcess):
 
     def __init__(self, pid, data=None):
-        super().__init__('buildsite', pid, 4, data)
+        super().__init__('buildsite', pid, 5, data)
 
         if pid != -1:
             self.room = Game.rooms[self._data.room_name]

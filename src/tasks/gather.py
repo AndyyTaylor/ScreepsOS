@@ -1,4 +1,5 @@
 
+import config
 from defs import *  # noqa
 
 from framework.task import Task
@@ -30,8 +31,8 @@ class Gather(Task):
 
     def select_target(self, creep, room):
         energy = _.filter(room.find(FIND_DROPPED_RESOURCES),
-                          lambda r: r.resourceType == RESOURCE_ENERGY and r.amount > 50)
-        tombstones = _.filter(room.tombstones, lambda t: t.store[RESOURCE_ENERGY] > 50)
+                          lambda r: r.resourceType == RESOURCE_ENERGY and r.amount > MIN_PICKUP_AMOUNT)
+        tombstones = _.filter(room.tombstones, lambda t: t.store[RESOURCE_ENERGY] > MIN_PICKUP_AMOUNT)
 
         if len(energy) > 0:
             target = creep.pos.findClosestByRange(energy)

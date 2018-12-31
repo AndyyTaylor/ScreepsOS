@@ -83,6 +83,7 @@ class Remote(Process):
 
             for target_room in to_claim:
                 if not _.isUndefined(Game.rooms[target_room]) and Game.rooms[target_room].is_city():
+                    self.room.memory.to_claim = list(self.room.memory.to_claim)[1:]
                     continue  # Room has already been claimed
 
                 if not taken.includes(target_room):
@@ -93,19 +94,15 @@ class Remote(Process):
                     self.launch_child_process('claim', proc_data)
 
     def launch_remote_work(self, to_work: List[str]) -> None:
-        # to_work = []
-        # for name in Object.keys(Game.rooms):
-        #     room = Game.rooms[name]
-        #     dist = Game.map.getRoomLinearDistance(self._data.room_name, name)
-        #     if room.is_city() and (len(room.spawns) < 1 or room.rcl < 2) and self.room.rcl > 4 and \
-        #             dist < js_global.REMOTE_WORK_DIST:
-        #         to_work.append(name)
-
         works = self.scheduler.proc_by_name('remotework', self._pid)
         if len(works) < len(to_work):
             taken = [m['data'].target_room for m in works]
 
             for target_room in to_work:
+                if not _.isUndefined(Game.rooms[target_room]) and Game.rooms[target_room].rcl >= 3:
+                    self.room.memory.to_work = list(self.room.memory.to_work)[1:]
+                    continue
+
                 if not taken.includes(target_room):
                     proc_data = {
                         'room_name': self._data.room_name,

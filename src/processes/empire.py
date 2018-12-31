@@ -24,6 +24,19 @@ class Empire(Process):
         
         if self.should_expand():
             self.plan_expansion()
+        
+        self.assign_remote_work()
+    
+    def assign_remote_work(self) -> None:
+        needs_help = []
+        for city in self.cities:
+            if Game.rooms[city].rcl < 3:  # TODO: more complex based on being attacked etc
+                needs_help.append(city)
+        
+        for city in needs_help:
+            closest_city, _ = self.get_closest_city(city, 3)
+            if not Memory.rooms[closest_city].to_work.includes(city):
+                Memory.rooms[closest_city].to_work.append(city)
     
     def should_expand(self) -> bool:
         if Game.gcl.level <= len(self.cities):
@@ -107,12 +120,12 @@ class Empire(Process):
             past_rooms = past_rooms.concat(cur_rooms)
             cur_rooms = new_rooms
         
-    def get_closest_city(self, room: str) -> Tuple[str, int]:
+    def get_closest_city(self, room: str, min_rcl: int=0) -> Tuple[str, int]:
         min_dist = 999
         best_city = None
         for city in self.cities:
             dist = Game.map.getRoomLinearDistance(city, room)
-            if dist < min_dist:
+            if dist < min_dist and Game.rooms[city].rcl >= min_rcl:
                 best_city = city
                 min_dist = dist
 

@@ -10,7 +10,7 @@ __pragma__('noalias', 'values')
 class WallRepair(CreepProcess):
 
     def __init__(self, pid, data=None):
-        super().__init__('wallrepair', pid, 4, data)
+        super().__init__('wallrepair', pid, 5, data)
 
         if pid != -1:
             self.room = Game.rooms[self._data.room_name]

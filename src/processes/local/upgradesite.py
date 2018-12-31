@@ -16,9 +16,15 @@ class UpgradeSite(CreepProcess):
             self.room = Game.rooms[self._data.room_name]
             self.controller = self.room.controller
 
+            if _.isUndefined(self._data.last_seen_construction):
+                self._data.last_seen_construction = Game.time
+
     def _run(self):
         if _.isUndefined(self._data.has_init):
             self.init()
+        
+        if len(self.room.construction_sites) > 0:
+            self._data.last_seen_construction = Game.time
 
         self.run_creeps()
 
@@ -55,7 +61,7 @@ class UpgradeSite(CreepProcess):
             creep.run_current_task()
 
     def needs_creeps(self):
-        if len(self.room.construction_sites) > 0:
+        if self._data.last_seen_construction > Game.time - 10:  # Give roomplanner time to place site before taking workers
             return len(self._data.creep_names) < 1  # Scale this
         else:
             return len(self._data.creep_names) < 1 + self.room.get_additional_workers()

@@ -11,7 +11,7 @@ __pragma__('noalias', 'name')
 class Claim(CreepProcess):
 
     def __init__(self, pid, data=None):
-        super().__init__('claim', pid, 4, data)
+        super().__init__('claim', pid, 6, data)
 
     def _run(self):
         self.room: Room = Game.rooms[self._data.room_name]

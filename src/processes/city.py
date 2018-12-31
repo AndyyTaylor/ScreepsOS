@@ -131,6 +131,9 @@ class City(Process):
         
         if _.isUndefined(self.room.memory.to_scout):
             self.room.memory.to_scout = []
+        
+        if _.isUndefined(self.room.memory.to_work):
+            self.room.memory.to_work = []
 
         # Room stats
         if _.isUndefined(Memory.stats.rooms[self._data.main_room]):
