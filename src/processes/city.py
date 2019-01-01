@@ -6,6 +6,8 @@ from base import base
 from framework.process import Process
 
 __pragma__('noalias', 'keys')
+__pragma__('noalias', 'name')
+__pragma__('noalias', 'values')
 
 
 class City(Process):
@@ -18,11 +20,38 @@ class City(Process):
 
         self.validate_room_memory()
 
+        remotes_per_rcl = {
+            4: 1,
+            5: 1,
+            6: 1,
+            7: 1,
+            8: 1
+        }
+        if self.room.rcl >= 4:
+            self.select_remotes(remotes_per_rcl[self.room.rcl])
+
         self.launch_feed_sites()
         self.launch_build_sites()
         self.launch_repair_sites()
         self.launch_mining_sites()
         self.launch_one_of_processes()
+    
+    def select_remotes(self, count: int) -> None:
+        """ Select up to count remotes based on scout_info """
+        # TODO: select from rooms that aren't direct neighours
+        possible = Object.values(Game.map.describeExits(self.room.name))
+        # TODO: Add check for reservation not me & not used by other room
+        # TODO: also check the distance to the sources
+        possible = [r for r in possible if not _.isUndefined(Memory.rooms[r].scout_info) and
+                                           Memory.rooms[r].scout_info.num_sources > 0 and
+                                           Memory.rooms[r].scout_info.owner is None]  
+        possible.sort(key=lambda r: Memory.rooms[r].scout_info.num_sources)  # ? Should this be reversed?
+        print(possible)
+
+        if len(possible) < count:  # Transcrypt will append undefined for slice > list length
+            self.room.memory.remotes = possible
+        else:
+            self.room.memory.remotes = possible[:count]
 
     def launch_one_of_processes(self) -> None:
         """ Launch one-of processes for the main room """

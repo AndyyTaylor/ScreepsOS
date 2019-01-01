@@ -54,12 +54,19 @@ class Scout(CreepProcess):
         mem.scout_info = {
             'owner': self.get_room_owner(room),
             'claimable': self.get_room_owner(room) is None and not _.isUndefined(room.controller),
+            'reservation': self.get_room_reservation(room),
             'num_sources': len(room.sources),
             'fits_base': rp_process.place_base()
         }
         mem.last_updated = Game.time
 
         print(room.name, JSON.stringify(mem.scout_info))
+    
+    def get_room_reservation(self, room: Room) -> Optional[str]:
+        if _.isUndefined(room.controller) or _.isUndefined(room.controller.reservation):
+            return None
+        
+        return room.controller.reservation.username
 
     @staticmethod
     def get_room_owner(room: Room) -> Optional[str]:
